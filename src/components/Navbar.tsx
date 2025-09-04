@@ -15,10 +15,10 @@ const Navbar = () => {
 
   const navItems = [
     { path: "/", label: "Home", icon: TrendingUp },
-    { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { path: "/strategies", label: "Strategies", icon: Activity },
+    // { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    // { path: "/strategies", label: "Strategies", icon: Activity },
     { path: "/risk-management", label: "Risk", icon: ShieldCheck },
-    { path: "/admin", label: "Admin", icon: Users },
+    // { path: "/admin", label: "Admin", icon: Users },
   ];
 
   return (
@@ -29,7 +29,7 @@ const Navbar = () => {
             <Link to="/" className="flex items-center space-x-2">
               <TrendingUp className="h-8 w-8 text-primary" />
               <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                TradeBridge Pro
+                TradeAlgo Pro
               </span>
             </Link>
             
