@@ -1,116 +1,103 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { 
-  TrendingUp, 
-  BarChart3, 
-  Clock,
-  Users,
-  Star,
-  Info,
-  Check
-} from "lucide-react";
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
+import { TrendingUp, BarChart3, Clock, Users, Star, Info, Check, Settings } from 'lucide-react';
+import Api from '@/services/Api';
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/providers/AuthProvider';
+import { RiskConfigModal } from './RiskConfigModal';
+import { RiskSettingsInterface } from '@/lib/types';
 
 const StrategyMarketplace = () => {
-  const strategies = [
-    {
-      id: 1,
-      name: "Momentum Pro",
-      description: "Advanced momentum-based strategy for trending markets",
-      category: "Trend Following",
-      winRate: 68,
-      avgProfit: 2.5,
-      avgLoss: 1.2,
-      monthlyReturn: 12.5,
-      subscribers: 234,
-      rating: 4.8,
-      markets: ["Forex", "Crypto"],
-      timeframe: "15M, 1H",
-      enabled: true,
-      premium: false
-    },
-    {
-      id: 2,
-      name: "Range Breaker",
-      description: "Breakout strategy for range-bound markets with high accuracy",
-      category: "Breakout",
-      winRate: 72,
-      avgProfit: 1.8,
-      avgLoss: 0.9,
-      monthlyReturn: 15.2,
-      subscribers: 189,
-      rating: 4.9,
-      markets: ["Forex", "Indices"],
-      timeframe: "30M, 4H",
-      enabled: true,
-      premium: true
-    },
-    {
-      id: 3,
-      name: "Crypto Trend",
-      description: "Specialized cryptocurrency trend following system",
-      category: "Crypto",
-      winRate: 65,
-      avgProfit: 3.2,
-      avgLoss: 1.5,
-      monthlyReturn: 18.7,
-      subscribers: 412,
-      rating: 4.6,
-      markets: ["Crypto"],
-      timeframe: "1H, 1D",
-      enabled: false,
-      premium: true
-    },
-    {
-      id: 4,
-      name: "Scalper Elite",
-      description: "High-frequency scalping strategy for quick profits",
-      category: "Scalping",
-      winRate: 78,
-      avgProfit: 0.5,
-      avgLoss: 0.3,
-      monthlyReturn: 8.3,
-      subscribers: 156,
-      rating: 4.7,
-      markets: ["Forex"],
-      timeframe: "1M, 5M",
-      enabled: false,
-      premium: false
-    },
-    {
-      id: 5,
-      name: "Smart Grid",
-      description: "Intelligent grid trading system with dynamic adjustments",
-      category: "Grid Trading",
-      winRate: 70,
-      avgProfit: 1.2,
-      avgLoss: 0.6,
-      monthlyReturn: 10.5,
-      subscribers: 298,
-      rating: 4.5,
-      markets: ["Forex", "Commodities"],
-      timeframe: "Any",
-      enabled: true,
-      premium: true
-    },
-    {
-      id: 6,
-      name: "News Trader",
-      description: "Event-driven strategy based on economic news releases",
-      category: "News Trading",
-      winRate: 62,
-      avgProfit: 2.8,
-      avgLoss: 1.4,
-      monthlyReturn: 11.2,
-      subscribers: 167,
-      rating: 4.4,
-      markets: ["Forex", "Indices"],
-      timeframe: "5M, 15M",
-      enabled: false,
-      premium: false
+  const { user, setUser } = useAuth();
+  const [strategies, setStrategies] = useState([]);
+  const [strategy, setStrategy] = useState({});
+  const [open, setOpen] = useState(false);
+  const [selectedSetting, setSelectedSetting] = useState<RiskSettingsInterface | null>(null);
+  const [stats, setStats] = useState({
+    count: 0,
+    avgMonthlyReturn: 0,
+    activeUsersCount: 0,
+    avgRating: 0,
+  });
+
+  useEffect(() => {
+    fetchStrategies();
+  }, []);
+
+  async function fetchStrategies() {
+    try {
+      const data = await Api.get('/strategy');
+      console.log('Data for fetching strategies:', data);
+
+      if (data.strategy) {
+        setStrategies(data.strategy);
+        setStats({
+          count: data.strategyStats.count,
+          avgMonthlyReturn: data.strategyStats.avgMonthlyReturn,
+          activeUsersCount: data.strategyStats.activeUsersCount,
+          avgRating: data.strategyStats.avgRating,
+        });
+      }
+    } catch (error) {
+      console.error('Error while fetching strategies:', error);
     }
-  ];
+  }
+
+  async function subscribeStrategy(strategyId: string, accountId: string, type: string) {
+    try {
+      const data = await Api.post('/strategy/subscribe', { strategyId, accountId, type });
+      console.log('data for subscribing strategy', data);
+
+      const temp = [...strategies]; // create a shallow copy to avoid mutating original
+
+      const index = temp.findIndex((stg) => stg._id === strategyId);
+
+      if (index !== -1) {
+        // Replace the existing element preserving order
+        temp[index] = data.strategy;
+      } else {
+        // If not found, append at the end or handle differently
+        temp.push(data.strategy);
+      }
+
+      setStrategies(temp);
+      setUser(data.user);
+    } catch (error) {
+      console.error('Error while subscribing strategy:', error);
+    }
+  }
+
+  function onConfigModalOpen(strat: any) {
+    setOpen(true);
+    const userSetting = user?.strategySetting.find((s) => s.title === strat.title);
+
+    if (userSetting) {
+      setSelectedSetting(userSetting);
+    } else {
+      setSelectedSetting({
+        title: strat.title,
+        dailyLossCurrency: 'amount',
+        dailyLossLimit: 0,
+        maxLossCurrency: 'amount',
+        maxLossLimit: 0,
+        isCloseAllPositions: false,
+        isPauseTrading: false,
+        isSendNotification: false,
+        maxCurrentPositions: 0,
+        riskPerTrade: 2,
+      } as RiskSettingsInterface);
+    }
+    setStrategy(strat);
+  }
+
+  function onConfigModalClose() {
+    setOpen(false);
+    setSelectedSetting(null);
+    setStrategy({});
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -120,49 +107,36 @@ const StrategyMarketplace = () => {
           <h1 className="text-3xl font-bold mb-2">Strategy Marketplace</h1>
           <p className="text-muted-foreground">Choose from proven trading strategies or create your own</p>
         </div>
-        <Button variant="gold">
-          Create Custom Strategy
-        </Button>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
           <div className="flex items-center gap-3">
             <BarChart3 className="h-8 w-8 text-primary" />
             <div>
-              <p className="text-2xl font-bold">24</p>
+              <p className="text-2xl font-bold">{stats.count.toLocaleString()}</p>
               <p className="text-sm text-muted-foreground">Available Strategies</p>
             </div>
           </div>
         </Card>
-        
+
         <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
           <div className="flex items-center gap-3">
             <Users className="h-8 w-8 text-profit" />
             <div>
-              <p className="text-2xl font-bold">1,456</p>
-              <p className="text-sm text-muted-foreground">Active Users</p>
+              <p className="text-2xl font-bold">{stats.activeUsersCount.toLocaleString()}</p>
+              <p className="text-sm text-muted-foreground">Available Markets</p>
             </div>
           </div>
         </Card>
-        
+
         <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
           <div className="flex items-center gap-3">
             <TrendingUp className="h-8 w-8 text-gold" />
             <div>
-              <p className="text-2xl font-bold">14.3%</p>
-              <p className="text-sm text-muted-foreground">Avg Monthly Return</p>
-            </div>
-          </div>
-        </Card>
-        
-        <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
-          <div className="flex items-center gap-3">
-            <Star className="h-8 w-8 text-warning" />
-            <div>
-              <p className="text-2xl font-bold">4.7</p>
-              <p className="text-sm text-muted-foreground">Average Rating</p>
+              <p className="text-2xl font-bold">{stats.avgMonthlyReturn.toLocaleString()}%</p>
+              <p className="text-sm text-muted-foreground">Active Algorithms</p>
             </div>
           </div>
         </Card>
@@ -171,8 +145,8 @@ const StrategyMarketplace = () => {
       {/* Strategy Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {strategies.map((strategy) => (
-          <Card 
-            key={strategy.id} 
+          <Card
+            key={strategy.title}
             className={`bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all ${
               strategy.enabled ? 'ring-2 ring-profit/20' : ''
             }`}
@@ -182,21 +156,26 @@ const StrategyMarketplace = () => {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-lg font-semibold">{strategy.name}</h3>
-                    {strategy.premium && (
-                      <Badge className="bg-gradient-gold text-background">Premium</Badge>
-                    )}
+                    <h3 className="text-lg font-semibold">{strategy.title}</h3>
+
+                    <Badge
+                      className={
+                        strategy.status === 'Live'
+                          ? 'bg-profit/20 text-profit'
+                          : strategy.status === 'Paused'
+                          ? 'bg-gold/20 text-gold'
+                          : 'bg-primary/20 text-primary'
+                      }
+                    >
+                      {strategy.status}
+                    </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">{strategy.description}</p>
                 </div>
-                <Switch 
-                  checked={strategy.enabled}
-                  className="data-[state=checked]:bg-profit"
-                />
               </div>
 
               {/* Stats Grid */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              {/* <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="bg-background/50 rounded p-2">
                   <p className="text-xs text-muted-foreground">Win Rate</p>
                   <p className="text-lg font-semibold text-profit">{strategy.winRate}%</p>
@@ -213,11 +192,11 @@ const StrategyMarketplace = () => {
                   <p className="text-xs text-muted-foreground">Avg Loss</p>
                   <p className="text-lg font-semibold">-{strategy.avgLoss}%</p>
                 </div>
-              </div>
+              </div> */}
 
               {/* Markets and Timeframe */}
-              <div className="flex flex-wrap gap-2 mb-4">
-                {strategy.markets.map((market) => (
+              {/* <div className="flex flex-wrap gap-2 mb-4">
+                {strategy.tags.map((market) => (
                   <Badge key={market} variant="outline" className="text-xs">
                     {market}
                   </Badge>
@@ -226,33 +205,61 @@ const StrategyMarketplace = () => {
                   <Clock className="h-3 w-3 mr-1" />
                   {strategy.timeframe}
                 </Badge>
-              </div>
+              </div> */}
 
               {/* Footer */}
-              <div className="flex items-center justify-between pt-4 border-t border-border">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 text-warning fill-warning" />
-                    <span className="text-sm font-medium">{strategy.rating}</span>
+              <div className="pt-2 border-t border-border">
+                <p className="text-sm text-muted-foreground">Select the account to subscribe this strategy.</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4 text-muted-foreground text-sm">
+                    {user?.accounts.map((acc) => {
+                      const sSetting = user?.strategySetting?.find((ss) => ss.strategyId === strategy._id);
+                      const isSubscribed = sSetting && sSetting.subscribed.includes(acc.accountId);
+                      return (
+                        <div key={acc.accountId} className="flex gap-2 items-center">
+                          <Checkbox
+                            checked={isSubscribed}
+                            onClick={() => {
+                              subscribeStrategy(strategy._id, acc.accountId, '');
+                            }}
+                          />
+                          {acc.name}
+                        </div>
+                      );
+                    })}
+                    {user?.accounts?.length > 1 && (
+                      <div className="flex gap-2 items-center">
+                        <Checkbox
+                          checked={
+                            user.accounts.length ===
+                            user?.strategySetting?.find((ss) => ss.strategyId === strategy._id).subscribed.length
+                          }
+                          onClick={() => {
+                            subscribeStrategy(strategy._id, '', 'All');
+                          }}
+                        />{' '}
+                        All
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">{strategy.subscribers}</span>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => onConfigModalOpen(strategy)}>
+                      <Settings />
+                    </Button>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {strategy.enabled && (
-                    <Check className="h-4 w-4 text-profit" />
-                  )}
-                  <Button variant="ghost" size="sm">
-                    <Info className="h-4 w-4" />
-                  </Button>
                 </div>
               </div>
             </div>
           </Card>
         ))}
       </div>
+
+      <RiskConfigModal
+        open={open}
+        onConfigModalClose={onConfigModalClose}
+        setting={selectedSetting}
+        strategy={strategy}
+      />
     </div>
   );
 };

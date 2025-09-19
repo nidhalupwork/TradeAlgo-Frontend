@@ -19,6 +19,13 @@ All colors MUST be HSL.
     --loss-glow: 0 72% 61%;
     --warning: 43 96% 56%;
     --gold: 43 96% 56%;
+
+    /* Trading specific colors */
+    --chart-1: 142 76% 36%;
+    --chart-2: 221 83% 53%;
+    --chart-3: 271 81% 56%;
+    --chart-4: 35 91% 65%;
+    --chart-5: 172 66% 50%;
     
     /* Cards and Surfaces */
     --card: 222 47% 8%;

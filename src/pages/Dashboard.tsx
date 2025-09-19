@@ -1,5 +1,5 @@
-import Navbar from "@/components/Navbar";
-import TradingDashboard from "@/components/TradingDashboard";
+import Navbar from '@/components/Navbar';
+import TradingDashboard from '@/components/dashboard/TradingDashboard';
 
 const Dashboard = () => {
   return (
