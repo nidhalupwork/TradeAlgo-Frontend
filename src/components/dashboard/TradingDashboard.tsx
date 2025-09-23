@@ -46,6 +46,13 @@ const TradingDashboard = () => {
     }
   }, [stats]);
 
+  useEffect(() => {
+    console.log('Component mounted');
+    return () => {
+      console.log('Component unmounted');
+    };
+  }, []);
+
   // Mock data for demonstration
   const dailyRiskUsed = 45;
 
@@ -180,8 +187,8 @@ const TradingDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {positions.map((position) => (
-                  <tr key={position?.id} className="border-b border-border/50 hover:bg-card/50 transition-colors">
+                {positions.map((position, index) => (
+                  <tr key={index} className="border-b border-border/50 hover:bg-card/50 transition-colors">
                     <td className="py-3 px-4 font-medium">{position.symbol}</td>
                     <td className="py-3 px-4">
                       <span

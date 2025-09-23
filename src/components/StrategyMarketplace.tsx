@@ -9,8 +9,10 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { RiskConfigModal } from './RiskConfigModal';
 import { RiskSettingsInterface } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 const StrategyMarketplace = () => {
+  const { toast } = useToast();
   const { user, setUser } = useAuth();
   const [strategies, setStrategies] = useState([]);
   const [strategy, setStrategy] = useState({});
@@ -67,6 +69,11 @@ const StrategyMarketplace = () => {
       setUser(data.user);
     } catch (error) {
       console.error('Error while subscribing strategy:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error?.response?.data?.error?.strategy ?? 'Somethign went wrong',
+      });
     }
   }
 
@@ -154,21 +161,23 @@ const StrategyMarketplace = () => {
             <div className="p-6">
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-lg font-semibold">{strategy.title}</h3>
-
-                    <Badge
-                      className={
-                        strategy.status === 'Live'
-                          ? 'bg-profit/20 text-profit'
-                          : strategy.status === 'Paused'
-                          ? 'bg-gold/20 text-gold'
-                          : 'bg-primary/20 text-primary'
-                      }
-                    >
-                      {strategy.status}
-                    </Badge>
+                <div className=" w-full">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-semibold">{strategy.title}</h3>
+                      <Badge
+                        className={
+                          strategy.status === 'Live'
+                            ? 'bg-profit/20 text-profit'
+                            : strategy.status === 'Paused'
+                            ? 'bg-gold/20 text-gold'
+                            : 'bg-primary/20 text-primary'
+                        }
+                      >
+                        {strategy.status}
+                      </Badge>
+                    </div>
+                    {user.role === 'admin' && <Switch checked={strategy.isActive} />}
                   </div>
                   <p className="text-sm text-muted-foreground">{strategy.description}</p>
                 </div>

@@ -3,6 +3,7 @@ import { useContext, createContext, Dispatch, SetStateAction, ReactNode, useStat
 import { useLocation, useNavigate } from 'react-router-dom';
 import apiClient from '@/services/Api';
 import { useSocket } from './SocketProvider';
+import { useAdmin } from './AdminProvider';
 
 interface AuthContextInterface {
   user: UserInterface;
@@ -16,6 +17,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const { initializeSocket } = useSocket();
   const location = useLocation();
   const navigate = useNavigate();
+  const { setUsers, setStrategies, setGlobalSetting } = useAdmin();
   const [user, setUser] = useState<UserInterface>({
     _id: '',
     createdAt: new Date(),
@@ -33,6 +35,8 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     lastLogin: new Date(),
     accounts: [],
     riskSettings: null,
+    plan: 'default',
+    status: 'pending',
   });
 
   useEffect(() => {
@@ -42,22 +46,25 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   async function checkExistingToken() {
     const isSignedIn = localStorage.getItem('isSignedIn');
 
-    if (location.pathname !== '/') {
-      if (isSignedIn) {
-        const data = await apiClient.get('/auth/refresh');
-        console.log('checkExistingToken -> data:', data);
-        if (data.success) {
-          setUser(data.user);
+    if (isSignedIn) {
+      const data = await apiClient.get('/auth/refresh');
+      console.log('checkExistingToken -> data:', data);
+      if (data.success) {
+        setUser(data.user);
+        setUsers(data.users);
+        setStrategies(data.strategies);
+        setGlobalSetting(data.setting);
 
-          const accountIds = data.user.accounts.reduce((acc, cur) => {
-            return [...acc, cur.accountId];
-          }, []);
-          console.log('accountIds', accountIds);
-          initializeSocket(data.user._id, accountIds);
-        } else {
-          navigate('/auth');
-        }
+        const accountIds = data.user.accounts.reduce((acc, cur) => {
+          return [...acc, cur.accountId];
+        }, []);
+        console.log('accountIds', accountIds);
+        initializeSocket(data.user._id, accountIds);
       } else {
+        navigate('/auth');
+      }
+    } else {
+      if (location.pathname !== '/') {
         navigate('/auth');
       }
     }

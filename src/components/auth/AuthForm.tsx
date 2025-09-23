@@ -11,18 +11,28 @@ import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import apiClient from '@/services/Api';
 import { useSocket } from '@/providers/SocketProvider';
+import { useAdmin } from '@/providers/AdminProvider';
+import { useToast } from '@/hooks/use-toast';
 
 export const AuthForm = () => {
-  const auth = useAuth();
-  const { initializeSocket } = useSocket();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { setUser } = useAuth();
+  const { setUsers, setStrategies, setGlobalSetting } = useAdmin();
+  const { initializeSocket } = useSocket();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [tab, setTab] = useState<'signin' | 'signup'>('signin');
 
-  const [personalData, setPersonalData] = useState<{ fullName?: string; email: string; password: string }>({
+  const [personalData, setPersonalData] = useState<{
+    fullName?: string;
+    email: string;
+    password: string;
+    phoneNumber: string;
+  }>({
     fullName: 'Nidhal Nouma',
     email: 'nidhalnouma10@gmail.com',
+    phoneNumber: '',
     password: '123123123',
   });
 
@@ -41,22 +51,43 @@ export const AuthForm = () => {
     try {
       if (type === 'signin') {
         const data = await apiClient.post('/auth/sign-in', personalData);
-        auth.setUser(data.user);
+        setUser(data.user);
         localStorage.setItem('isSignedIn', 'true');
 
         console.log('userid:', data.user);
-        const accountIds = data.user.accounts.reduce((acc, cur) => {
+        const accountIds = data?.user?.accounts?.reduce((acc, cur) => {
           return [...acc, cur.accountId];
         }, []);
 
-        initializeSocket(data.user._id, accountIds);
-        navigate('/dashboard');
+        if (data.user.role === 'user') {
+          initializeSocket(data.user._id, accountIds);
+          navigate('/dashboard');
+        } else {
+          setUsers(data.users);
+          setStrategies(data.strategies);
+          setGlobalSetting(data.setting);
+          navigate('/user-management');
+        }
       } else {
         const data = await apiClient.post('/auth/register', personalData);
         setTab('signin');
       }
     } catch (error) {
       console.error(`Error while ${type}:`, error);
+
+      if (error?.status === 503) {
+        toast({
+          variant: 'destructive',
+          title: 'Maintanence',
+          description: error?.response?.data?.message ?? 'Unexpected error',
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Login failed',
+          description: error?.response?.data?.error?.email ?? 'Unexpected error',
+        });
+      }
     }
     setIsLoading(false);
   };
@@ -184,6 +215,24 @@ export const AuthForm = () => {
                       className="pl-10 bg-auth-bg/50 border-auth-border focus:border-primary transition-colors text-secondary"
                       value={personalData.email}
                       onChange={(e) => onPersonalDataChange(e.target.value, 'email')}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email" className="text-sm font-medium">
+                    Phone Number
+                  </Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="signup-phone"
+                      type="text"
+                      placeholder="Enter your phone number"
+                      className="pl-10 bg-auth-bg/50 border-auth-border focus:border-primary transition-colors text-secondary"
+                      value={personalData.phoneNumber}
+                      onChange={(e) => onPersonalDataChange(e.target.value, 'phoneNumber')}
                       required
                     />
                   </div>

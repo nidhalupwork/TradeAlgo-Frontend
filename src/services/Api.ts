@@ -68,4 +68,4 @@ class ApiClient {
   }
 }
 
-export default new ApiClient('http://localhost:3000/api/v1');
+export default new ApiClient('https://primarily-assured-albacore.ngrok-free.app/api/v1');

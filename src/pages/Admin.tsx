@@ -1,5 +1,5 @@
 import Navbar from "@/components/Navbar";
-import AdminPanel from "@/components/AdminPanel";
+import AdminPanel from "@/components/admin/AdminPanel";
 
 const Admin = () => {
   return (

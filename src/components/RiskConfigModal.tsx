@@ -26,8 +26,6 @@ export const RiskConfigModal = ({
 }) => {
   const { setUser } = useAuth();
 
-  console.log('setting', setting);
-
   const [riskSettings, setRiskSettings] = useState<RiskSettingsInterface | null>(null);
   const [quickTemplate, setQuickTemplate] = useState<'Conservative' | 'Balanced' | 'Aggressive' | ''>(''); // Conservative, Balanced, Aggressive
 

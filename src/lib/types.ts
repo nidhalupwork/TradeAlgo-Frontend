@@ -4,7 +4,8 @@ export interface UserInterface {
   username: string;
   fullName: string;
   phoneNumber: string;
-  role: 'user' | 'admin' | 'trader';
+  role: 'user' | 'admin' | 'owner';
+  plan: 'premium' | 'default';
   mt5AccountId: string;
   riskSettings: RiskSettingsInterface;
   isPausedTradingForDay: boolean;
@@ -15,6 +16,8 @@ export interface UserInterface {
   accounts: ConnectAccount[];
   strategySetting: RiskSettingsInterface[];
   metaApiToken: string;
+  trades?: any[] | undefined;
+  status: 'active' | 'pending' | 'suspended';
 }
 
 export interface ConnectAccount {
@@ -73,7 +76,7 @@ export interface RiskSettingsInterface {
   riskPerTrade: number;
   maxCurrentPositions: number;
   dailyLossLimit: number;
-  dailyLossCurrency: string;
+  dailyLossCurrency: 'percentage' | 'amount';
   maxLossLimit: number;
   maxLossCurrency: string;
   // maximumDrawdown: number;
@@ -86,4 +89,31 @@ export interface RiskSettingsInterface {
 export interface PositionSizeInterface {
   riskAmount: number;
   positionSize: number;
+}
+
+export interface StrategyInterface {
+  _id: string;
+  title: string;
+  description: string;
+  winRate: number;
+  avgProfit: number;
+  avgLoss: number;
+  star: number;
+  tags: string[];
+  subscribers: string[];
+  status: 'Live' | 'Development' | 'Paused';
+  enabled: boolean;
+}
+
+export interface GlobalSettingInterface {
+  isPausedAllTrading: boolean;
+  isMaintaining: boolean;
+  tiers: ITier[];
+}
+
+export interface ITier {
+  name: 'basic' | 'premium';
+  price: number;
+  maxAccountsCount: number;
+  level: number;
 }

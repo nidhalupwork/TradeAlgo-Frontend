@@ -32,12 +32,15 @@ const Navbar = () => {
   }, [location.pathname]);
 
   const navItems = [
-    { path: '/', label: 'Home', icon: Home },
-    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/strategies', label: 'Strategies', icon: Activity },
-    // { path: '/risk-management', label: 'Risk', icon: ShieldCheck },
-    { path: '/admin', label: 'Admin', icon: Users },
-    { path: '/profile', label: 'Profile', icon: SquareUser },
+    { path: '/', label: 'Home', icon: Home, role: 'all' },
+    // user page
+    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, role: 'user' },
+    { path: '/strategies', label: 'Strategies', icon: Activity, role: 'user' },
+    { path: '/profile', label: 'Profile', icon: SquareUser, role: 'user' },
+
+    // admin page
+    { path: '/user-management', label: 'Users', icon: Users, role: 'admin' },
+    { path: '/strategy-management', label: 'Strategy', icon: Activity, role: 'admin' },
   ];
 
   return (
@@ -52,26 +55,28 @@ const Navbar = () => {
 
             {isSignedIn === 'true' && (
               <div className="hidden md:flex items-center space-x-1">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.path;
-                  if (user?.role !== 'admin' && item.label === 'Admin') {
-                    return <div key={item.path}></div>;
-                  } else {
-                    return (
-                      <Link key={item.path} to={item.path}>
-                        <Button
-                          variant={isActive ? 'default' : 'ghost'}
-                          size="sm"
-                          className={isActive ? 'shadow-glow-primary' : ''}
-                        >
-                          <Icon className="h-4 w-4 mr-2" />
-                          {item.label}
-                        </Button>
-                      </Link>
-                    );
-                  }
-                })}
+                {navItems
+                  .filter((ni) => ni.role === user.role || ni.role === 'all')
+                  .map((item) => {
+                    const Icon = item.icon;
+                    const isActive = location.pathname === item.path;
+                    if (user?.role !== 'admin' && item.label === 'Admin') {
+                      return <div key={item.path}></div>;
+                    } else {
+                      return (
+                        <Link key={item.path} to={item.path}>
+                          <Button
+                            variant={isActive ? 'default' : 'ghost'}
+                            size="sm"
+                            className={isActive ? 'shadow-glow-primary' : ''}
+                          >
+                            <Icon className="h-4 w-4 mr-2" />
+                            {item.label}
+                          </Button>
+                        </Link>
+                      );
+                    }
+                  })}
               </div>
             )}
           </div>

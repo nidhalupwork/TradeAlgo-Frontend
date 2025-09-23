@@ -48,7 +48,7 @@ export const SocketProvider = ({ children }) => {
     });
 
     socketRef.current.on('stats', (data) => {
-      console.log('Received from socket connection!');
+      // console.log('Received from socket connection!');
       processStatsData(data);
     });
 
@@ -60,6 +60,10 @@ export const SocketProvider = ({ children }) => {
 
   function initializeSocket(id: string, accountIds: string[]) {
     socketRef.current.emit('initialize', { userId: id, accountIds });
+  }
+
+  function deinitializeSocket(id: string, accountIds: string[]) {
+    socketRef.current.emit('deinitialize', { userId: id, accountIds });
   }
 
   function processStatsData(data: any) {
@@ -116,7 +120,7 @@ export const SocketProvider = ({ children }) => {
       }
     });
 
-    console.log('balance:', balance);
+    // console.log('balance:', balance);
 
     const sum = [...positions].reduce((sum, cur) => {
       return sum + cur.profit;
