@@ -58,12 +58,13 @@ export default function StrategyManagement() {
     try {
       const data = await Api.post('/strategy/enable', { strategyId, value });
       console.log('data to enable the strategy:', data);
-
-      setStrategies((prev) =>
-        prev.map((s) => {
-          return s._id === data.strategy._id ? data.strategy : s;
-        })
-      );
+      if (data?.success) {
+        setStrategies((prev) =>
+          prev.map((s) => {
+            return s._id === data.strategy._id ? data.strategy : s;
+          })
+        );
+      }
     } catch (error) {
       console.error('Error while enabling strategy:', error);
       toast({
@@ -79,14 +80,14 @@ export default function StrategyManagement() {
       setIsLoading(true);
       const data = await Api.delete(`/strategy/${strategyId}`);
       console.log('data:', data);
-
-      setStrategies(strategies.filter((s) => s._id !== strategyId));
-
-      toast({
-        title: 'Success',
-        description: 'Successfully deleted',
-      });
-      setOpen('');
+      if (data?.success) {
+        setStrategies(strategies.filter((s) => s._id !== strategyId));
+        toast({
+          title: 'Success',
+          description: 'Successfully deleted',
+        });
+        setOpen('');
+      }
     } catch (error) {
       toast({
         title: 'Error',

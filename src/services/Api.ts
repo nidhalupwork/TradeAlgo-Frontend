@@ -1,4 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
+import { toast } from '@/hooks/use-toast';
+import { BACKEND_ENDPOINT } from '@/config/config';
 
 class ApiClient {
   private axiosInstance: AxiosInstance;
@@ -13,24 +15,31 @@ class ApiClient {
       },
     });
 
-    // Add request interceptor if needed (e.g., add auth token)
     this.axiosInstance.interceptors.request.use(
       (config) => {
-        // For example, add authorization header here if exists
-        // const token = localStorage.getItem('token');
-        // if (token) {
-        //   config.headers.Authorization = `Bearer ${token}`;
-        // }
         return config;
       },
       (error) => Promise.reject(error)
     );
 
-    // Add response interceptor if needed (e.g., handle errors globally)
     this.axiosInstance.interceptors.response.use(
       (response) => response,
       (error) => {
-        // Handle error (e.g., log out user on 401)
+        if (error?.status === 429) {
+          toast({
+            variant: 'warn',
+            title: 'Too many request',
+            description: error?.response?.data?.message ?? 'Too many request',
+          });
+          return Promise.resolve(error?.response);
+        } else if (error.status === 403) {
+          toast({
+            variant: 'warn',
+            title: 'Forbidden',
+            description: error?.response?.data?.message ?? 'Permission denied',
+          });
+          return Promise.resolve(error?.response);
+        }
         return Promise.reject(error);
       }
     );
@@ -40,14 +49,12 @@ class ApiClient {
   async get(path, config = {}) {
     try {
       const response = await this.axiosInstance.get(path, config);
-
       return response.data;
     } catch (error) {
       if (error.status === 401) {
         localStorage.removeItem('isSignedIn');
         window.location.href = '/auth';
       }
-
       throw error;
     }
   }
@@ -57,15 +64,15 @@ class ApiClient {
     try {
       const response = await this.axiosInstance.post(path, data, config);
       console.log('response:', response);
-
       return response.data;
     } catch (error) {
+      console.error(error);
       if (error.status === 401) {
         localStorage.removeItem('isSignedIn');
         window.location.href = '/auth';
+      } else {
+        throw error;
       }
-
-      throw error;
     }
   }
 
@@ -74,18 +81,15 @@ class ApiClient {
     try {
       const response = await this.axiosInstance.delete(path, config);
       console.log('response:', response);
-
       return response.data;
     } catch (error) {
       if (error.status === 401) {
         localStorage.removeItem('isSignedIn');
         window.location.href = '/auth';
       }
-
       throw error;
     }
   }
 }
 
-// export default new ApiClient('http://95.216.228.74:3000/api/v1');
-export default new ApiClient('http://localhost:3000/api/v1');
+export default new ApiClient(BACKEND_ENDPOINT + '/api/v1'); // AWS

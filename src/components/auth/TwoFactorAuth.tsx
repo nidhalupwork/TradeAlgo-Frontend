@@ -36,21 +36,23 @@ const TwoFactorAuth = () => {
 
     try {
       const data = await Api.post('/auth/2fa', { code: otp, email: user.email });
-      setUser(data.user);
-      localStorage.setItem('isSignedIn', 'true');
+      if (data?.success) {
+        setUser(data.user);
+        localStorage.setItem('isSignedIn', 'true');
 
-      if (data.user.role === 'user') {
-        const accountIds = data?.user?.accounts?.reduce((acc, cur) => {
-          return [...acc, cur.accountId];
-        }, []);
+        if (data.user.role === 'user') {
+          const accountIds = data?.user?.accounts?.reduce((acc, cur) => {
+            return [...acc, cur.accountId];
+          }, []);
 
-        initializeSocket(data.user._id, accountIds);
-        navigate('/dashboard');
-      } else {
-        setUsers(data.users);
-        setStrategies(data.strategies);
-        setGlobalSetting(data.setting);
-        navigate('/user-management');
+          initializeSocket(data.user._id, accountIds);
+          navigate('/dashboard');
+        } else {
+          setUsers(data.users);
+          setStrategies(data.strategies);
+          setGlobalSetting(data.setting);
+          navigate('/user-management');
+        }
       }
     } catch (error) {
       console.error('error:', error);

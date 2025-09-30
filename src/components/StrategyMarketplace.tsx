@@ -34,7 +34,7 @@ const StrategyMarketplace = () => {
       const data = await Api.get('/strategy');
       console.log('Data for fetching strategies:', data);
 
-      if (data.strategy) {
+      if (data?.success && data?.strategy) {
         setStrategies(data.strategy);
         setStats({
           count: data.strategyStats.count,
@@ -52,27 +52,23 @@ const StrategyMarketplace = () => {
     try {
       const data = await Api.post('/strategy/subscribe', { strategyId, accountId, type });
       console.log('data for subscribing strategy', data);
-
-      const temp = [...strategies]; // create a shallow copy to avoid mutating original
-
-      const index = temp.findIndex((stg) => stg._id === strategyId);
-
-      if (index !== -1) {
-        // Replace the existing element preserving order
-        temp[index] = data.strategy;
-      } else {
-        // If not found, append at the end or handle differently
-        temp.push(data.strategy);
+      if (data?.success) {
+        const temp = [...strategies];
+        const index = temp.findIndex((stg) => stg._id === strategyId);
+        if (index !== -1) {
+          temp[index] = data.strategy;
+        } else {
+          temp.push(data.strategy);
+        }
+        setStrategies(temp);
+        setUser(data.user);
       }
-
-      setStrategies(temp);
-      setUser(data.user);
     } catch (error) {
       console.error('Error while subscribing strategy:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: error?.response?.data?.error?.strategy ?? 'Somethign went wrong',
+        description: error?.response?.data?.error?.strategy ?? error?.response?.data?.message ?? 'Somethign went wrong',
       });
     }
   }
@@ -153,9 +149,9 @@ const StrategyMarketplace = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {strategies.map((strategy) => (
           <Card
-            key={strategy.title}
+            key={strategy?.title}
             className={`bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all ${
-              strategy.enabled ? 'ring-2 ring-profit/20' : ''
+              strategy?.enabled ? 'ring-2 ring-profit/20' : ''
             }`}
           >
             <div className="p-6">
@@ -164,22 +160,22 @@ const StrategyMarketplace = () => {
                 <div className=" w-full">
                   <div className="flex items-center justify-between gap-2 mb-2">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-semibold">{strategy.title}</h3>
+                      <h3 className="text-lg font-semibold">{strategy?.title}</h3>
                       <Badge
                         className={
-                          strategy.status === 'Live'
+                          strategy?.status === 'Live'
                             ? 'bg-profit/20 text-profit'
-                            : strategy.status === 'Paused'
+                            : strategy?.status === 'Paused'
                             ? 'bg-gold/20 text-gold'
                             : 'bg-primary/20 text-primary'
                         }
                       >
-                        {strategy.status}
+                        {strategy?.status}
                       </Badge>
                     </div>
-                    {user.role === 'admin' && <Switch checked={strategy.isActive} />}
+                    {user?.role === 'admin' && <Switch checked={strategy?.isActive} />}
                   </div>
-                  <p className="text-sm text-muted-foreground">{strategy.description}</p>
+                  <p className="text-sm text-muted-foreground">{strategy?.description}</p>
                 </div>
               </div>
 

@@ -57,8 +57,9 @@ export const AddStrategyModal = ({ open, onOpenChange, selectedStrategy }: AddSt
       if (type === 'Add') {
         const data = await Api.post('/strategy/add-strategy', strategy);
         console.log('strategy add:', data);
-
-        setStrategies([...strategies, data.strategy]);
+        if (data?.success) {
+          setStrategies([...strategies, data.strategy]);
+        }
       } else if (type === 'Edit') {
         if (
           strategy.title == selectedStrategy.title &&
@@ -70,11 +71,13 @@ export const AddStrategyModal = ({ open, onOpenChange, selectedStrategy }: AddSt
         }
         const data = await Api.post('/strategy/update-strategy', strategy);
         console.log('strategy add:', data);
-        setStrategies((prev) =>
-          prev.map((s) => {
-            return s._id === data.strategy._id ? data.strategy : s;
-          })
-        );
+        if (data?.success) {
+          setStrategies((prev) =>
+            prev.map((s) => {
+              return s._id === data.strategy._id ? data.strategy : s;
+            })
+          );
+        }
       }
 
       onOpenChange();

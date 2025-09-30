@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthProvider';
 import { roundUp } from '@/lib/utils';
+import { BACKEND_ENDPOINT } from '@/config/config';
 
 interface StatsInterface {
   balance: any;
@@ -39,7 +40,7 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     // Connect once when provider mounts
-    socketRef.current = io('http://localhost:3000');
+    socketRef.current = io(BACKEND_ENDPOINT);
 
     socketRef.current.on('connect', () => {
       setConnected(true);

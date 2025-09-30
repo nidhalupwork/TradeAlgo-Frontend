@@ -84,7 +84,7 @@ const TradingDashboard = () => {
 
       console.log('Positions updated');
     }
-  }, [stats]);
+  }, [stats, filter, filterPrefix]);
 
   useEffect(() => {
     fetchPortfolio();
@@ -103,24 +103,24 @@ const TradingDashboard = () => {
       setFilter(filt);
       pref = 1;
     }
-    setPositions((prev) =>
-      prev.sort((a, b) => {
-        if (typeof a.type === 'number' && typeof b.type === 'number') {
-          return (a.type - b.type) * pref;
-        }
-        return (a.type as string).localeCompare(b.type as string) * pref;
-      })
-    );
+    // setPositions((prev) =>
+    //   prev.sort((a, b) => {
+    //     if (typeof a.type === 'number' && typeof b.type === 'number') {
+    //       return (a.type - b.type) * pref;
+    //     }
+    //     return (a.type as string).localeCompare(b.type as string) * pref;
+    //   })
+    // );
   }
 
   async function fetchPortfolio() {
     try {
       const data = await Api.get('/users/portfolio');
       console.log('data for portfolio:', data);
-
-      const result = transformData(data.data.sort((a, b) => a.accountId.localeCompare(b.accountId)));
-
-      setCharts(result);
+      if (data?.success) {
+        const result = transformData(data.data.sort((a, b) => a.accountId.localeCompare(b.accountId)));
+        setCharts(result);
+      }
     } catch (error) {}
   }
 

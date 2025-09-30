@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import apiClient from '@/services/Api';
 import { useSocket } from './SocketProvider';
 import { useAdmin } from './AdminProvider';
+import Api from '@/services/Api';
 
 interface AuthContextInterface {
   user: UserInterface;
@@ -75,9 +76,17 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   }
 
   async function signOut() {
-    console.log('Sign out buttong is clicked');
-    localStorage.removeItem('isSignedIn');
-    navigate('/auth');
+    try {
+      const data = await Api.post('/auth/sign-out');
+      console.log('sign-out data:', data);
+      if (data?.success) {
+        console.log('Sign out buttong is clicked');
+        localStorage.removeItem('isSignedIn');
+        navigate('/auth');
+      }
+    } catch (error) {
+      console.error('Error in sign-out:', error);
+    }
   }
 
   return <AuthContext.Provider value={{ user, setUser, signOut }}>{children}</AuthContext.Provider>;

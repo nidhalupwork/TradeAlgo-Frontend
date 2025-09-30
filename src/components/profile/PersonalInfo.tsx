@@ -39,13 +39,15 @@ export const PersonalInfo = () => {
 
   async function updatePassword() {
     try {
-      await Api.post('/users/update-password', password);
-      setPassword({ last: '', new: '', confirm: '' });
-      toast({
-        title: 'Password updated',
-        description: `Account password has been successfully updated.`,
-        variant: 'profit',
-      });
+      const data = await Api.post('/users/update-password', password);
+      if (data?.success) {
+        setPassword({ last: '', new: '', confirm: '' });
+        toast({
+          title: 'Password updated',
+          description: `Account password has been successfully updated.`,
+          variant: 'profit',
+        });
+      }
     } catch (error) {
       console.error('Error in updating password:', error);
       toast({

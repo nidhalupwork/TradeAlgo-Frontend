@@ -14,16 +14,18 @@ export const TwoStep = () => {
     try {
       const data = await Api.post('/users/2fa');
       console.log('data:', data);
-      setUser(data.user);
-      toast({
-        title: 'Success',
-        description: 'Successfully updated 2fa configuration',
-        variant: 'profit',
-      });
+      if (data?.success) {
+        setUser(data.user);
+        toast({
+          title: 'Success',
+          description: 'Successfully updated 2fa configuration',
+          variant: 'profit',
+        });
+      }
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to update 2fa configuration',
+        description: error?.response?.data?.message ?? 'Failed to update 2fa configuration',
         variant: 'destructive',
       });
     }

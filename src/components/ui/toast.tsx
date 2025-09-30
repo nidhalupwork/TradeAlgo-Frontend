@@ -30,7 +30,8 @@ const toastVariants = cva(
         default: "border bg-background text-foreground",
         destructive:
           "destructive group border-destructive bg-destructive text-destructive-foreground",
-        profit: "profit group border-profit/80 bg-profit/85 text-profit-foreground"
+        profit: "profit group border-profit/80 bg-profit/85 text-profit-foreground",
+        warn: "gold group border-gold/80 bg-gold/85 text-gold-foreground"
       },
     },
     defaultVariants: {

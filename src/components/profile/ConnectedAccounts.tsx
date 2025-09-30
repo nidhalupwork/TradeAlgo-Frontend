@@ -38,7 +38,9 @@ export const ConnectedAccounts = () => {
   async function handleActiveClick(accountId: string) {
     try {
       const data = await Api.post('/users/account/active', { accountId });
-      setUser(data.user);
+      if (data?.success) {
+        setUser(data.user);
+      }
     } catch (error) {
       console.error('Error while activating:', error);
       toast({
@@ -52,13 +54,15 @@ export const ConnectedAccounts = () => {
   async function handleSaveToken() {
     try {
       const data = await Api.post('/users/meta-token', { token: metaToken });
-      setUser(data.user);
-      setIsEditing(false);
-      toast({
-        title: 'Success',
-        description: 'Successfully updated meta API token',
-        variant: 'profit',
-      });
+      if (data?.success) {
+        setUser(data.user);
+        setIsEditing(false);
+        toast({
+          title: 'Success',
+          description: 'Successfully updated meta API token',
+          variant: 'profit',
+        });
+      }
     } catch (error) {
       toast({
         title: 'Error',

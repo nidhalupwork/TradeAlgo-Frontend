@@ -49,8 +49,9 @@ export default function UserProfile() {
     try {
       const data = await Api.get(`/admin/activity/${userId}`);
       console.log('data for recent activities:', data);
-
-      setActivities(data.activities);
+      if (data?.success) {
+        setActivities(data.activities);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -106,16 +107,17 @@ export default function UserProfile() {
   async function onResetRiskClick(userId: string, strategyId: string) {
     try {
       const data = await Api.post('/admin/reset-risk', { userId, strategyId });
+      if (data?.success) {
+        setUsers((prevUsers) => prevUsers.map((u) => (u._id === data.user._id ? data.user : u)));
+        setUser(data.user);
 
-      setUsers((prevUsers) => prevUsers.map((u) => (u._id === data.user._id ? data.user : u)));
-      setUser(data.user);
-
-      toast({
-        title: 'Success',
-        description: 'Successfully reset the risk setting',
-        variant: 'default',
-        duration: 2000,
-      });
+        toast({
+          title: 'Success',
+          description: 'Successfully reset the risk setting',
+          variant: 'default',
+          duration: 2000,
+        });
+      }
     } catch (error) {
       toast({
         title: 'Error',

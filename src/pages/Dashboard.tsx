@@ -1,4 +1,3 @@
-import Announcement from '@/components/Announcement';
 import Navbar from '@/components/Navbar';
 import AdminDashboard from '@/components/admin/AdminDashboard';
 import TradingDashboard from '@/components/dashboard/TradingDashboard';
@@ -9,7 +8,6 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <Announcement />
       <div className="pt-16">{user.role === 'user' ? <TradingDashboard /> : <AdminDashboard />}</div>
     </div>
   );

@@ -50,7 +50,7 @@ const Navbar = () => {
             {isSignedIn === 'true' && (
               <div className="hidden md:flex items-center space-x-1">
                 {navItems
-                  .filter((ni) => ni.role === user.role || ni.role === 'all')
+                  .filter((ni) => ni?.role === user?.role || ni?.role === 'all')
                   .map((item) => {
                     const Icon = item.icon;
                     const isActive = location.pathname === item.path;

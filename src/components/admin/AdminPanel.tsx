@@ -57,14 +57,15 @@ const AdminPanel = () => {
     try {
       const data = await Api.post('/admin/manage-user', { id, type });
       console.log('user management data:', data);
-
-      setUsers((prevUsers) => prevUsers.map((user) => (user._id === data.user._id ? data.user : user)));
-      toast({
-        title: type + ' succeeded',
-        description: '',
-        variant: 'default',
-        duration: 2000,
-      });
+      if (data?.success) {
+        setUsers((prevUsers) => prevUsers.map((user) => (user._id === data.user._id ? data.user : user)));
+        toast({
+          title: type + ' succeeded',
+          description: '',
+          variant: 'default',
+          duration: 2000,
+        });
+      }
     } catch (error) {
       toast({
         title: type + ' failed',
@@ -103,15 +104,15 @@ const AdminPanel = () => {
   async function manageAllTrading(type: 'start' | 'stop') {
     try {
       const data = await Api.post('/admin/manage-trading', { type });
-
       console.log('stop-trading:', data);
-
-      setGlobalSetting(data.setting);
-      toast({
-        title: 'Global setting',
-        description: `Successfully ${type === 'stop' ? 'paused' : 'started'} all trading`,
-        variant: 'default',
-      });
+      if (data?.success) {
+        setGlobalSetting(data.setting);
+        toast({
+          title: 'Global setting',
+          description: `Successfully ${type === 'stop' ? 'paused' : 'started'} all trading`,
+          variant: 'default',
+        });
+      }
     } catch (error) {
       console.error('Error while pausing all trading:', error);
       toast({
@@ -127,13 +128,15 @@ const AdminPanel = () => {
       const data = await Api.post('/admin/change-mode', { type });
       console.log('change mode data:', data);
 
-      setGlobalSetting(data.setting);
-      toast({
-        title: 'Global setting',
-        description: `Successfully moved to ${type} mode`,
-        variant: 'default',
-        duration: 2000,
-      });
+      if (data?.success) {
+        setGlobalSetting(data.setting);
+        toast({
+          title: 'Global setting',
+          description: `Successfully moved to ${type} mode`,
+          variant: 'default',
+          duration: 2000,
+        });
+      }
     } catch (error) {
       toast({
         title: 'Global setting',

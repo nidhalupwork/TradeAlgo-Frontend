@@ -26,15 +26,15 @@ export default function AdminDashboard() {
   async function manageAllTrading(type: string) {
     try {
       const data = await Api.post('/admin/manage-trading', { type });
-
       console.log('stop-trading:', data);
-
-      setGlobalSetting(data.setting);
-      toast({
-        title: 'Global setting',
-        description: `Successfully ${type === 'stop' ? 'paused' : 'started'} all trading`,
-        variant: 'default',
-      });
+      if (data?.success) {
+        setGlobalSetting(data.setting);
+        toast({
+          title: 'Global setting',
+          description: `Successfully ${type === 'stop' ? 'paused' : 'started'} all trading`,
+          variant: 'default',
+        });
+      }
     } catch (error) {
       console.error('Error while pausing all trading:', error);
       toast({
@@ -49,14 +49,15 @@ export default function AdminDashboard() {
     try {
       const data = await Api.post('/admin/change-mode', { type });
       console.log('change mode data:', data);
-
-      setGlobalSetting(data.setting);
-      toast({
-        title: 'Global setting',
-        description: `Successfully moved to ${type} mode`,
-        variant: 'default',
-        duration: 2000,
-      });
+      if (data?.success) {
+        setGlobalSetting(data.setting);
+        toast({
+          title: 'Global setting',
+          description: `Successfully moved to ${type} mode`,
+          variant: 'default',
+          duration: 2000,
+        });
+      }
     } catch (error) {
       toast({
         title: 'Global setting',
