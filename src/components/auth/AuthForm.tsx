@@ -75,7 +75,10 @@ export const AuthForm = () => {
         }
       } else {
         const data = await apiClient.post('/auth/register', personalData);
-        setTab('signin');
+        if (data?.success) {
+          setUser(data.user);
+          navigate('/2fa');
+        }
       }
     } catch (error) {
       console.error(`Error while ${type}:`, error);
