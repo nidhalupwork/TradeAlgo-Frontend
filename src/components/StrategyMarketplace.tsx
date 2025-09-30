@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
-import { TrendingUp, BarChart3, Clock, Users, Star, Info, Check, Settings } from 'lucide-react';
+import { TrendingUp, BarChart3, Clock, Users, Star, Info, Check, Settings, CircleAlert } from 'lucide-react';
 import Api from '@/services/Api';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
@@ -138,7 +138,7 @@ const StrategyMarketplace = () => {
           </div>
         </Card>
 
-        <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
+        {/* <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
           <div className="flex items-center gap-3">
             <TrendingUp className="h-8 w-8 text-gold" />
             <div>
@@ -146,7 +146,7 @@ const StrategyMarketplace = () => {
               <p className="text-sm text-muted-foreground">Active Algorithms</p>
             </div>
           </div>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Strategy Grid */}
@@ -225,7 +225,7 @@ const StrategyMarketplace = () => {
                       const sSetting = user?.strategySetting?.find((ss) => ss.strategyId === strategy._id);
                       const isSubscribed = sSetting && sSetting.subscribed.includes(acc.accountId);
                       return (
-                        <div key={acc.accountId} className="flex gap-2 items-center">
+                        <div key={acc.accountId} className="flex gap-2 items-center mt-1">
                           <Checkbox
                             checked={isSubscribed}
                             onClick={() => {
@@ -237,11 +237,11 @@ const StrategyMarketplace = () => {
                       );
                     })}
                     {user?.accounts?.length > 1 && (
-                      <div className="flex gap-2 items-center">
+                      <div className="flex gap-2 items-center mt-1">
                         <Checkbox
                           checked={
                             user.accounts.length ===
-                            user?.strategySetting?.find((ss) => ss.strategyId === strategy._id).subscribed.length
+                            user?.strategySetting?.find((ss) => ss.strategyId === strategy._id)?.subscribed?.length
                           }
                           onClick={() => {
                             subscribeStrategy(strategy._id, '', 'All');
@@ -250,12 +250,20 @@ const StrategyMarketplace = () => {
                         All
                       </div>
                     )}
+                    {user?.accounts?.length === 0 && (
+                      <div className="flex gap-2 items-center mt-1">
+                        <CircleAlert color="gold" size={20} />
+                        <p className="text-muted-foreground text-sm">You have no account</p>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => onConfigModalOpen(strategy)}>
-                      <Settings />
-                    </Button>
-                  </div>
+                  {user?.status === 'active' && user?.accounts?.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => onConfigModalOpen(strategy)}>
+                        <Settings />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

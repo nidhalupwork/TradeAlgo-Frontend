@@ -168,30 +168,7 @@ const AdminPanel = () => {
           <h1 className="text-3xl font-bold mb-2">Admin Control Center</h1>
           <p className="text-muted-foreground">Manage users and monitor system-wide trading activity</p>
         </div>
-        <div className="flex gap-2">
-          {!!globalSetting?.isMaintaining ? (
-            <Button variant="profit" size="lg" className="p-4" onClick={() => changeMode('live')}>
-              <TvMinimalPlay className="h-4 w-4 mr-1" />
-              Live mode
-            </Button>
-          ) : (
-            <Button variant="gold" size="lg" className="p-4" onClick={() => changeMode('maintain')}>
-              <Bug className="h-4 w-4 mr-1" />
-              Maintain mode
-            </Button>
-          )}
-          {!!globalSetting?.isPausedAllTrading ? (
-            <Button variant="profit" size="lg" className="p-4" onClick={() => manageAllTrading('start')}>
-              <TvMinimalPlay className="h-4 w-4 mr-1" />
-              Start All Trading
-            </Button>
-          ) : (
-            <Button variant="destructive" size="lg" className="p-4" onClick={() => manageAllTrading('stop')}>
-              <Power className="h-4 w-4 mr-1" />
-              Global Kill Switch
-            </Button>
-          )}
-        </div>
+        <div className="flex gap-2"></div>
       </div>
 
       {/* System Stats */}
@@ -447,7 +424,7 @@ const AdminPanel = () => {
       </Card>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="bg-card/50 backdrop-blur-sm border-border/50">
           <div className="p-6">
             <h3 className="text-lg font-semibold mb-4">System Controls</h3>
@@ -502,7 +479,7 @@ const AdminPanel = () => {
             </div>
           </div>
         </Card>
-      </div>
+      </div> */}
     </div>
   );
 };

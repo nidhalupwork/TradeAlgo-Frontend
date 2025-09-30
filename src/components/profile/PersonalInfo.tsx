@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import Api from '@/services/Api';
 import { useToast } from '@/hooks/use-toast';
+import { Switch } from '../ui/switch';
 
 export const PersonalInfo = () => {
   const { user } = useAuth();
@@ -26,10 +27,10 @@ export const PersonalInfo = () => {
   });
 
   useEffect(() => {
-    const [firsst, last] = user ? user?.fullName.split(' ') : ['', ''];
+    const [first, last] = user ? user?.fullName.split(' ') : ['', ''];
 
     setPersonalInfo({
-      firstName: firsst,
+      firstName: first,
       lastName: last,
       email: user?.email || '',
       phoneNumber: user?.phoneNumber || '',
@@ -38,12 +39,12 @@ export const PersonalInfo = () => {
 
   async function updatePassword() {
     try {
-      const data = await Api.post('/users/update-password', password);
-
-      console.log('data from update-password request', data);
+      await Api.post('/users/update-password', password);
+      setPassword({ last: '', new: '', confirm: '' });
       toast({
         title: 'Password updated',
         description: `Account password has been successfully updated.`,
+        variant: 'profit',
       });
     } catch (error) {
       console.error('Error in updating password:', error);
@@ -87,7 +88,7 @@ export const PersonalInfo = () => {
             <Label htmlFor="firstName">First Name</Label>
             <Input
               id="firstName"
-              value={personalInfo.firstName}
+              value={personalInfo?.firstName || ''}
               disabled={!isEditing}
               className={!isEditing ? 'bg-muted' : ''}
               onChange={(e) => {
@@ -99,7 +100,7 @@ export const PersonalInfo = () => {
             <Label htmlFor="lastName">Last Name</Label>
             <Input
               id="lastName"
-              value={personalInfo.lastName}
+              value={personalInfo?.lastName || ''}
               disabled={!isEditing}
               className={!isEditing ? 'bg-muted' : ''}
               onChange={(e) => {

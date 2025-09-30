@@ -18,6 +18,7 @@ export interface UserInterface {
   metaApiToken: string;
   trades?: any[] | undefined;
   status: 'active' | 'pending' | 'suspended';
+  twoFA: boolean;
 }
 
 export interface ConnectAccount {
@@ -116,4 +117,19 @@ export interface ITier {
   price: number;
   maxAccountsCount: number;
   level: number;
+}
+
+export interface HistoryItem {
+  quantity: number;
+  date: number;
+}
+
+export interface DataItem {
+  _id: any;
+  userId: any;
+  accountId: string;
+  history: HistoryItem[];
+  lastUpdated: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }

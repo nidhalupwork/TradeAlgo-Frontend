@@ -16,15 +16,30 @@ import {
   Users,
   Pause,
   Play,
+  Plus,
+  Edit,
+  Trash2,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useAdmin } from '@/providers/AdminProvider';
 import Api from '@/services/Api';
 import { useToast } from '@/hooks/use-toast';
+import { AddStrategyModal } from './AddStrategyModal';
+import { useState } from 'react';
+import { StrategyInterface } from '@/lib/types';
+import { ConfirmDeletionModal } from './ConfirmDeletionModal';
 
 export default function StrategyManagement() {
-  const { strategies, globalSetting, setGlobalSetting, setStrategies } = useAdmin();
+  const { strategies, setStrategies } = useAdmin();
   const { toast } = useToast();
+  const [open, setOpen] = useState<'Add' | 'Edit' | 'Delete' | ''>('');
+  const [strategy, setStrategy] = useState<StrategyInterface>();
+  const [isLoading, setIsLoading] = useState(false);
+
+  function openChange() {
+    setOpen('');
+    setStrategy(undefined);
+  }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -39,28 +54,6 @@ export default function StrategyManagement() {
     }
   };
 
-  async function manageAllTrading(type: string) {
-    try {
-      const data = await Api.post('/admin/manage-trading', { type });
-
-      console.log('stop-trading:', data);
-
-      setGlobalSetting(data.setting);
-      toast({
-        title: 'Global setting',
-        description: `Successfully ${type === 'stop' ? 'paused' : 'started'} all trading`,
-        variant: 'default',
-      });
-    } catch (error) {
-      console.error('Error while pausing all trading:', error);
-      toast({
-        title: 'Global setting',
-        description: 'Something went wrong. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  }
-
   async function enablingStrategy(strategyId: string, value: boolean) {
     try {
       const data = await Api.post('/strategy/enable', { strategyId, value });
@@ -73,7 +66,35 @@ export default function StrategyManagement() {
       );
     } catch (error) {
       console.error('Error while enabling strategy:', error);
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message || 'Unexpected Error',
+        variant: 'destructive',
+      });
     }
+  }
+
+  async function deleteStrategy(strategyId: string) {
+    try {
+      setIsLoading(true);
+      const data = await Api.delete(`/strategy/${strategyId}`);
+      console.log('data:', data);
+
+      setStrategies(strategies.filter((s) => s._id !== strategyId));
+
+      toast({
+        title: 'Success',
+        description: 'Successfully deleted',
+      });
+      setOpen('');
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message || 'Unexpected Error',
+        variant: 'destructive',
+      });
+    }
+    setIsLoading(false);
   }
 
   return (
@@ -84,7 +105,7 @@ export default function StrategyManagement() {
           {/* Page Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Risk Oversight</h1>
+              <h1 className="text-3xl font-bold tracking-tight">Strategy Management</h1>
               <p className="text-muted-foreground">
                 Global risk controls, strategy management, and emergency overrides
               </p>
@@ -98,7 +119,7 @@ export default function StrategyManagement() {
           </div>
 
           {/* Emergency Controls */}
-          <Card className="border-destructive/50 bg-destructive/5">
+          {/* <Card className="border-destructive/50 bg-destructive/5">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-destructive">
                 <Shield className="h-5 w-5" />
@@ -122,7 +143,7 @@ export default function StrategyManagement() {
                   ) : (
                     <Button
                       size="lg"
-                      className="w-full h-16 bg-destructive/80 shadow-danger hover:shadow-danger/80"
+                      className="w-full h-16 bg-destructive/70 shadow-danger hover:bg-destructive/80"
                       onClick={() => manageAllTrading('stop')}
                     >
                       <div className="flex items-center gap-3">
@@ -137,7 +158,7 @@ export default function StrategyManagement() {
                     </Button>
                   )}
 
-                  {/* <Button
+                  <Button
                     variant="outline"
                     size="lg"
                     className="w-full h-16 border-destructive text-destructive hover:bg-destructive/10"
@@ -149,19 +170,19 @@ export default function StrategyManagement() {
                         <div className="text-xs opacity-70">Emergency position closure</div>
                       </div>
                     </div>
-                  </Button> */}
+                  </Button>
                 </div>
 
                 <div className="space-y-4">
-                  {/* <div className="p-4 rounded-lg bg-card border">
+                  <div className="p-4 rounded-lg bg-card border">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-medium">Global Trading Status</span>
                       <Switch checked={globalSetting?.isPausedAllTrading} />
                     </div>
                     <p className="text-sm text-muted-foreground">Enable/disable all trading operations platform-wide</p>
-                  </div> */}
+                  </div>
 
-                  {/* <div className="p-4 rounded-lg bg-card border">
+                  <div className="p-4 rounded-lg bg-card border">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-medium">New Position Creation</span>
                       <Switch defaultChecked />
@@ -169,11 +190,11 @@ export default function StrategyManagement() {
                     <p className="text-sm text-muted-foreground">
                       Allow new positions while keeping existing ones active
                     </p>
-                  </div> */}
+                  </div>
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Risk Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -228,9 +249,20 @@ export default function StrategyManagement() {
 
           {/* Strategy Controls */}
           <Card>
-            <CardHeader>
-              <CardTitle>Strategy Risk Management</CardTitle>
-              <CardDescription>Control and monitor individual trading strategies across the platform</CardDescription>
+            <CardHeader className="flex flex-row justify-between">
+              <div>
+                <CardTitle>Strategy Risk Management</CardTitle>
+                <CardDescription>Control and monitor individual trading strategies across the platform</CardDescription>
+              </div>
+              <Button
+                onClick={() => {
+                  setOpen('Add');
+                  setStrategy(undefined);
+                }}
+              >
+                <Plus />
+                Add New Strategy
+              </Button>
             </CardHeader>
             <CardContent>
               <div className="rounded-md border">
@@ -277,7 +309,7 @@ export default function StrategyManagement() {
 
                         {/* Actions */}
                         <TableCell>
-                          <div className="flex items-center">
+                          <div className="flex items-center gap-2">
                             {/* <Button variant="ghost" size="sm">
                               {strategy.status !== 'Paused' ? (
                                 <Pause className="h-3 w-3" />
@@ -285,21 +317,37 @@ export default function StrategyManagement() {
                                 <Play className="h-3 w-3" />
                               )}
                             </Button> */}
-                            {strategy.status === 'Live' && (
-                              <Button size="sm" className='p-2'>
+                            <Edit
+                              size={20}
+                              className="hover:cursor-pointer hover:text-blue-400 transition-all"
+                              onClick={() => {
+                                setOpen('Edit');
+                                setStrategy(strategy);
+                              }}
+                            />
+                            <Trash2
+                              size={20}
+                              className="hover:cursor-pointer text-red-600 hover:text-red-700 transition-all"
+                              onClick={() => {
+                                setOpen('Delete');
+                                setStrategy(strategy);
+                              }}
+                            />
+                            {/* {strategy.status === 'Live' && (
+                              <Button size="sm" className="p-2">
                                 <Pause className="h-3 w-3" /> Pause
                               </Button>
                             )}
                             {strategy.status === 'Paused' && (
-                              <Button size="sm" className='p-2'>
+                              <Button size="sm" className="p-2">
                                 <Play className="h-3 w-3" /> Start
                               </Button>
                             )}
                             {strategy.status === 'Development' && (
-                              <Button size="sm" className='p-2'>
+                              <Button size="sm" className="p-2">
                                 <Play className="h-3 w-3" /> Go to Live
                               </Button>
-                            )}
+                            )} */}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -311,6 +359,15 @@ export default function StrategyManagement() {
           </Card>
         </div>
       </div>
+
+      <AddStrategyModal open={open} onOpenChange={openChange} selectedStrategy={strategy} />
+      <ConfirmDeletionModal
+        open={open}
+        onOpenChange={openChange}
+        selectedStrategy={strategy}
+        deleteStrategy={deleteStrategy}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

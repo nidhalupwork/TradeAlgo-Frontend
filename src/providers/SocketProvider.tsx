@@ -8,6 +8,8 @@ interface StatsInterface {
   openPositions: any[];
   closedPositions: any[];
   accountInformation: any[];
+  unrealizedPnl: number;
+  unrealizedPnlPercentage: number;
   pnl: number;
   pnlPercentage: number;
 }
@@ -29,6 +31,8 @@ export const SocketProvider = ({ children }) => {
     openPositions: [],
     closedPositions: [],
     accountInformation: [],
+    unrealizedPnl: 0,
+    unrealizedPnlPercentage: 0,
     pnl: 0,
     pnlPercentage: 0,
   });
@@ -122,7 +126,11 @@ export const SocketProvider = ({ children }) => {
 
     // console.log('balance:', balance);
 
-    const sum = [...positions].reduce((sum, cur) => {
+    const openSum = [...positions].reduce((sum, cur) => {
+      return sum + cur.profit;
+    }, 0);
+
+    const closedSum = closedPositions.reduce((sum, cur) => {
       return sum + cur.profit;
     }, 0);
 
@@ -131,8 +139,10 @@ export const SocketProvider = ({ children }) => {
       closedPositions,
       balance,
       accountInformation: data.accountInfos,
-      pnl: sum,
-      pnlPercentage: roundUp((sum / (balance.mt4 + balance.mt5)) * 100, 2),
+      unrealizedPnl: openSum,
+      unrealizedPnlPercentage: roundUp((openSum / (balance.mt4 + balance.mt5)) * 100, 2),
+      pnl: closedSum,
+      pnlPercentage: roundUp((closedSum / (balance.mt4 + balance.mt5)) * 100, 2),
     });
   }
 

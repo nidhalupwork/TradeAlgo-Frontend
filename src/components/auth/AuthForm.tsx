@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 export const AuthForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { setUser } = useAuth();
+  const { setUser, user } = useAuth();
   const { setUsers, setStrategies, setGlobalSetting } = useAdmin();
   const { initializeSocket } = useSocket();
   const [showPassword, setShowPassword] = useState(false);
@@ -31,9 +31,9 @@ export const AuthForm = () => {
     phoneNumber: string;
   }>({
     fullName: 'Nidhal Nouma',
-    email: 'nidhalnouma10@gmail.com',
+    email: 'jamesharuki@gmail.com',
     phoneNumber: '',
-    password: '123123123',
+    password: '123123',
   });
 
   useEffect(() => {
@@ -51,22 +51,27 @@ export const AuthForm = () => {
     try {
       if (type === 'signin') {
         const data = await apiClient.post('/auth/sign-in', personalData);
-        setUser(data.user);
-        localStorage.setItem('isSignedIn', 'true');
 
-        console.log('userid:', data.user);
-        const accountIds = data?.user?.accounts?.reduce((acc, cur) => {
-          return [...acc, cur.accountId];
-        }, []);
-
-        if (data.user.role === 'user') {
-          initializeSocket(data.user._id, accountIds);
-          navigate('/dashboard');
+        if (data.twoFA) {
+          setUser({ ...user, email: personalData.email });
+          navigate('/2fa');
         } else {
-          setUsers(data.users);
-          setStrategies(data.strategies);
-          setGlobalSetting(data.setting);
-          navigate('/user-management');
+          setUser(data.user);
+          localStorage.setItem('isSignedIn', 'true');
+
+          const accountIds = data?.user?.accounts?.reduce((acc, cur) => {
+            return [...acc, cur.accountId];
+          }, []);
+
+          if (data.user.role === 'user') {
+            initializeSocket(data.user._id, accountIds);
+            navigate('/dashboard');
+          } else {
+            setUsers(data.users);
+            setStrategies(data.strategies);
+            setGlobalSetting(data.setting);
+            navigate('/user-management');
+          }
         }
       } else {
         const data = await apiClient.post('/auth/register', personalData);

@@ -2,42 +2,45 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useState } from 'react';
 import { Button } from '../ui/button';
-
-interface ChartData {
-  date: string;
-  account1: number;
-  account2: number;
-  account3: number;
-  account4: number;
-}
+import { ConnectAccount } from '@/lib/types';
 
 interface TradingChartProps {
-  data: ChartData[];
-  selectedAccounts: string[];
+  data: any[];
+  selectedAccounts: { accountId: string; name: string }[];
+  accounts: ConnectAccount[];
 }
 
-const accountColors = {
-  account1: 'hsl(var(--chart-1))',
-  account2: 'hsl(var(--chart-2))',
-  account3: 'hsl(var(--chart-3))',
-  account4: 'hsl(var(--chart-4))',
-};
+const accountColors = [
+  'hsl(var(--chart-1))',
+  'hsl(var(--chart-2))',
+  'hsl(var(--chart-3))',
+  'hsl(var(--chart-4))',
+  'hsl(var(--chart-5))',
+  'hsl(var(--chart-6))',
+  'hsl(var(--chart-7))',
+  'hsl(var(--chart-8))',
+  'hsl(var(--chart-9))',
+  'hsl(var(--chart-10))',
+  'hsl(var(--chart-11))',
+  'hsl(var(--chart-12))',
+  'hsl(var(--chart-13))',
+  'hsl(var(--chart-14))',
+  'hsl(var(--chart-15))',
+  'hsl(var(--chart-16))',
+  'hsl(var(--chart-17))',
+  'hsl(var(--chart-18))',
+  'hsl(var(--chart-19))',
+  'hsl(var(--chart-20))',
+];
 
-const accountNames = {
-  account1: 'Growth Account',
-  account2: 'Conservative Account',
-  account3: 'Aggressive Account',
-  account4: 'Balanced Account',
-};
-
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label, accounts }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="rounded-lg border bg-card p-3 shadow-md">
         <p className="text-sm font-medium text-card-foreground mb-2">{label}</p>
         {payload.map((entry: any, index: number) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
-            {accountNames[entry.dataKey as keyof typeof accountNames]}: ${entry.value.toLocaleString()}
+            {accounts.find((a) => a.accountId === entry.dataKey).name}: ${entry.value.toLocaleString()}
           </p>
         ))}
       </div>
@@ -46,24 +49,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export const TradingChart = ({ data, selectedAccounts }: TradingChartProps) => {
+export const TradingChart = ({ data, selectedAccounts, accounts }: TradingChartProps) => {
   const [range, setRange] = useState<'1m' | '3m' | '1y'>('1m');
-  // function PortfolioChart({ data, range }) {
-  // `range` could be '1m', '3m', or '1y'
-
-  // Filter data based on range
-  const now = new Date();
-  const filteredData = data.filter((d) => {
-    const date = new Date(d.date);
-    if (range === '1m') {
-      return date >= new Date(now.setMonth(now.getMonth() - 1));
-    } else if (range === '3m') {
-      return date >= new Date(now.setMonth(now.getMonth() - 3));
-    } else if (range === '1y') {
-      return date >= new Date(now.setFullYear(now.getFullYear() - 1));
-    }
-    return true;
-  });
 
   // Choose XAxis tick formatter and ticks interval based on range
   let tickFormatter;
@@ -119,23 +106,25 @@ export const TradingChart = ({ data, selectedAccounts }: TradingChartProps) => {
                 axisLine={true}
                 tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
               />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend
+              <Tooltip content={<CustomTooltip accounts={selectedAccounts} />} />
+              {/* <Legend
                 wrapperStyle={{ paddingTop: '20px' }}
                 iconType="line"
                 formatter={(value) => accountNames[value as keyof typeof accountNames]}
-              />
+              /> */}
 
-              {selectedAccounts.includes('b664d005-f96a-4052-9a96-ee5124f84704') && (
+              {selectedAccounts.map((a, index) => (
                 <Line
+                  key={index}
                   type="monotone"
-                  dataKey="account1"
-                  stroke={accountColors.account1}
+                  dataKey={a.accountId}
+                  stroke={accountColors[index]}
+                  // hide={!selectedAccounts.some((sa) => sa.accountId === a.accountId)}
                   strokeWidth={3}
                   dot={false}
-                  activeDot={{ r: 6, stroke: accountColors.account1, strokeWidth: 2, fill: 'hsl(var(--background))' }}
+                  activeDot={{ r: 6, stroke: accountColors[index], strokeWidth: 2, fill: 'hsl(var(--background))' }}
                 />
-              )}
+              ))}
             </LineChart>
           </ResponsiveContainer>
         </div>

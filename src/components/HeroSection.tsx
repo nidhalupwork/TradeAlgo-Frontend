@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Shield, Zap, TrendingUp, BarChart3 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Button } from '@/components/ui/button';
+import { ArrowRight, Shield, Zap, TrendingUp, BarChart3 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
   return (
@@ -17,18 +17,18 @@ const HeroSection = () => {
             <Zap className="h-4 w-4 text-gold" />
             <span className="text-sm text-gold font-medium">Advanced Trading Automation Platform</span>
           </div>
-          
+
           <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
             Bridge Your TradingView
             <br />
             <span className="bg-gradient-profit bg-clip-text">Signals to Success</span>
           </h1>
-          
+
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Seamlessly connect TradingView alerts to MetaTrader, cTrader, dxTrade, and Tradovate. 
-            Advanced risk management, automated position sizing, and real-time monitoring.
+            Seamlessly connect TradingView alerts to MetaTrader, cTrader, dxTrade, and Tradovate. Advanced risk
+            management, automated position sizing, and real-time monitoring.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
             <Link to="/dashboard">
               <Button size="xl" variant="gold" className="group">
@@ -43,7 +43,7 @@ const HeroSection = () => {
               </Button>
             </Link>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
             <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-6 hover:border-primary/50 transition-colors">
               <Shield className="h-10 w-10 text-primary mb-4 mx-auto" />
@@ -52,7 +52,7 @@ const HeroSection = () => {
                 Automated position sizing, max loss limits, and daily drawdown protection
               </p>
             </div>
-            
+
             <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-6 hover:border-profit/50 transition-colors">
               <TrendingUp className="h-10 w-10 text-profit mb-4 mx-auto" />
               <h3 className="text-lg font-semibold mb-2">Multiple Strategies</h3>
@@ -60,7 +60,7 @@ const HeroSection = () => {
                 Choose from proven setups or create your own custom trading strategies
               </p>
             </div>
-            
+
             <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-6 hover:border-gold/50 transition-colors">
               <Zap className="h-10 w-10 text-gold mb-4 mx-auto" />
               <h3 className="text-lg font-semibold mb-2">Real-Time Execution</h3>

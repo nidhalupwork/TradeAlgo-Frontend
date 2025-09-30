@@ -33,7 +33,6 @@ const RiskManagement = () => {
     setRiskSettings(user?.riskSettings);
   }, [user]);
 
-
   function onRiskSettingsChange(parentKey: string, key: string, value: string | boolean | number) {
     const temp = riskSettings[parentKey];
     setRiskSettings({
@@ -45,15 +44,6 @@ const RiskManagement = () => {
     });
   }
 
-  async function onSaveClick() {
-    try {
-      const data = await apiClient.post('/users/risk-management', riskSettings);
-      console.log('Data:', data);
-      setUser(data.user);
-    } catch (error) {
-      console.error('Error while saving:', error);
-    }
-  }
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -62,7 +52,7 @@ const RiskManagement = () => {
           <h1 className="text-3xl font-bold mb-2">Risk Management</h1>
           <p className="text-muted-foreground">Configure your trading risk parameters and position sizing</p>
         </div>
-        <Button variant="gold" onClick={() => onSaveClick()}>
+        <Button variant="gold">
           <Lock className="h-4 w-4 mr-2" />
           Save Settings
         </Button>
@@ -149,9 +139,7 @@ const RiskManagement = () => {
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <Label>Risk Per Trade</Label>
-                      <span className="text-sm font-medium text-primary">
-                        {riskSettings?.riskPerTrade}%
-                      </span>
+                      <span className="text-sm font-medium text-primary">{riskSettings?.riskPerTrade}%</span>
                     </div>
                     <Slider
                       value={[riskSettings?.riskPerTrade]}
@@ -267,9 +255,7 @@ const RiskManagement = () => {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <Label>Max Concurrent Positions</Label>
-                    <span className="text-sm font-medium text-primary">
-                      {riskSettings?.maxCurrentPositions}
-                    </span>
+                    <span className="text-sm font-medium text-primary">{riskSettings?.maxCurrentPositions}</span>
                   </div>
                   <Slider
                     min={1}

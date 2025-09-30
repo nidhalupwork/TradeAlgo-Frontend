@@ -1,22 +1,17 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
-  TrendingUp,
   LayoutDashboard,
   Activity,
   Settings,
-  ShieldCheck,
   Users,
-  ChartCandlestick,
-  LockKeyhole,
-  User,
   SquareUser,
   Bell,
-  Home,
   LogOut,
 } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useEffect } from 'react';
+import logo from '@/assets/logo.png';
 
 const Navbar = () => {
   const { user } = useAuth();
@@ -32,9 +27,8 @@ const Navbar = () => {
   }, [location.pathname]);
 
   const navItems = [
-    { path: '/', label: 'Home', icon: Home, role: 'all' },
     // user page
-    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, role: 'user' },
+    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, role: 'all' },
     { path: '/strategies', label: 'Strategies', icon: Activity, role: 'user' },
     { path: '/profile', label: 'Profile', icon: SquareUser, role: 'user' },
 
@@ -49,8 +43,8 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-8">
             <Link to="/" className="flex items-center space-x-2">
-              <ChartCandlestick className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">TradeAlgo Pro</span>
+              <img src={logo} className="h-8 w-8 text-primary" alt="TradeAlgo logo" />
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-gray-700 via-gray-600 to-gray-200">TradeAlgorithm</span>
             </Link>
 
             {isSignedIn === 'true' && (

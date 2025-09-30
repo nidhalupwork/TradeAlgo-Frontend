@@ -4,9 +4,32 @@ import { ConnectAccount } from '@/lib/types';
 
 interface AccountSelectorProps {
   accounts: ConnectAccount[];
-  selectedAccounts: string[];
-  onAccountToggle: (accountId: string) => void;
+  selectedAccounts: { accountId: string; name: string }[];
+  onAccountToggle: (accountId: string, name: string) => void;
 }
+
+const accountColors = [
+  'border-[hsl(var(--chart-1))] bg-[hsl(var(--chart-1))]',
+  'border-[hsl(var(--chart-2))] bg-[hsl(var(--chart-2))]',
+  'border-[hsl(var(--chart-3))] bg-[hsl(var(--chart-3))]',
+  'border-[hsl(var(--chart-4))] bg-[hsl(var(--chart-4))]',
+  'border-[hsl(var(--chart-5))] bg-[hsl(var(--chart-5))]',
+  'border-[hsl(var(--chart-6))] bg-[hsl(var(--chart-6))]',
+  'border-[hsl(var(--chart-7))] bg-[hsl(var(--chart-7))]',
+  'border-[hsl(var(--chart-8))] bg-[hsl(var(--chart-8))]',
+  'border-[hsl(var(--chart-9))] bg-[hsl(var(--chart-9))]',
+  'border-[hsl(var(--chart-10))] bg-[hsl(var(--chart-10))]',
+  'border-[hsl(var(--chart-11))] bg-[hsl(var(--chart-11))]',
+  'border-[hsl(var(--chart-12))] bg-[hsl(var(--chart-12))]',
+  'border-[hsl(var(--chart-13))] bg-[hsl(var(--chart-13))]',
+  'border-[hsl(var(--chart-14))] bg-[hsl(var(--chart-14))]',
+  'border-[hsl(var(--chart-15))] bg-[hsl(var(--chart-15))]',
+  'border-[hsl(var(--chart-16))] bg-[hsl(var(--chart-16))]',
+  'border-[hsl(var(--chart-17))] bg-[hsl(var(--chart-17))]',
+  'border-[hsl(var(--chart-18))] bg-[hsl(var(--chart-18))]',
+  'border-[hsl(var(--chart-19))] bg-[hsl(var(--chart-19))]',
+  'border-[hsl(var(--chart-20))] bg-[hsl(var(--chart-20))]',
+];
 
 export const AccountSelector = ({ accounts, selectedAccounts, onAccountToggle }: AccountSelectorProps) => {
   return (
@@ -17,36 +40,34 @@ export const AccountSelector = ({ accounts, selectedAccounts, onAccountToggle }:
       </CardHeader>
       <CardContent>
         <div className="h-56 space-y-2 scroll-smooth overflow-auto">
-          {accounts.map((account) => (
-            <div
-              key={account.accountId}
-              className="flex items-center justify-between p-3 rounded-lg border bg-secondary/50 hover:bg-secondary transition-colors"
-            >
-              <div className="flex items-center space-x-3">
-                <Checkbox
-                  id={account.accountId}
-                  checked={selectedAccounts.includes(account.accountId)}
-                  onCheckedChange={() => onAccountToggle(account.accountId)}
-                  className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                />
-                <div>
-                  <label htmlFor={account.accountId} className="text-sm font-medium cursor-pointer">
-                    {account.name}
-                  </label>
+          {accounts
+            .sort((a, b) => a.accountId.localeCompare(b.accountId))
+            .map((account, index) => (
+              <div
+                key={account.accountId}
+                className="flex items-center justify-between p-3 rounded-lg border bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer"
+                onClick={() => onAccountToggle(account.accountId, account.name)}
+              >
+                <div className="flex items-center space-x-3 w-full">
+                  <Checkbox
+                    id={account.accountId}
+                    checked={selectedAccounts.some((s) => s.accountId === account.accountId)}
+                    // onCheckedChange={() => onAccountToggle(account.accountId, account.name)}
+                    className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  />
+                  <div className="flex justify-between items-center w-full">
+                    <label htmlFor={account.accountId} className={`text-sm font-medium `}>
+                      {account.name}
+                    </label>
+                    <div
+                      className={`w-4 h-4 rounded-full border-2 ${
+                        accountColors[selectedAccounts.findIndex((s) => s.accountId === account.accountId)]
+                      }`}
+                    />
+                  </div>
                 </div>
               </div>
-              {/* <div className="text-right">
-                <Badge
-                  variant={account.change >= 0 ? 'default' : 'destructive'}
-                  className={`${account.change >= 0 ? 'bg-profit text-profit-foreground' : ''}`}
-                >
-                  {account.change >= 0 ? '+' : ''}${account.change.toLocaleString()}(
-                  {account.changePercent >= 0 ? '+' : ''}
-                  {account.changePercent.toFixed(2)}%)
-                </Badge>
-              </div> */}
-            </div>
-          ))}
+            ))}
         </div>
       </CardContent>
     </Card>

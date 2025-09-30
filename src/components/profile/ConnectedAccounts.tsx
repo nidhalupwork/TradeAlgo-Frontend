@@ -11,8 +11,10 @@ import Api from '@/services/Api';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Input } from '../ui/input';
+import { useToast } from '@/hooks/use-toast';
 
 export const ConnectedAccounts = () => {
+  const { toast } = useToast();
   const { user, setUser } = useAuth();
   const [accounts, setAccounts] = useState<ConnectAccount[]>();
   const [selectedAccount, setSelectedAccount] = useState(null);
@@ -36,10 +38,33 @@ export const ConnectedAccounts = () => {
   async function handleActiveClick(accountId: string) {
     try {
       const data = await Api.post('/users/account/active', { accountId });
-      console.log('data for activating:', data);
       setUser(data.user);
     } catch (error) {
       console.error('Error while activating:', error);
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message || 'Unexpected Error',
+        variant: 'destructive',
+      });
+    }
+  }
+
+  async function handleSaveToken() {
+    try {
+      const data = await Api.post('/users/meta-token', { token: metaToken });
+      setUser(data.user);
+      setIsEditing(false);
+      toast({
+        title: 'Success',
+        description: 'Successfully updated meta API token',
+        variant: 'profit',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message || 'Unexpected Error',
+        variant: 'destructive',
+      });
     }
   }
 
@@ -136,7 +161,13 @@ export const ConnectedAccounts = () => {
             </Button>
           </div>
           <div className="relative">
-            <Input type={showPassword ? 'text' : 'password'} value={metaToken} disabled={!isEditing} />
+            <Input
+              type={showPassword ? 'text' : 'password'}
+              value={metaToken}
+              disabled={!isEditing}
+              className="pr-8"
+              onChange={(e) => setMetaToken(e.target.value)}
+            />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
@@ -149,7 +180,7 @@ export const ConnectedAccounts = () => {
 
         {isEditing && (
           <div className="flex gap-3">
-            <Button className="gap-2">
+            <Button className="gap-2" onClick={() => handleSaveToken()}>
               <Save className="h-4 w-4" />
               Save
             </Button>

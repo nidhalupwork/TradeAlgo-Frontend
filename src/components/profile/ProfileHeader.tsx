@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Camera, Settings, CalendarDays } from 'lucide-react';
+import { Camera, Settings, CalendarDays, Verified, AlertCircle, OctagonX } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 
 export const ProfileHeader = () => {
@@ -28,12 +28,17 @@ export const ProfileHeader = () => {
 
           <div className="flex-1 space-y-3">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">{user?.fullName || ''}</h1>
+              <div className="flex gap-2 items-center">
+                <h1 className="text-3xl font-bold tracking-tight">{user?.fullName || ''}</h1>
+                {user?.status === 'active' && <Verified className="text-primary" size={25} strokeWidth={2.5} />}
+                {user?.status === 'pending' && <AlertCircle className="text-gold" size={25} strokeWidth={2.5} />}
+                {user?.status === 'suspended' && <OctagonX className="text-destructive" size={25} strokeWidth={2.5} />}
+              </div>
               <p className="text-muted-foreground">
                 {user?.role ? user?.role[0].toUpperCase() + user?.role.slice(1) : ''}
               </p>
-              <div className='flex gap-2 items-center'>
-                <CalendarDays className='text-muted-foreground' size={20} />
+              <div className="flex gap-2 items-center">
+                <CalendarDays className="text-muted-foreground" size={20} />
                 <p className="text-muted-foreground">
                   {new Date(user?.createdAt).toLocaleDateString('en-US', {
                     year: 'numeric',
@@ -70,10 +75,10 @@ export const ProfileHeader = () => {
             </div> */}
           </div>
 
-          <Button className="gap-2">
+          {/* <Button className="gap-2">
             <Settings className="h-4 w-4" />
             Edit Profile
-          </Button>
+          </Button> */}
         </div>
       </CardContent>
     </Card>

@@ -1,22 +1,43 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { TrendingUp, TrendingDown, Activity, DollarSign, AlertTriangle, Clock, Target, Shield } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  TrendingUp,
+  TrendingDown,
+  Activity,
+  DollarSign,
+  AlertTriangle,
+  Clock,
+  Target,
+  Shield,
+  ArrowDownNarrowWide,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
-import Api from '@/services/Api';
 import { useSocket } from '@/providers/SocketProvider';
 import { useAuth } from '@/providers/AuthProvider';
 import { Badge } from '../ui/badge';
 import { AccountSelector } from './AccountSelector';
 import { TradingChart } from './Chart';
-import { chartData } from '@/data/mockData';
+import Api from '@/services/Api';
+import { transformData } from '@/utils/utils';
 
 const TradingDashboard = () => {
   const { user } = useAuth();
   const { stats } = useSocket();
-  const [filter, setFilter] = useState<'Open' | 'Close' | 'All'>('All');
+  const [filter, setFilter] = useState('All');
+  const [activeTab, setActiveTab] = useState<'Open' | 'Close' | 'All'>('All');
+  const [filterPrefix, setFilterPrefix] = useState(1);
   const [positions, setPositions] = useState([]);
-  const [positionCount, setPositionCount] = useState(0);
+  const [positionCount, setPositionCount] = useState({
+    all: 0,
+    open: 0,
+    closed: 0,
+  });
+  const [unrealizedPnl, setUnrealizedPnl] = useState(0);
+  const [unrealizedPnlPercentage, setUnrealizedPnlPercentage] = useState(0);
   const [pnl, setPnl] = useState(0);
   const [pnlPercentage, setPnlPercentage] = useState(0);
   const [balance, setBalance] = useState({
@@ -24,53 +45,117 @@ const TradingDashboard = () => {
     mt4: 0,
     mt5: 0,
   });
-  const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
+  const [selectedAccounts, setSelectedAccounts] = useState([]);
+  const [charts, setCharts] = useState([]);
 
   useEffect(() => {
     if (stats) {
-      if (filter === 'Open') {
-        setPositions([...stats?.openPositions]);
-      } else if (filter === 'Close') {
-        setPositions([...stats?.closedPositions]);
+      let temps = [];
+      if (activeTab === 'Open') {
+        temps = [...stats?.openPositions];
+      } else if (activeTab === 'Close') {
+        temps = [...stats?.closedPositions];
       } else {
-        setPositions([...stats?.closedPositions, ...stats?.openPositions]);
+        temps = [...stats?.openPositions, ...stats?.closedPositions];
       }
-      setPositionCount([...stats?.closedPositions, stats?.openPositions].length);
+
+      setPositions(
+        temps.sort((a, b) => {
+          if (typeof a[filter] === 'number' && typeof b[filter] === 'number') {
+            return (a[filter] - b[filter]) * filterPrefix;
+          }
+          return (a[filter] as string)?.localeCompare(b[filter] as string) * filterPrefix;
+        })
+      );
+      setPositionCount({
+        all: [...stats?.openPositions, ...stats?.closedPositions].length,
+        open: stats?.openPositions.length,
+        closed: stats?.closedPositions.length,
+      });
       setBalance({
         mt4: stats?.balance?.mt4 || 0,
         mt5: stats?.balance?.mt5 || 0,
         total: stats?.balance?.mt4 + stats?.balance?.mt5 || 0,
       });
+      setUnrealizedPnl(stats.unrealizedPnl);
+      setUnrealizedPnlPercentage(stats.unrealizedPnlPercentage);
       setPnl(stats.pnl);
       setPnlPercentage(stats.pnlPercentage);
+
+      console.log('Positions updated');
     }
   }, [stats]);
 
   useEffect(() => {
-    console.log('Component mounted');
+    fetchPortfolio();
     return () => {
       console.log('Component unmounted');
     };
   }, []);
 
-  // Mock data for demonstration
-  const dailyRiskUsed = 45;
-
-  function handleOpenCloseClick(type: 'Open' | 'Close' | 'All') {
-    if (type === 'Open') {
-      setPositions([...stats?.openPositions]);
-    } else if (type === 'Close') {
-      setPositions([...stats?.closedPositions]);
+  function sortPositions(filt: string) {
+    let pref = filterPrefix;
+    if (filt === filter) {
+      setFilterPrefix(filterPrefix * -1);
+      pref *= -1;
     } else {
-      setPositions([...stats?.closedPositions, ...stats?.openPositions]);
+      setFilterPrefix(1);
+      setFilter(filt);
+      pref = 1;
     }
-    setFilter(type);
+    setPositions((prev) =>
+      prev.sort((a, b) => {
+        if (typeof a.type === 'number' && typeof b.type === 'number') {
+          return (a.type - b.type) * pref;
+        }
+        return (a.type as string).localeCompare(b.type as string) * pref;
+      })
+    );
   }
 
-  const handleAccountToggle = (accountId: string) => {
+  async function fetchPortfolio() {
+    try {
+      const data = await Api.get('/users/portfolio');
+      console.log('data for portfolio:', data);
+
+      const result = transformData(data.data.sort((a, b) => a.accountId.localeCompare(b.accountId)));
+
+      setCharts(result);
+    } catch (error) {}
+  }
+
+  const handleAccountToggle = (accountId: string, name: string) => {
     setSelectedAccounts((prev) =>
-      prev.includes(accountId) ? prev.filter((id) => id !== accountId) : [...prev, accountId]
+      prev.some((p) => p.accountId === accountId)
+        ? prev.filter((p) => p.accountId !== accountId)
+        : [...prev, { accountId, name }]
     );
+  };
+
+  const ths = [
+    { name: 'Symbol', key: 'symbol' },
+    { name: 'Type', key: 'type' },
+    { name: 'Open Date', key: 'brokerTime' },
+    { name: 'Open', key: 'openPrice' },
+    { name: 'Size', key: 'volume' },
+    { name: 'Close Date', key: 'closedTime' },
+    { name: 'Current/Close', key: 'currentPrice' },
+    { name: 'Profit', key: 'profit' },
+    { name: 'Platform', key: 'platform' },
+    // { name: 'Strategy', key: 'strategy' },
+    { name: 'Status', key: 'status' },
+  ];
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    });
   };
 
   return (
@@ -116,8 +201,8 @@ const TradingDashboard = () => {
         <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Open Positions</p>
-              <p className="text-2xl font-bold">{positionCount}</p>
+              <p className="text-sm text-muted-foreground">All Positions</p>
+              <p className="text-2xl font-bold">{positionCount.all}</p>
               <p className="text-sm text-muted-foreground">3 strategies active</p>
             </div>
             <Activity className="h-8 w-8 text-gold" />
@@ -128,11 +213,21 @@ const TradingDashboard = () => {
         <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Daily Risk Used</p>
-              <p className="text-2xl font-bold">{dailyRiskUsed}%</p>
-              <Progress value={dailyRiskUsed} className="mt-2 h-2" />
+              <p className="text-sm text-muted-foreground">Unrealized PNL</p>
+              <p className={`text-2xl font-bold ${unrealizedPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
+                ${unrealizedPnl >= 0 ? '+' : ''}
+                {unrealizedPnl.toFixed(2)}
+              </p>
+              <p className={`text-sm ${unrealizedPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
+                {unrealizedPnl >= 0 ? '+' : ''}
+                {unrealizedPnlPercentage}%
+              </p>
             </div>
-            <Shield className="h-8 w-8 text-primary" />
+            {unrealizedPnl >= 0 ? (
+              <TrendingUp className="h-8 w-8 text-profit" />
+            ) : (
+              <TrendingDown className="h-8 w-8 text-loss" />
+            )}
           </div>
         </Card>
       </div>
@@ -147,172 +242,99 @@ const TradingDashboard = () => {
         </div>
 
         <div className="lg:col-span-3">
-          <TradingChart data={chartData} selectedAccounts={selectedAccounts} />
+          <TradingChart data={charts} selectedAccounts={selectedAccounts} accounts={user.accounts} />
         </div>
       </div>
 
       {/* Open Positions Table */}
       <Card className="bg-card/50 backdrop-blur-sm border-border/50">
         <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Order History</h2>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => handleOpenCloseClick('Open')}>
-                Open Trades
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => handleOpenCloseClick('Close')}>
-                Closed Trades
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => handleOpenCloseClick('All')}>
-                View All
-              </Button>
-            </div>
-          </div>
-
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Symbol</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Type</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Open Date</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Open</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Size</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Close Date</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Current/Close</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Profit</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Platform</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Strategy</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {positions.map((position, index) => (
-                  <tr key={index} className="border-b border-border/50 hover:bg-card/50 transition-colors">
-                    <td className="py-3 px-4 font-medium">{position.symbol}</td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`px-2 py-1 rounded text-xs font-semibold ${
-                          position.type.split('_')[2] === 'BUY' ? 'bg-profit/20 text-profit' : 'bg-loss/20 text-loss'
-                        }`}
+            <Tabs value={activeTab} onValueChange={(value: 'Open' | 'Close' | 'All') => setActiveTab(value)}>
+              <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
+                <TabsTrigger value="All">All Positions ({positionCount.all})</TabsTrigger>
+                <TabsTrigger value="Open">Open ({positionCount.open})</TabsTrigger>
+                <TabsTrigger value="Close">Closed ({positionCount.closed})</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value={activeTab} className="mt-6">
+                <table className="w-full border border-border rounded-[5px]">
+                  <thead className="bg-muted/40">
+                    <tr className="border-b border-border">
+                      {ths.map((t) => (
+                        <th
+                          className="text-left py-3 px-4 text-sm font-medium text-muted-foreground hover:cursor-pointer"
+                          onClick={() => sortPositions(t.key)}
+                          key={t.key}
+                        >
+                          <div className="flex gap-1 items-center">
+                            <p>{t.name}</p>
+                            {filter === t.key && filterPrefix === 1 && <ChevronUp size={20} />}
+                            {filter === t.key && filterPrefix === -1 && <ChevronDown size={20} />}
+                          </div>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {positions.map((position, index) => (
+                      <tr
+                        key={index}
+                        className="border-b border-border/50 hover:bg-card/50 transition-colors even:bg-muted/20"
                       >
-                        {position.type.split('_')[2]}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">{position.brokerTime.slice(0, 19)}</td>
-                    <td className="py-3 px-4">{position.openPrice}</td>
-                    <td className="py-3 px-4">{position.volume}</td>
-                    <td className="py-3 px-4 text-center">
-                      {position.closedTime ? position.closedTime.slice(0, 19) : '-'}
-                    </td>
-                    <td className="py-3 px-4">{position.currentPrice}</td>
-                    <td className="py-3 px-4">
-                      <div className={position.profit >= 0 ? 'text-profit' : 'text-loss'}>
-                        <p className="font-semibold">
-                          ${position.profit >= 0 ? '+' : ''}
-                          {position?.profit?.toFixed(2)}
-                        </p>
-                        {/* <p className="text-xs">
+                        <td className="py-3 px-4 font-medium">{position.symbol}</td>
+                        <td className="py-3 px-4">
+                          <span
+                            className={`px-2 py-1 rounded text-xs font-semibold ${
+                              position.type.split('_')[2] === 'BUY'
+                                ? 'bg-profit/20 text-profit'
+                                : 'bg-loss/20 text-loss'
+                            }`}
+                          >
+                            {position.type.split('_')[2]}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-muted-foreground">{formatDate(position.brokerTime)}</td>
+                        <td className="py-3 px-4 font-mono">{position.openPrice}</td>
+                        <td className="py-3 px-4">{position.volume}</td>
+                        <td className="py-3 px-4 text-muted-foreground">
+                          {position.closedTime ? formatDate(position.closedTime) : '-'}
+                        </td>
+                        <td className="py-3 px-4 font-mono">{position.currentPrice}</td>
+                        <td className="py-3 px-4">
+                          <div className={position.profit >= 0 ? 'text-profit' : 'text-loss'}>
+                            <p className="font-semibold">
+                              ${position.profit >= 0 ? '+' : ''}
+                              {position?.profit?.toFixed(2)}
+                            </p>
+                            {/* <p className="text-xs">
                           {position.pnlPercent >= 0 ? '+' : ''}
                           {position.pnlPercent}%
                         </p> */}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="text-sm text-muted-foreground">{position.platform}</span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="text-sm text-muted-foreground">{position.strategy}</span>
-                    </td>
-                    <td className="py-3 px-4">
-                      {position.status === 'Closed' ? (
-                        <Badge className="bg-loss/20 text-loss">Closed</Badge>
-                      ) : (
-                        <Badge className="bg-profit/20 text-profit">Open</Badge>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="text-sm text-muted-foreground">{position.platform.toUpperCase()}</span>
+                        </td>
+                        {/* <td className="py-3 px-4">
+                          <span className="text-sm text-muted-foreground">{position.strategy}</span>
+                        </td> */}
+                        <td className="py-3 px-4">
+                          {position.status === 'Closed' ? (
+                            <Badge variant="secondary">CLOSED</Badge>
+                          ) : (
+                            <Badge variant="profit">OPEN</Badge>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </Card>
-
-      {/* Recent Alerts */}
-      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Recent Alerts</h2>
-              <AlertTriangle className="h-5 w-5 text-gold" />
-            </div>
-
-            <div className="space-y-3">
-              {recentAlerts.map((alert, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">{alert.time}</span>
-                    <span className="font-medium">{alert.symbol}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-semibold ${
-                        alert.action === 'BUY' ? 'bg-profit/20 text-profit' : 'bg-loss/20 text-loss'
-                      }`}
-                    >
-                      {alert.action}
-                    </span>
-                    <span className="text-xs text-muted-foreground">{alert.strategy}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card> */}
-
-      {/* Risk Metrics */}
-      {/* <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Risk Metrics</h2>
-              <Shield className="h-5 w-5 text-primary" />
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">Max Daily Loss</span>
-                  <span className="text-sm font-medium">$500 / $1,000</span>
-                </div>
-                <Progress value={50} className="h-2" />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">Overall Drawdown</span>
-                  <span className="text-sm font-medium">$750 / $2,500</span>
-                </div>
-                <Progress value={30} className="h-2" />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">Active Positions</span>
-                  <span className="text-sm font-medium">3 / 5</span>
-                </div>
-                <Progress value={60} className="h-2" />
-              </div>
-
-              <div className="flex items-center justify-between pt-2 border-t border-border">
-                <span className="text-sm font-medium">Risk Status</span>
-                <span className="px-2 py-1 rounded text-xs font-semibold bg-profit/20 text-profit">HEALTHY</span>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div> */}
     </div>
   );
 };

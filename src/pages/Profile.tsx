@@ -4,6 +4,7 @@ import { ConnectedAccounts } from '@/components/profile/ConnectedAccounts';
 import { APISettings } from '@/components/profile/APISettings';
 import { TradingPreferences } from '@/components/profile/TradingPreferences';
 import Navbar from '@/components/Navbar';
+import { TwoStep } from '@/components/profile/TwoStep';
 
 const Profile = () => {
   return (
@@ -15,6 +16,7 @@ const Profile = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-8">
             <PersonalInfo />
+            <TwoStep />
             {/* <TradingPreferences /> */}
           </div>
 

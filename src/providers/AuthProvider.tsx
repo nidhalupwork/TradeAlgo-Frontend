@@ -37,6 +37,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     riskSettings: null,
     plan: 'default',
     status: 'pending',
+    twoFA: false,
   });
 
   useEffect(() => {
@@ -47,21 +48,24 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     const isSignedIn = localStorage.getItem('isSignedIn');
 
     if (isSignedIn) {
-      const data = await apiClient.get('/auth/refresh');
-      console.log('checkExistingToken -> data:', data);
-      if (data.success) {
-        setUser(data.user);
-        setUsers(data.users);
-        setStrategies(data.strategies);
-        setGlobalSetting(data.setting);
+      try {
+        const data = await apiClient.get('/auth/refresh');
+        console.log('1');
+        if (data.success) {
+          setUser(data.user);
+          setUsers(data.users);
+          setStrategies(data.strategies);
+          setGlobalSetting(data.setting);
 
-        const accountIds = data.user.accounts.reduce((acc, cur) => {
-          return [...acc, cur.accountId];
-        }, []);
-        console.log('accountIds', accountIds);
-        initializeSocket(data.user._id, accountIds);
-      } else {
-        navigate('/auth');
+          const accountIds = data.user.accounts.reduce((acc, cur) => {
+            return [...acc, cur.accountId];
+          }, []);
+          initializeSocket(data.user._id, accountIds);
+        } else {
+          navigate('/auth');
+        }
+      } catch (error) {
+        console.error('error in refresh:', error);
       }
     } else {
       if (location.pathname !== '/') {

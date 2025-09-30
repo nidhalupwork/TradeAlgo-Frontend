@@ -50,7 +50,6 @@ const generateChartData = (): ChartData[] => {
       account4: Math.max(account4, 10000),
     });
   }
-  console.log('data:', data);
 
   return data;
 };

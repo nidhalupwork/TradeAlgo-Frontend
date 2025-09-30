@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, CreateAxiosDefaults } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 
 class ApiClient {
   private axiosInstance: AxiosInstance;
@@ -47,6 +47,8 @@ class ApiClient {
         localStorage.removeItem('isSignedIn');
         window.location.href = '/auth';
       }
+
+      throw error;
     }
   }
 
@@ -66,6 +68,24 @@ class ApiClient {
       throw error;
     }
   }
+
+  // Example: POST request
+  async delete(path, config = {}) {
+    try {
+      const response = await this.axiosInstance.delete(path, config);
+      console.log('response:', response);
+
+      return response.data;
+    } catch (error) {
+      if (error.status === 401) {
+        localStorage.removeItem('isSignedIn');
+        window.location.href = '/auth';
+      }
+
+      throw error;
+    }
+  }
 }
 
-export default new ApiClient('https://primarily-assured-albacore.ngrok-free.app/api/v1');
+// export default new ApiClient('http://95.216.228.74:3000/api/v1');
+export default new ApiClient('http://localhost:3000/api/v1');

@@ -21,11 +21,31 @@ All colors MUST be HSL.
     --gold: 43 96% 56%;
 
     /* Trading specific colors */
-    --chart-1: 142 76% 36%;
+    /* --chart-1: 142 76% 36%;
     --chart-2: 221 83% 53%;
     --chart-3: 271 81% 56%;
     --chart-4: 35 91% 65%;
-    --chart-5: 172 66% 50%;
+    --chart-5: 172 66% 50%; */
+    --chart-1: 0, 76%, 36%;
+    --chart-2: 342, 88%, 53%;
+    --chart-3: 180, 75%, 52%;
+    --chart-4: 306, 79%, 57%;
+    --chart-5: 216, 85%, 53%;
+    --chart-6: 270, 84%, 54%;
+    --chart-7: 108, 80%, 55%;
+    --chart-8: 126, 85%, 60%;
+    --chart-9: 144, 70%, 50%;
+    --chart-10: 162, 90%, 58%;
+    --chart-11: 324, 81%, 59%;
+    --chart-12: 198, 78%, 48%;
+    --chart-13: 72, 66%, 50%;
+    --chart-14: 234, 80%, 50%;
+    --chart-15: 252, 76%, 55%;
+    --chart-16: 90, 75%, 45%;
+    --chart-17: 288, 82%, 56%;
+    --chart-18: 54, 91%, 65%;
+    --chart-19: 36, 81%, 56%;
+    --chart-20: 18, 83%, 53%;
     
     /* Cards and Surfaces */
     --card: 222 47% 8%;
@@ -67,6 +87,7 @@ All colors MUST be HSL.
     --gradient-loss: linear-gradient(135deg, hsl(var(--loss)), hsl(var(--loss-glow)));
     --gradient-gold: linear-gradient(135deg, hsl(var(--gold)), hsl(var(--warning)));
     --gradient-dark: linear-gradient(180deg, hsl(222 47% 8%), hsl(222 47% 5%));
+    --gradient-danger: linear-gradient(135deg, hsl(0 84% 60%), hsl(0 84% 50%));
     
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
@@ -75,6 +96,7 @@ All colors MUST be HSL.
     --shadow-glow-profit: 0 0 20px hsl(var(--profit) / 0.3);
     --shadow-glow-loss: 0 0 20px hsl(var(--loss) / 0.3);
     --shadow-glow-primary: 0 0 30px hsl(var(--primary) / 0.2);
+    --shadow-danger: 0 0 20px hsl(0 84% 60% / 0.3);
     
     /* Animations */
     --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
