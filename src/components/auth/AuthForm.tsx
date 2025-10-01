@@ -74,6 +74,7 @@ export const AuthForm = () => {
             }
           }
         } else if (data?.message === 'Your account email has not been verified.') {
+          setUser({ ...user, email: personalData.email });
           navigate('/2fa');
         }
       } else {
