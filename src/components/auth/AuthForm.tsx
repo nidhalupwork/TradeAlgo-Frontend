@@ -30,10 +30,10 @@ export const AuthForm = () => {
     password: string;
     phoneNumber: string;
   }>({
-    fullName: 'Nidhal Nouma',
-    email: 'jamesharuki@gmail.com',
+    fullName: '',
+    email: '',
     phoneNumber: '',
-    password: '123123',
+    password: '',
   });
 
   useEffect(() => {
@@ -51,27 +51,30 @@ export const AuthForm = () => {
     try {
       if (type === 'signin') {
         const data = await apiClient.post('/auth/sign-in', personalData);
-
-        if (data.twoFA) {
-          setUser({ ...user, email: personalData.email });
-          navigate('/2fa');
-        } else {
-          setUser(data.user);
-          localStorage.setItem('isSignedIn', 'true');
-
-          const accountIds = data?.user?.accounts?.reduce((acc, cur) => {
-            return [...acc, cur.accountId];
-          }, []);
-
-          if (data.user.role === 'user') {
-            initializeSocket(data.user._id, accountIds);
-            navigate('/dashboard');
+        if (data?.success) {
+          if (data.twoFA) {
+            setUser({ ...user, email: personalData.email });
+            navigate('/2fa');
           } else {
-            setUsers(data.users);
-            setStrategies(data.strategies);
-            setGlobalSetting(data.setting);
-            navigate('/user-management');
+            setUser(data.user);
+            localStorage.setItem('isSignedIn', 'true');
+
+            const accountIds = data?.user?.accounts?.reduce((acc, cur) => {
+              return [...acc, cur.accountId];
+            }, []);
+
+            if (data.user.role === 'user') {
+              initializeSocket(data.user._id, accountIds);
+              navigate('/dashboard');
+            } else {
+              setUsers(data.users);
+              setStrategies(data.strategies);
+              setGlobalSetting(data.setting);
+              navigate('/user-management');
+            }
           }
+        } else if (data?.message === 'Your account email has not been verified.') {
+          navigate('/2fa');
         }
       } else {
         const data = await apiClient.post('/auth/register', personalData);

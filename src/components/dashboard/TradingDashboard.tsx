@@ -103,14 +103,6 @@ const TradingDashboard = () => {
       setFilter(filt);
       pref = 1;
     }
-    // setPositions((prev) =>
-    //   prev.sort((a, b) => {
-    //     if (typeof a.type === 'number' && typeof b.type === 'number') {
-    //       return (a.type - b.type) * pref;
-    //     }
-    //     return (a.type as string).localeCompare(b.type as string) * pref;
-    //   })
-    // );
   }
 
   async function fetchPortfolio() {

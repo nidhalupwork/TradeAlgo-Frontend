@@ -1,14 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import {
-  LayoutDashboard,
-  Activity,
-  Settings,
-  Users,
-  SquareUser,
-  Bell,
-  LogOut,
-} from 'lucide-react';
+import { LayoutDashboard, Activity, Settings, Users, SquareUser, Bell, LogOut } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useEffect } from 'react';
 import logo from '@/assets/logo.png';
@@ -21,7 +13,7 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isSignedIn !== 'true' && location.pathname !== '/') {
+    if (isSignedIn !== 'true' && location.pathname !== '/' && location.pathname !== '/2fa') {
       navigate('/auth');
     }
   }, [location.pathname]);
@@ -44,7 +36,9 @@ const Navbar = () => {
           <div className="flex items-center space-x-8">
             <Link to="/" className="flex items-center space-x-2">
               <img src={logo} className="h-8 w-8 text-primary" alt="TradeAlgo logo" />
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-gray-700 via-gray-600 to-gray-200">TradeAlgorithm</span>
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-gray-700 via-gray-600 to-gray-200">
+                TradeAlgorithm
+              </span>
             </Link>
 
             {isSignedIn === 'true' && (

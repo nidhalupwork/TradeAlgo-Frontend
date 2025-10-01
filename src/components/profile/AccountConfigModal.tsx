@@ -26,19 +26,19 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
     login: '',
     password: '',
     brokerage: '',
-    platform: 'mt4',
+    platform: 'mt5',
     magic: '',
   });
   const { toast } = useToast();
 
   useEffect(() => {
     setConfiguration({
-      name: account?.name || 'Test',
-      login: account?.login.toString() || '213661439',
-      password: '3*MwYvXj',
+      name: account?.name || '',
+      login: account?.login.toString() || '',
+      password: '',
       brokerage: account?.brokerage || 'OctaFX-Demo',
-      platform: account?.platform || 'mt4',
-      magic: account?.magic.toString() || '123123',
+      platform: account?.platform || 'mt5',
+      magic: account?.magic.toString() || '',
     });
   }, [account]);
 
@@ -48,15 +48,16 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
     try {
       const data = await apiClient.post('/users/connect-account', configuration);
       console.log('Data in account config modal:', data);
+      if (data?.success) {
+        setUser(data.user);
 
-      setUser(data.user);
+        toast({
+          title: 'Account Connected',
+          description: `${account?.name} account has been successfully configured.`,
+        });
 
-      toast({
-        title: 'Account Connected',
-        description: `${account?.name} account has been successfully configured.`,
-      });
-
-      onOpenChange(false);
+        onOpenChange(false);
+      }
     } catch (error) {
       console.log(error);
       toast({

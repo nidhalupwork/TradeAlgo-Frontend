@@ -19,6 +19,7 @@ interface SocketContextInterface {
   socket: Socket;
   connected: boolean;
   initializeSocket: (id: string, accountIds: string[]) => void;
+  deinitializeSocket: (id: string, accountIds: string[]) => void;
   stats: StatsInterface;
 }
 
@@ -88,7 +89,7 @@ export const SocketProvider = ({ children }) => {
 
     const closedPositions = [];
     deals.map((deal) => {
-      if (deals.filter((d) => d.positionId === deal.positionId).length === 2) {
+      if (deals.filter((d) => d.positionId && d.positionId === deal.positionId).length === 2) {
         const temp = {
           brokerTime: '',
           openPrice: 0,
@@ -149,7 +150,9 @@ export const SocketProvider = ({ children }) => {
 
   // Provide socket and connection status to consumers
   return (
-    <SocketContext.Provider value={{ socket: socketRef.current, connected, initializeSocket, stats }}>
+    <SocketContext.Provider
+      value={{ socket: socketRef.current, connected, initializeSocket, deinitializeSocket, stats }}
+    >
       {children}
     </SocketContext.Provider>
   );

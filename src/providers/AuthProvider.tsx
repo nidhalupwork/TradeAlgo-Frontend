@@ -15,7 +15,7 @@ interface AuthContextInterface {
 export const AuthContext = createContext<AuthContextInterface | undefined>(undefined);
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
-  const { initializeSocket } = useSocket();
+  const { initializeSocket, deinitializeSocket } = useSocket();
   const location = useLocation();
   const navigate = useNavigate();
   const { setUsers, setStrategies, setGlobalSetting } = useAdmin();
@@ -69,7 +69,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         console.error('error in refresh:', error);
       }
     } else {
-      if (location.pathname !== '/') {
+      if (location.pathname !== '/' && location.pathname !== '/2fa') {
         navigate('/auth');
       }
     }
@@ -81,6 +81,10 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       console.log('sign-out data:', data);
       if (data?.success) {
         console.log('Sign out buttong is clicked');
+        const accountIds = user?.accounts.reduce((acc, cur) => {
+          return [...acc, cur.accountId];
+        }, []);
+        deinitializeSocket(user._id, accountIds);
         localStorage.removeItem('isSignedIn');
         navigate('/auth');
       }

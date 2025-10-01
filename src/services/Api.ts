@@ -39,8 +39,9 @@ class ApiClient {
             description: error?.response?.data?.message ?? 'Permission denied',
           });
           return Promise.resolve(error?.response);
+        } else {
+          return Promise.reject(error);
         }
-        return Promise.reject(error);
       }
     );
   }
