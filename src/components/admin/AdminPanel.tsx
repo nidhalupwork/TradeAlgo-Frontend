@@ -60,16 +60,16 @@ const AdminPanel = () => {
       if (data?.success) {
         setUsers((prevUsers) => prevUsers.map((user) => (user._id === data.user._id ? data.user : user)));
         toast({
-          title: type + ' succeeded',
-          description: '',
-          variant: 'default',
+          title: 'Success',
+          description: 'Successfully ' + type + 'ed',
+          variant: 'profit',
           duration: 2000,
         });
       }
     } catch (error) {
       toast({
-        title: type + ' failed',
-        description: '',
+        title: 'Error',
+        description: type + ' failed',
         variant: 'destructive',
         duration: 2000,
       });

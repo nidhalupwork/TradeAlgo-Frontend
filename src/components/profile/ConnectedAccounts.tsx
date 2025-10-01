@@ -94,7 +94,7 @@ export const ConnectedAccounts = () => {
                 login: '',
                 magic: '',
                 name: '',
-                platform: 'mt4',
+                platform: '-',
                 subscribedStrategies: [],
               },
               'Connect'

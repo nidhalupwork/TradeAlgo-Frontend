@@ -51,7 +51,6 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     if (isSignedIn) {
       try {
         const data = await apiClient.get('/auth/refresh');
-        console.log('1');
         if (data.success) {
           setUser(data.user);
           setUsers(data.users);

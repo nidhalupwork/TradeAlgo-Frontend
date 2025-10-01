@@ -37,25 +37,21 @@ const TwoFactorAuth = () => {
     try {
       const data = await Api.post('/auth/2fa', { code: otp, email: user.email });
       if (data?.success) {
-        if (data?.type == 'Signup') {
-          navigate('/auth');
+        setUser(data.user);
+        localStorage.setItem('isSignedIn', 'true');
+
+        if (data.user.role === 'user') {
+          const accountIds = data?.user?.accounts?.reduce((acc, cur) => {
+            return [...acc, cur.accountId];
+          }, []);
+
+          initializeSocket(data.user._id, accountIds);
+          navigate('/dashboard');
         } else {
-          setUser(data.user);
-          localStorage.setItem('isSignedIn', 'true');
-
-          if (data.user.role === 'user') {
-            const accountIds = data?.user?.accounts?.reduce((acc, cur) => {
-              return [...acc, cur.accountId];
-            }, []);
-
-            initializeSocket(data.user._id, accountIds);
-            navigate('/dashboard');
-          } else {
-            setUsers(data.users);
-            setStrategies(data.strategies);
-            setGlobalSetting(data.setting);
-            navigate('/user-management');
-          }
+          setUsers(data.users);
+          setStrategies(data.strategies);
+          setGlobalSetting(data.setting);
+          navigate('/user-management');
         }
       }
     } catch (error) {
@@ -74,6 +70,13 @@ const TwoFactorAuth = () => {
     try {
       const data = await Api.post('/auth/resend', { email: user.email });
       console.log('Data for resending:', data);
+      if (data?.success) {
+        toast({
+          title: 'Success',
+          description: 'Successfully resent the code. Please check your email',
+          variant: 'profit',
+        });
+      }
     } catch (error) {
       console.error('Error:', error);
       toast({

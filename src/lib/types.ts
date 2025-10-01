@@ -23,7 +23,7 @@ export interface UserInterface {
 
 export interface ConnectAccount {
   name: string;
-  platform: 'mt4' | 'mt5';
+  platform: 'mt4' | 'mt5' | '-';
   magic: string;
   login: string;
   brokerage: string;

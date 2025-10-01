@@ -115,7 +115,7 @@ export default function AdminDashboard() {
             >
               <div className="flex flex-col items-center gap-1">
                 <Play className="h-6 w-6" />
-                <div className="font-bold"> START GLOBAL TRADING</div>
+                <div className="font-bold">START GLOBAL TRADING</div>
                 <div className="text-xs opacity-90">Start all trading immediately</div>
               </div>
             </Button>
@@ -130,7 +130,7 @@ export default function AdminDashboard() {
             >
               <div className="flex flex-col items-center gap-1">
                 <TvMinimalPlay className="h-6 w-6" />
-                <span className="font-bold">LIVE MODE</span>
+                <span className="font-bold">GO TO LIVE MODE</span>
                 <span className="text-xs opacity-70">Allow New Logins</span>
               </div>
             </Button>
@@ -143,7 +143,7 @@ export default function AdminDashboard() {
             >
               <div className="flex flex-col items-center gap-1">
                 <Pause className="h-6 w-6" />
-                <span className="font-bold">MAINTENANCE MODE</span>
+                <span className="font-bold">GO TO MAINTENANCE MODE</span>
                 <span className="text-xs opacity-70">Block New Logins</span>
               </div>
             </Button>

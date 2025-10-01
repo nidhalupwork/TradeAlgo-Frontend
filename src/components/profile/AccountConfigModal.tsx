@@ -26,7 +26,7 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
     login: '',
     password: '',
     brokerage: '',
-    platform: 'mt5',
+    platform: '-',
     magic: '',
   });
   const { toast } = useToast();
@@ -37,7 +37,7 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
       login: account?.login.toString() || '',
       password: '',
       brokerage: account?.brokerage || 'OctaFX-Demo',
-      platform: account?.platform || 'mt5',
+      platform: account?.platform || '-',
       magic: account?.magic.toString() || '',
     });
   }, [account]);
@@ -46,6 +46,16 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
     e.preventDefault();
     setIsLoading(true);
     try {
+      if (
+        !configuration.name ||
+        !configuration.brokerage ||
+        !configuration.login ||
+        !configuration.magic ||
+        !configuration.password ||
+        configuration.platform === '-'
+      ) {
+        throw new Error('Please fill in all the fields.');
+      }
       const data = await apiClient.post('/users/connect-account', configuration);
       console.log('Data in account config modal:', data);
       if (data?.success) {
@@ -53,7 +63,8 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
 
         toast({
           title: 'Account Connected',
-          description: `${account?.name} account has been successfully configured.`,
+          description: `Account has been successfully configured.`,
+          variant: 'profit',
         });
 
         onOpenChange(false);
@@ -62,7 +73,10 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
       console.log(error);
       toast({
         title: 'Connection Failed',
-        description: error.response.data.message || 'Failed to connect account. Please check your credentials.',
+        description:
+          error?.response?.data?.message ||
+          error?.message ||
+          'Failed to connect account. Please check your credentials.',
         variant: 'destructive',
       });
     } finally {
@@ -92,7 +106,7 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
               placeholder="Enter human readable name"
               value={configuration.name}
               onChange={(e) => setConfiguration({ ...configuration, name: e.target.value })}
-              disabled={isLoading}
+              disabled={isLoading || modalType === 'Details'}
               required
             />
           </div>
@@ -104,11 +118,13 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
                 <Select
                   value={configuration.platform}
                   onValueChange={(value) => setConfiguration({ ...configuration, platform: value })}
+                  disabled={isLoading || modalType === 'Details'}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="-">-</SelectItem>
                     <SelectItem value="mt4">MetaTrader 4</SelectItem>
                     <SelectItem value="mt5">MetaTrader 5</SelectItem>
                   </SelectContent>
@@ -122,7 +138,7 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
                   placeholder="Enter the magic number"
                   value={configuration.magic}
                   onChange={(e) => setConfiguration({ ...configuration, magic: e.target.value })}
-                  disabled={isLoading}
+                  disabled={isLoading || modalType === 'Details'}
                   required
                 />
               </div>
@@ -136,7 +152,7 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
               placeholder="Enter your login number"
               value={configuration.login}
               onChange={(e) => setConfiguration({ ...configuration, login: e.target.value })}
-              disabled={isLoading}
+              disabled={isLoading || modalType === 'Details'}
               required
             />
           </div>
@@ -149,7 +165,7 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
               placeholder="Enter your password"
               value={configuration.password}
               onChange={(e) => setConfiguration({ ...configuration, password: e.target.value })}
-              disabled={isLoading}
+              disabled={isLoading || modalType === 'Details'}
               required
             />
           </div>
@@ -161,7 +177,7 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
               placeholder="Enter brokerage name"
               value={configuration.brokerage}
               onChange={(e) => setConfiguration({ ...configuration, brokerage: e.target.value })}
-              disabled={isLoading}
+              disabled={isLoading || modalType === 'Details'}
               required
             />
           </div>
