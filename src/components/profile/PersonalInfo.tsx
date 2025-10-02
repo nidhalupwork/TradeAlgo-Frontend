@@ -2,16 +2,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Edit3, Save, X } from 'lucide-react';
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import Api from '@/services/Api';
 import { useToast } from '@/hooks/use-toast';
-import { Switch } from '../ui/switch';
+// import { Switch } from '../ui/switch';
 
 export const PersonalInfo = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [personalInfo, setPersonalInfo] = useState({
@@ -44,7 +44,7 @@ export const PersonalInfo = () => {
         setPassword({ last: '', new: '', confirm: '' });
         toast({
           title: 'Password updated',
-          description: `Account password has been successfully updated.`,
+          description: `Account password has been successfully updated`,
           variant: 'profit',
         });
       }
@@ -54,7 +54,28 @@ export const PersonalInfo = () => {
         title: 'Password update failed',
         duration: 2000,
         variant: 'destructive',
-        description: error.response.data.message ?? `Account password has been successfully updated.`,
+        description: error.response.data.message ?? `Unexpected error`,
+      });
+    }
+  }
+
+  async function saveChanges() {
+    try {
+      const data = await Api.post('/users/update-profile', personalInfo);
+      if (data?.success) {
+        setUser({
+          ...user,
+          fullName: data.fullName,
+          email: data.email,
+          phoneNumber: data.phoneNumber,
+        });
+      }
+    } catch (error) {
+      console.error('Error in saving changes:', error);
+      toast({
+        title: 'Profile update failed',
+        description: error?.response?.data?.message ?? 'Unexpected error',
+        variant: 'destructive',
       });
     }
   }
@@ -62,8 +83,9 @@ export const PersonalInfo = () => {
   return (
     <Card className="shadow-card">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-xl">Personal Information</CardTitle>
-        <Button
+        <CardTitle className="text-xl">Update Password</CardTitle>
+        {/* <CardTitle className="text-xl">Personal Information</CardTitle> */}
+        {/* <Button
           variant={isEditing ? 'outline' : 'ghost'}
           size="sm"
           onClick={() => setIsEditing(!isEditing)}
@@ -80,12 +102,12 @@ export const PersonalInfo = () => {
               Edit
             </>
           )}
-        </Button>
+        </Button> */}
       </CardHeader>
 
       <CardContent className="space-y-4">
         {/* First name and last name */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="firstName">First Name</Label>
             <Input
@@ -110,10 +132,10 @@ export const PersonalInfo = () => {
               }}
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Email and phone number */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
             <Input
@@ -140,7 +162,7 @@ export const PersonalInfo = () => {
               }}
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Phone number and timezone */}
         {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -171,7 +193,7 @@ export const PersonalInfo = () => {
 
         {isEditing && (
           <div className="flex gap-3 pt-4">
-            <Button className="gap-2">
+            <Button className="gap-2" onClick={saveChanges}>
               <Save className="h-4 w-4" />
               Save Changes
             </Button>

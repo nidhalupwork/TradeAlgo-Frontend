@@ -99,7 +99,7 @@ export const RiskConfigModal = ({
             <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
               <TrendingUp className="h-4 w-4 text-primary-foreground" />
             </div>
-            Risk Management for {strategy.title}
+            Risk Management for {strategy?.title}
           </DialogTitle>
         </DialogHeader>
 

@@ -133,8 +133,7 @@ const TradingDashboard = () => {
     { name: 'Close Date', key: 'closedTime' },
     { name: 'Current/Close', key: 'currentPrice' },
     { name: 'Profit', key: 'profit' },
-    { name: 'Platform', key: 'platform' },
-    // { name: 'Strategy', key: 'strategy' },
+    { name: 'Account', key: 'account' },
     { name: 'Status', key: 'status' },
   ];
 
@@ -306,7 +305,10 @@ const TradingDashboard = () => {
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <span className="text-sm text-muted-foreground">{position.platform.toUpperCase()}</span>
+                          <span className="text-sm text-muted-foreground">
+                            {user.accounts.find((a) => a.accountId === position.accountId)?.name}
+                            <span className="text-xs">({position.platform.toUpperCase()})</span>
+                          </span>
                         </td>
                         {/* <td className="py-3 px-4">
                           <span className="text-sm text-muted-foreground">{position.strategy}</span>

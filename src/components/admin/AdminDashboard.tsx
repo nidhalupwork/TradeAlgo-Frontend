@@ -54,7 +54,7 @@ export default function AdminDashboard() {
         toast({
           title: 'Global setting',
           description: `Successfully moved to ${type} mode`,
-          variant: 'default',
+          variant: 'profit',
           duration: 2000,
         });
       }

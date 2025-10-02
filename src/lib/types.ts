@@ -133,3 +133,17 @@ export interface DataItem {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface StrategyInterface {
+  _id: string;
+  title: string;
+  description: string;
+  winRate: number;
+  avgProfit: number;
+  avgLoss: number;
+  star: number;
+  tags: string[];
+  subscribers: string[];
+  status: 'Live' | 'Development' | 'Paused';
+  enabled: boolean;
+}

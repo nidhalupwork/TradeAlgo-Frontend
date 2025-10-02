@@ -8,14 +8,14 @@ import Api from '@/services/Api';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { RiskConfigModal } from './RiskConfigModal';
-import { RiskSettingsInterface } from '@/lib/types';
+import { RiskSettingsInterface, StrategyInterface } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
 const StrategyMarketplace = () => {
   const { toast } = useToast();
   const { user, setUser } = useAuth();
-  const [strategies, setStrategies] = useState([]);
-  const [strategy, setStrategy] = useState({});
+  const [strategies, setStrategies] = useState<StrategyInterface[]>([]);
+  const [strategy, setStrategy] = useState<StrategyInterface | null>(null);
   const [open, setOpen] = useState(false);
   const [selectedSetting, setSelectedSetting] = useState<RiskSettingsInterface | null>(null);
   const [stats, setStats] = useState({
@@ -81,6 +81,7 @@ const StrategyMarketplace = () => {
       setSelectedSetting(userSetting);
     } else {
       setSelectedSetting({
+        strategyId: strat.id,
         title: strat.title,
         dailyLossCurrency: 'amount',
         dailyLossLimit: 0,
@@ -99,7 +100,7 @@ const StrategyMarketplace = () => {
   function onConfigModalClose() {
     setOpen(false);
     setSelectedSetting(null);
-    setStrategy({});
+    setStrategy(null);
   }
 
   return (
@@ -173,7 +174,7 @@ const StrategyMarketplace = () => {
                         {strategy?.status}
                       </Badge>
                     </div>
-                    {user?.role === 'admin' && <Switch checked={strategy?.isActive} />}
+                    {user?.role === 'admin' && <Switch checked={strategy?.enabled} />}
                   </div>
                   <p className="text-sm text-muted-foreground">{strategy?.description}</p>
                 </div>

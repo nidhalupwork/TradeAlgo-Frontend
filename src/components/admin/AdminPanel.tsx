@@ -2,7 +2,6 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
 import {
   Users,
   Shield,
@@ -12,14 +11,10 @@ import {
   AlertTriangle,
   Search,
   Settings,
-  Power,
   Eye,
   MoreHorizontal,
   Loader,
   UserCheck,
-  Bug,
-  TvMinimalPlay,
-  RotateCcw,
 } from 'lucide-react';
 import { useAdmin } from '@/providers/AdminProvider';
 import {
@@ -37,7 +32,7 @@ import { roundUp } from '@/lib/utils';
 
 const AdminPanel = () => {
   const { toast } = useToast();
-  const { users, setUsers, setGlobalSetting, globalSetting } = useAdmin();
+  const { users, setUsers } = useAdmin();
   // const [selectedUsers, setSelectedUsers] = useState<UserInterface[]>([]);
   // const [showButton, setShowButton] = useState(false);
 
@@ -100,52 +95,6 @@ const AdminPanel = () => {
   //     });
   //   }
   // }
-
-  async function manageAllTrading(type: 'start' | 'stop') {
-    try {
-      const data = await Api.post('/admin/manage-trading', { type });
-      console.log('stop-trading:', data);
-      if (data?.success) {
-        setGlobalSetting(data.setting);
-        toast({
-          title: 'Global setting',
-          description: `Successfully ${type === 'stop' ? 'paused' : 'started'} all trading`,
-          variant: 'default',
-        });
-      }
-    } catch (error) {
-      console.error('Error while pausing all trading:', error);
-      toast({
-        title: 'Global setting',
-        description: 'Something went wrong. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  }
-
-  async function changeMode(type: 'maintain' | 'live') {
-    try {
-      const data = await Api.post('/admin/change-mode', { type });
-      console.log('change mode data:', data);
-
-      if (data?.success) {
-        setGlobalSetting(data.setting);
-        toast({
-          title: 'Global setting',
-          description: `Successfully moved to ${type} mode`,
-          variant: 'default',
-          duration: 2000,
-        });
-      }
-    } catch (error) {
-      toast({
-        title: 'Global setting',
-        description: `Failed moving to ${type} mode`,
-        variant: 'destructive',
-        duration: 2000,
-      });
-    }
-  }
 
   // function onCheckedChange(value: CheckedState, user: UserInterface) {
   //   let temp = [];
