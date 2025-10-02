@@ -8,7 +8,7 @@ import { TwoStep } from '@/components/profile/TwoStep';
 
 const Profile = () => {
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <div className="min-h-screen bg-gradient-subtle main">
       <div className="mx-auto px-4 py-8 space-y-8">
         <Navbar />
         <ProfileHeader />

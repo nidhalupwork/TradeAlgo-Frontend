@@ -3,7 +3,7 @@ import AdminPanel from "@/components/admin/AdminPanel";
 
 const Admin = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background main">
       <Navbar />
       <div className="pt-16">
         <AdminPanel />

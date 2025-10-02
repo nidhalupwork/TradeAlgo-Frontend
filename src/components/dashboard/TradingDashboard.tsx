@@ -84,7 +84,7 @@ const TradingDashboard = () => {
 
       console.log('Positions updated');
     }
-  }, [stats, filter, filterPrefix]);
+  }, [stats, filter, filterPrefix, activeTab]);
 
   useEffect(() => {
     fetchPortfolio();

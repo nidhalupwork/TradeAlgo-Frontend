@@ -2,8 +2,6 @@ import * as React from 'react';
 
 // CSS for spinner (tailwind or plain CSS)
 const spinnerStyle = {
-  width: '48px',
-  height: '48px',
   borderTop: '4px solid #3b82f6',
   borderRadius: '50%',
   animation: 'spin 1s linear infinite',
@@ -20,11 +18,7 @@ if (styleSheet) {
 }
 
 export const Spinner = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>((props, ref) => {
-  return (
-    <div className="w-full h-[calc(100vh-64px)] flex items-center justify-center">
-      <div ref={ref} style={spinnerStyle} {...props} role="status" aria-label="Loading" />
-    </div>
-  );
+  return <div ref={ref} style={spinnerStyle} {...props} role="status" aria-label="Loading" />;
 });
 
 Spinner.displayName = 'Spinner';

@@ -3,7 +3,7 @@ import StrategyMarketplace from "@/components/StrategyMarketplace";
 
 const Strategies = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background main">
       <Navbar />
       <div className="pt-16">
         <StrategyMarketplace />

@@ -16,7 +16,7 @@ import { AdminContextProvider } from './providers/AdminProvider';
 import UserProfile from './components/admin/UserProfile';
 import StrategyManagement from './components/admin/strategy/StrategyManagement';
 import TwoFactorAuth from './components/auth/TwoFactorAuth';
-import AdminDashboard from './components/admin/AdminDashboard';
+import './App.css';
 
 const queryClient = new QueryClient();
 

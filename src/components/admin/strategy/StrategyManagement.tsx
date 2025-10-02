@@ -28,6 +28,7 @@ import { AddStrategyModal } from './AddStrategyModal';
 import { useState } from 'react';
 import { StrategyInterface } from '@/lib/types';
 import { ConfirmDeletionModal } from './ConfirmDeletionModal';
+import { Spinner } from '@/components/ui/Spinner';
 
 export default function StrategyManagement() {
   const { strategies, setStrategies } = useAdmin();
@@ -99,7 +100,7 @@ export default function StrategyManagement() {
   }
 
   return (
-    <div>
+    <div className='main'>
       <Navbar />
       <div className="pt-16">
         <div className="p-6 space-y-6">
@@ -280,61 +281,62 @@ export default function StrategyManagement() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {strategies.map((strategy) => (
-                      <TableRow key={strategy._id}>
-                        <TableCell>
-                          <div className="font-medium">{strategy.title}</div>
-                        </TableCell>
-                        <TableCell>{getStatusBadge(strategy.status)}</TableCell>
-                        {/* <TableCell>{getRiskBadge(strategy.star.toString())}</TableCell> */}
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Users className="h-3 w-3 text-muted-foreground" />
-                            {strategy.subscribers.length}
-                          </div>
-                        </TableCell>
-                        {/* <TableCell className="font-mono">{strategy.avgProfit}</TableCell> */}
+                    {strategies?.length > 0 &&
+                      strategies?.map((strategy) => (
+                        <TableRow key={strategy._id}>
+                          <TableCell>
+                            <div className="font-medium">{strategy.title}</div>
+                          </TableCell>
+                          <TableCell>{getStatusBadge(strategy.status)}</TableCell>
+                          {/* <TableCell>{getRiskBadge(strategy.star.toString())}</TableCell> */}
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Users className="h-3 w-3 text-muted-foreground" />
+                              {strategy.subscribers.length}
+                            </div>
+                          </TableCell>
+                          {/* <TableCell className="font-mono">{strategy.avgProfit}</TableCell> */}
 
-                        {/* Enabled */}
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              checked={strategy.enabled}
-                              onCheckedChange={(value) => enablingStrategy(strategy._id, value)}
-                            />
-                            <span className="text-xs text-muted-foreground">
-                              {strategy.enabled ? 'Enabled' : 'Disabled'}
-                            </span>
-                          </div>
-                        </TableCell>
+                          {/* Enabled */}
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={strategy.enabled}
+                                onCheckedChange={(value) => enablingStrategy(strategy._id, value)}
+                              />
+                              <span className="text-xs text-muted-foreground">
+                                {strategy.enabled ? 'Enabled' : 'Disabled'}
+                              </span>
+                            </div>
+                          </TableCell>
 
-                        {/* Actions */}
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {/* <Button variant="ghost" size="sm">
+                          {/* Actions */}
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {/* <Button variant="ghost" size="sm">
                               {strategy.status !== 'Paused' ? (
                                 <Pause className="h-3 w-3" />
                               ) : (
                                 <Play className="h-3 w-3" />
                               )}
                             </Button> */}
-                            <Edit
-                              size={20}
-                              className="hover:cursor-pointer hover:text-blue-400 transition-all"
-                              onClick={() => {
-                                setOpen('Edit');
-                                setStrategy(strategy);
-                              }}
-                            />
-                            <Trash2
-                              size={20}
-                              className="hover:cursor-pointer text-red-600 hover:text-red-700 transition-all"
-                              onClick={() => {
-                                setOpen('Delete');
-                                setStrategy(strategy);
-                              }}
-                            />
-                            {/* {strategy.status === 'Live' && (
+                              <Edit
+                                size={20}
+                                className="hover:cursor-pointer hover:text-blue-400 transition-all"
+                                onClick={() => {
+                                  setOpen('Edit');
+                                  setStrategy(strategy);
+                                }}
+                              />
+                              <Trash2
+                                size={20}
+                                className="hover:cursor-pointer text-red-600 hover:text-red-700 transition-all"
+                                onClick={() => {
+                                  setOpen('Delete');
+                                  setStrategy(strategy);
+                                }}
+                              />
+                              {/* {strategy.status === 'Live' && (
                               <Button size="sm" className="p-2">
                                 <Pause className="h-3 w-3" /> Pause
                               </Button>
@@ -349,12 +351,20 @@ export default function StrategyManagement() {
                                 <Play className="h-3 w-3" /> Go to Live
                               </Button>
                             )} */}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
+                {strategies === null && (
+                  <div className="flex justify-center py-3">
+                    <Spinner className="w-6 h-6" />
+                  </div>
+                )}
+                {strategies?.length === 0 && (
+                  <div className="flex justify-center py-3 text-muted-foreground">No strategies</div>
+                )}
               </div>
             </CardContent>
           </Card>

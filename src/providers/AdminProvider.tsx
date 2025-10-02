@@ -4,7 +4,7 @@ import { useContext, createContext, Dispatch, SetStateAction, ReactNode, useStat
 interface AdminContextInterface {
   users: UserInterface[];
   setUsers: Dispatch<SetStateAction<UserInterface[]>>;
-  strategies: StrategyInterface[];
+  strategies: StrategyInterface[] | null;
   setStrategies: Dispatch<SetStateAction<StrategyInterface[]>>;
   globalSetting: GlobalSettingInterface;
   setGlobalSetting: Dispatch<SetStateAction<GlobalSettingInterface>>;
@@ -14,7 +14,7 @@ export const AdminContext = createContext<AdminContextInterface | undefined>(und
 
 export const AdminContextProvider = ({ children }: { children: ReactNode }) => {
   const [users, setUsers] = useState<UserInterface[]>([]);
-  const [strategies, setStrategies] = useState([]);
+  const [strategies, setStrategies] = useState(null);
   const [globalSetting, setGlobalSetting] = useState<GlobalSettingInterface>();
 
   return (

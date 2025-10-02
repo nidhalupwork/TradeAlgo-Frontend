@@ -6,10 +6,9 @@ import { useEffect } from 'react';
 import logo from '@/assets/logo.png';
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const location = useLocation();
   const isSignedIn = localStorage.getItem('isSignedIn');
-  const { signOut } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,7 +30,7 @@ const Navbar = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
-      <div className="mx-auto px-4">
+      <div className="max-w-[1400px] mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-8">
             <Link to="/" className="flex items-center space-x-2">

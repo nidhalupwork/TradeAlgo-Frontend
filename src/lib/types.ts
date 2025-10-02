@@ -4,8 +4,8 @@ export interface UserInterface {
   username: string;
   fullName: string;
   phoneNumber: string;
-  role: 'user' | 'admin' | 'owner';
-  plan: 'premium' | 'default';
+  role: 'user' | 'admin' | 'owner' | '';
+  plan: 'premium' | 'default' | '';
   mt5AccountId: string;
   riskSettings: RiskSettingsInterface;
   isPausedTradingForDay: boolean;
@@ -17,8 +17,9 @@ export interface UserInterface {
   strategySetting: RiskSettingsInterface[];
   metaApiToken: string;
   trades?: any[] | undefined;
-  status: 'active' | 'pending' | 'suspended';
+  status: 'active' | 'pending' | 'suspended' | '';
   twoFA: boolean;
+  emailVerified: boolean;
 }
 
 export interface ConnectAccount {

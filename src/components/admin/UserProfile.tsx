@@ -33,24 +33,21 @@ import { useToast } from '@/hooks/use-toast';
 export default function UserProfile() {
   const { toast } = useToast();
   const { userId } = useParams();
-  const { users, strategies, setUsers } = useAdmin();
+  const { strategies, setUsers } = useAdmin();
   const [user, setUser] = useState<UserInterface>();
   const [activities, setActivities] = useState([]);
 
   useEffect(() => {
-    setUser(users?.find((u) => u._id === userId));
-  }, [users]);
-
-  useEffect(() => {
-    fetchRecentActivities();
+    fetchUserAndRecentActivities();
   }, []);
 
-  async function fetchRecentActivities() {
+  async function fetchUserAndRecentActivities() {
     try {
       const data = await Api.get(`/admin/activity/${userId}`);
       console.log('data for recent activities:', data);
       if (data?.success) {
         setActivities(data.activities);
+        setUser(data.user);
       }
     } catch (error) {
       console.error(error);
@@ -129,7 +126,7 @@ export default function UserProfile() {
   }
 
   return (
-    <div>
+    <div className="main">
       <Navbar />
       {/* Header */}
       <div className="flex items-center justify-between pt-24 px-6">
@@ -141,7 +138,10 @@ export default function UserProfile() {
           {/* <Separator orientation="vertical" className="h-6" /> */}
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{user?.fullName}</h1>
-            <p className="text-muted-foreground">{user?.email}</p>
+            <div className="flex gap-2 items-center">
+              <p className="text-muted-foreground">{user?.email}</p>
+              {user?.emailVerified && <Verified size={16} className="text-profit" />}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -195,18 +195,9 @@ export default function UserProfile() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="col-span-2">
-                  <p className="text-muted-foreground">Email</p>
-                  <p className="flex items-center gap-2">
-                    {user?.email}
-                    {/* {user?.emailVerified && ( */}
-                    <Verified size={16} className="text-profit" />
-                    {/* )} */}
-                  </p>
-                </div>
+              <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
                 <div>
-                  <p className="text-muted-foreground">Phone</p>
+                  <p className="">Phone</p>
                   <p>{user?.phoneNumber}</p>
                 </div>
                 {/* <div>
@@ -218,31 +209,31 @@ export default function UserProfile() {
                   <p>{user?.timezone}</p>
                 </div> */}
                 <div>
-                  <p className="text-muted-foreground">Account Tier</p>
+                  <p>Account Tier</p>
                   <div>{getTierBadge(user?.plan)}</div>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">2FA Status</p>
-                  <p className="flex items-center gap-2">
-                    {/* {user?.twoFaEnabled ? (
-                      <Badge className="bg-success/20 text-success border-success/30">Enabled</Badge>
+                  <p>2FA Status</p>
+                  <div className="flex items-center gap-2">
+                    {user?.twoFA ? (
+                      <Badge className="bg-profit/20 text-profit border-profit/30">Enabled</Badge>
                     ) : (
                       <Badge variant="destructive">Disabled</Badge>
-                    )} */}
-                  </p>
+                    )}
+                  </div>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Registered</p>
-                  <p className="flex items-center gap-1">
+                  <p>Registered</p>
+                  <p className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     {user?.createdAt?.toString().slice(0, 10) ?? ''}
                   </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Last Login</p>
-                  <p className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    {user?.createdAt?.toString().slice(0, 10) ?? ''}
+                  <p className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    {user?.lastLogin?.toString().slice(0, 10) ?? ''}
                   </p>
                 </div>
               </div>
@@ -331,7 +322,7 @@ export default function UserProfile() {
           {/* Connected Brokers */}
           <Card>
             <CardHeader>
-              <CardTitle>Connected Brokers</CardTitle>
+              <CardTitle>Connected Accounts</CardTitle>
               <CardDescription>Trading accounts connected to this user</CardDescription>
             </CardHeader>
             <CardContent>
@@ -344,7 +335,7 @@ export default function UserProfile() {
                       <TableHead>Platform</TableHead>
                       <TableHead>Login</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead className="w-[50px]"></TableHead>
+                      {/* <TableHead className="w-[50px]"></TableHead> */}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -357,11 +348,11 @@ export default function UserProfile() {
                         </TableCell>
                         <TableCell className="font-mono text-sm">{account.login}</TableCell>
                         <TableCell>{getBrokerStatusBadge(account.active)}</TableCell>
-                        <TableCell>
+                        {/* <TableCell>
                           <Button variant="ghost" size="sm">
                             <ExternalLink className="h-4 w-4" />
                           </Button>
-                        </TableCell>
+                        </TableCell> */}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -374,7 +365,7 @@ export default function UserProfile() {
           <Card>
             <CardHeader>
               <CardTitle>Trading Strategies</CardTitle>
-              <CardDescription>User's active and paused trading strategies</CardDescription>
+              <CardDescription>User's active strategies</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="rounded-md border">
@@ -393,8 +384,8 @@ export default function UserProfile() {
                   </TableHeader>
                   <TableBody>
                     {strategies
-                      .filter((s) => user?.accounts.some((a) => s.subscribers.includes(a.accountId)))
-                      .map((strategy) => {
+                      ?.filter((s) => s.subscribers.includes(user._id))
+                      ?.map((strategy) => {
                         const setting = user?.strategySetting?.find((ss) => ss.strategyId === strategy._id);
                         return (
                           <TableRow key={strategy._id}>

@@ -91,6 +91,7 @@ export const SocketProvider = ({ children }) => {
     deals.map((deal) => {
       if (deals.filter((d) => d.positionId && d.positionId === deal.positionId).length === 2) {
         const temp = {
+          accountId: '',
           brokerTime: '',
           openPrice: 0,
           profit: 0,
@@ -110,6 +111,7 @@ export const SocketProvider = ({ children }) => {
         }
         const pos = closedPositions.find((cp) => cp.positionId === deal.positionId);
         if (deal.entryType === 'DEAL_ENTRY_IN') {
+          pos.accountId = deal.accountId;
           pos.brokerTime = deal.brokerTime;
           pos.openPrice = deal.price;
           pos.type = deal.type;

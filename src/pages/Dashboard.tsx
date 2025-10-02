@@ -7,10 +7,14 @@ import { useAuth } from '@/providers/AuthProvider';
 const Dashboard = () => {
   const { user } = useAuth();
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background main">
       <Navbar />
       <div className="pt-16">
-        {!user.role && <Spinner />}
+        {!user.role && (
+          <div className="w-full h-[calc(100vh-64px)] flex items-center justify-center">
+            <Spinner className="w-12 h-12" />
+          </div>
+        )}
         {user.role === 'user' && <TradingDashboard />}
         {user.role === 'admin' && <AdminDashboard />}
       </div>

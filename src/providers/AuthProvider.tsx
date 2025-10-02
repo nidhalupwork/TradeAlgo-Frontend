@@ -29,16 +29,17 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     metaApiToken: '',
     mt5AccountId: '',
     phoneNumber: '',
-    role: 'user',
+    role: '',
     strategySetting: [],
     updatedAt: new Date(),
     username: '',
     lastLogin: new Date(),
     accounts: [],
     riskSettings: null,
-    plan: 'default',
-    status: 'pending',
+    plan: '',
+    status: '',
     twoFA: false,
+    emailVerified: false,
   });
 
   useEffect(() => {

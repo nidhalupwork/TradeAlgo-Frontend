@@ -38,6 +38,24 @@ export const PersonalInfo = () => {
   }, [user]);
 
   async function updatePassword() {
+    if (!password.last || !password.new || !password.confirm) {
+      toast({
+        title: 'Warn',
+        duration: 2000,
+        variant: 'warn',
+        description: 'All fields are required',
+      });
+      return;
+    }
+    if (password.new !== password.confirm) {
+      toast({
+        title: 'Warn',
+        duration: 2000,
+        variant: 'warn',
+        description: "Passwords don't match. Please double check.",
+      });
+      return;
+    }
     try {
       const data = await Api.post('/users/update-password', password);
       if (data?.success) {
@@ -191,7 +209,7 @@ export const PersonalInfo = () => {
           </div>
         </div> */}
 
-        {isEditing && (
+        {/* {isEditing && (
           <div className="flex gap-3 pt-4">
             <Button className="gap-2" onClick={saveChanges}>
               <Save className="h-4 w-4" />
@@ -201,7 +219,7 @@ export const PersonalInfo = () => {
               Cancel
             </Button>
           </div>
-        )}
+        )} */}
 
         {/* Previous Password */}
         <div className="space-y-2 border-t-2 pt-2">
@@ -243,7 +261,7 @@ export const PersonalInfo = () => {
         </div>
 
         <div className="flex gap-3 pt-4">
-          <Button className="gap-2" onClick={() => updatePassword()}>
+          <Button className="gap-2" onClick={updatePassword}>
             <Save className="h-4 w-4" />
             Update Password
           </Button>
