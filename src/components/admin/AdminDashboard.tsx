@@ -103,8 +103,8 @@ export default function AdminDashboard() {
             >
               <div className="flex flex-col items-center gap-1">
                 <Power className="h-6 w-6" />
-                <span className="font-bold">GLOBAL KILL SWITCH & CLOSE ALL POSITIONS</span>
-                <span className="text-xs opacity-90">Stop All Trading & Close All Open Positions</span>
+                <span className="font-bold">GLOBAL KILL SWITCH</span>
+                <span className="text-xs opacity-90">Stop All Trading</span>
               </div>
             </Button>
           ) : (

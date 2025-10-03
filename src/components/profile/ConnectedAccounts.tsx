@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Edit3, Eye, EyeOff, Plus, Save, Settings, TrendingUp, X, Zap } from 'lucide-react';
+import { Edit3, Eye, EyeOff, Logs, Plus, Save, Settings, Trash2, TrendingUp, X, Zap } from 'lucide-react';
 import { AccountConfigModal } from './AccountConfigModal';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
@@ -12,17 +12,19 @@ import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Input } from '../ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { DeleteModal } from './DeleteModal';
 
 export const ConnectedAccounts = () => {
   const { toast } = useToast();
   const { user, setUser } = useAuth();
   const [accounts, setAccounts] = useState<ConnectAccount[]>();
   const [selectedAccount, setSelectedAccount] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState<'Delete' | 'Account' | ''>('');
   const [modalType, setModalType] = useState<'Details' | 'Connect'>('Details');
   const [metaToken, setMetaToken] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setAccounts(user?.accounts);
@@ -32,7 +34,7 @@ export const ConnectedAccounts = () => {
   const handleConfigure = (account: ConnectAccount, type: 'Details' | 'Connect') => {
     setSelectedAccount(account);
     setModalType(type);
-    setModalOpen(true);
+    setModalOpen('Account');
   };
 
   async function handleActiveClick(accountId: string) {
@@ -70,6 +72,31 @@ export const ConnectedAccounts = () => {
         variant: 'destructive',
       });
     }
+  }
+
+  async function deleteAccount(accountId: string) {
+    setIsLoading(true);
+    try {
+      console.log('Deletion of accountid:', accountId);
+      const data = await Api.delete(`/users/account/${accountId}`);
+      console.log('Result of deletion:', data);
+      if (data.success) {
+        setUser(data.user);
+        toast({
+          title: 'Success',
+          description: data.message || 'Successfully deleted account',
+          variant: 'profit',
+        });
+        setModalOpen('');
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message || 'Unexpected Error',
+        variant: 'destructive',
+      });
+    }
+    setIsLoading(false);
   }
 
   return (
@@ -135,10 +162,19 @@ export const ConnectedAccounts = () => {
                 <Switch checked={account.active} onClick={() => handleActiveClick(account.accountId)} />
                 <span className="text-sm text-muted-foreground">{account.active ? 'Active' : 'Inactive'}</span>
               </div>
-              <Button variant="outline" size="sm" className="gap-2" onClick={() => handleConfigure(account, 'Details')}>
-                <Settings className="h-4 w-4" />
-                Details
-              </Button>
+              <Logs
+                size={20}
+                className="hover:cursor-pointer text-primary hover:text-primary/80 transition-all"
+                onClick={() => handleConfigure(account, 'Details')}
+              />
+              <Trash2
+                size={20}
+                className="hover:cursor-pointer text-red-600 hover:text-red-700 transition-all"
+                onClick={() => {
+                  setSelectedAccount(account);
+                  setModalOpen('Delete');
+                }}
+              />
             </div>
           </div>
         ))}
@@ -200,6 +236,14 @@ export const ConnectedAccounts = () => {
         open={modalOpen}
         onOpenChange={setModalOpen}
         modalType={modalType}
+      />
+
+      <DeleteModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        isLoading={isLoading}
+        confirmDelete={deleteAccount}
+        accountId={selectedAccount?.accountId}
       />
     </Card>
   );

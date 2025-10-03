@@ -13,9 +13,9 @@ import { useAuth } from '@/providers/AuthProvider';
 
 interface AccountConfigModalProps {
   account: ConnectAccount;
-  open: boolean;
+  open: 'Delete' | 'Account' | '';
   modalType: 'Details' | 'Connect';
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (open: 'Delete' | 'Account' | '') => void;
 }
 
 export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: AccountConfigModalProps) => {
@@ -67,7 +67,7 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
           variant: 'profit',
         });
 
-        onOpenChange(false);
+        onOpenChange('');
       }
     } catch (error) {
       console.log(error);
@@ -87,7 +87,7 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
   if (!account) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open === 'Account'} onOpenChange={() => onOpenChange('')}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -186,7 +186,7 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => onOpenChange('')}
               disabled={isLoading}
               className="flex-1"
             >

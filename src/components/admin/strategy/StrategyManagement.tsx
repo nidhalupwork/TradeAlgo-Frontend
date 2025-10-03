@@ -25,7 +25,7 @@ import { useAdmin } from '@/providers/AdminProvider';
 import Api from '@/services/Api';
 import { useToast } from '@/hooks/use-toast';
 import { AddStrategyModal } from './AddStrategyModal';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StrategyInterface } from '@/lib/types';
 import { ConfirmDeletionModal } from './ConfirmDeletionModal';
 import { Spinner } from '@/components/ui/Spinner';
@@ -36,6 +36,38 @@ export default function StrategyManagement() {
   const [open, setOpen] = useState<'Add' | 'Edit' | 'Delete' | ''>('');
   const [strategy, setStrategy] = useState<StrategyInterface>();
   const [isLoading, setIsLoading] = useState(false);
+  const [stats, setStats] = useState({
+    activeUsers: 0,
+    totalStrategies: 0,
+    enabeldStrategies: 0,
+    pausedStrategies: 0,
+    devStrategies: 0,
+  });
+
+  useEffect(() => {
+    if (strategies) {
+      const subscribers = new Set();
+      let enabled = 0;
+      let paused = 0;
+      let development = 0;
+      strategies.map((s) => {
+        s.subscribers.map((ss) => {
+          subscribers.add(ss);
+        });
+        if (s.enabled) enabled += 1;
+        if (s.status === 'Paused') paused += 1;
+        if (s.status === 'Development') development += 1;
+      });
+
+      setStats({
+        activeUsers: subscribers.size,
+        totalStrategies: strategies.length,
+        enabeldStrategies: enabled,
+        pausedStrategies: paused,
+        devStrategies: development,
+      });
+    }
+  }, [strategies]);
 
   function openChange() {
     setOpen('');
@@ -100,7 +132,7 @@ export default function StrategyManagement() {
   }
 
   return (
-    <div className='main'>
+    <div className="main">
       <Navbar />
       <div className="pt-16">
         <div className="p-6 space-y-6">
@@ -202,48 +234,48 @@ export default function StrategyManagement() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Exposure</CardTitle>
+                <CardTitle className="text-sm font-medium">Total Strategies</CardTitle>
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">$45.2M</div>
+                <div className="text-2xl font-bold">{stats.totalStrategies}</div>
                 <p className="text-xs text-muted-foreground">
-                  <span className="text-warning">+5.2%</span> from yesterday
+                  <span className="text-warning">Enabled:</span> {stats.enabeldStrategies}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Positions</CardTitle>
+                <CardTitle className="text-sm font-medium">Active Users</CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">1,247</div>
+                <div className="text-2xl font-bold">{stats.activeUsers}</div>
                 <p className="text-xs text-muted-foreground">Across all users</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Risk Score</CardTitle>
+                <CardTitle className="text-sm font-medium">Paused Strategies</CardTitle>
                 <Shield className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-warning">6.2</div>
-                <p className="text-xs text-muted-foreground">Medium risk level</p>
+                <div className="text-2xl font-bold text-warning">{stats.pausedStrategies}</div>
+                {/* <p className="text-xs text-muted-foreground">Medium risk level</p> */}
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Margin Usage</CardTitle>
+                <CardTitle className="text-sm font-medium">In Development</CardTitle>
                 <Activity className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">72%</div>
+                <div className="text-2xl font-bold">{stats.devStrategies}</div>
                 <p className="text-xs text-muted-foreground">
-                  <span className="text-success">Safe levels</span>
+                  {/* <span className="text-success">Safe levels</span> */}
                 </p>
               </CardContent>
             </Card>
