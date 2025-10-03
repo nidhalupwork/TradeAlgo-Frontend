@@ -19,6 +19,7 @@ import {
   Plus,
   Edit,
   Trash2,
+  Code,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useAdmin } from '@/providers/AdminProvider';
@@ -29,6 +30,7 @@ import { useEffect, useState } from 'react';
 import { StrategyInterface } from '@/lib/types';
 import { ConfirmDeletionModal } from './ConfirmDeletionModal';
 import { Spinner } from '@/components/ui/Spinner';
+import { roundUp } from '@/lib/utils';
 
 export default function StrategyManagement() {
   const { strategies, setStrategies } = useAdmin();
@@ -235,7 +237,7 @@ export default function StrategyManagement() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Strategies</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <Activity className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalStrategies}</div>
@@ -247,8 +249,8 @@ export default function StrategyManagement() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Subscribers</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.activeUsers}</div>
@@ -259,24 +261,22 @@ export default function StrategyManagement() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Paused Strategies</CardTitle>
-                <Shield className="h-4 w-4 text-muted-foreground" />
+                <Pause className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-warning">{stats.pausedStrategies}</div>
-                {/* <p className="text-xs text-muted-foreground">Medium risk level</p> */}
+                <p className="text-xs text-warning">{roundUp(stats.pausedStrategies / stats.totalStrategies, 2)}%</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">In Development</CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
+                <Code className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.devStrategies}</div>
-                <p className="text-xs text-muted-foreground">
-                  {/* <span className="text-success">Safe levels</span> */}
-                </p>
+                <div className="text-2xl font-bold text-primary">{stats.devStrategies}</div>
+                <p className="text-xs text-primary">{roundUp(stats.devStrategies / stats.totalStrategies, 2)}%</p>
               </CardContent>
             </Card>
           </div>

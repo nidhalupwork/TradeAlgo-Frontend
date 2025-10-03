@@ -97,7 +97,7 @@ export const AuthForm = () => {
         toast({
           variant: 'destructive',
           title: 'Login failed',
-          description: error?.response?.data?.error?.email ?? 'Unexpected error',
+          description: error?.response?.data?.message ?? 'Unexpected error',
         });
       }
     }

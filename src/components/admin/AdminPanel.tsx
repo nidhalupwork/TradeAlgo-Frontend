@@ -15,6 +15,7 @@ import {
   MoreHorizontal,
   Loader,
   UserCheck,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAdmin } from '@/providers/AdminProvider';
 import {
@@ -143,7 +144,7 @@ const AdminPanel = () => {
               <p className="text-2xl font-bold">{activeUsers}</p>
               <p className="text-xs text-muted-foreground">{roundUp((activeUsers / users.length) * 100, 2)}%</p>
             </div>
-            <Activity className="h-8 w-8 text-profit" />
+            <ShieldCheck className="h-8 w-8 text-profit" />
           </div>
         </Card>
 
@@ -154,7 +155,7 @@ const AdminPanel = () => {
               <p className="text-2xl font-bold">{pendingUsers}</p>
               <p className="text-xs text-gold">{roundUp((pendingUsers / users.length) * 100, 2)}%</p>
             </div>
-            <Shield className="h-8 w-8 text-gold" />
+            <Loader className="h-8 w-8 text-gold" />
           </div>
         </Card>
 
@@ -165,7 +166,7 @@ const AdminPanel = () => {
               <p className="text-2xl font-bold">{suspendedUsers}</p>
               <p className="text-xs text-loss">{roundUp((suspendedUsers / users.length) * 100, 2)}%</p>
             </div>
-            <AlertTriangle className="h-8 w-8 text-loss" />
+            <Ban className="h-8 w-8 text-loss" />
           </div>
         </Card>
       </div>
@@ -215,14 +216,14 @@ const AdminPanel = () => {
                   Reset Risk
                 </Button>
               )} */}
-              <div className="relative">
+              {/* <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Search users..." className="pl-10 w-64" />
               </div>
               <Button variant="outline" size="sm">
                 <Settings className="h-4 w-4 mr-2" />
                 Filters
-              </Button>
+              </Button> */}
             </div>
           </div>
 
@@ -232,6 +233,7 @@ const AdminPanel = () => {
                 <tr className="border-b border-border">
                   {/* <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground"></th> */}
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">User</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Role</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Status</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Plan</th>
                   {/* <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Balance</th> */}
@@ -255,6 +257,12 @@ const AdminPanel = () => {
                       <div>
                         <p className="font-medium">{user.fullName}</p>
                         <p className="text-xs text-muted-foreground">{user.email}</p>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className='flex gap-1 items-center text-muted-foreground'>
+                        {user.role === 'user' ? <Users size={16} /> : <ShieldCheck size={16} />}
+                        <p className="font-medium">{user.role}</p>
                       </div>
                     </td>
                     <td className="py-3 px-4">
