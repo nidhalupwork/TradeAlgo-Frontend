@@ -18,7 +18,7 @@ interface StatsInterface {
 interface SocketContextInterface {
   socket: Socket;
   connected: boolean;
-  initializeSocket: (id: string, accountIds: string[]) => void;
+  initializeSocket: (id: string, email: string, accountIds: string[]) => void;
   deinitializeSocket: (id: string, accountIds: string[]) => void;
   stats: StatsInterface;
 }
@@ -64,8 +64,8 @@ export const SocketProvider = ({ children }) => {
     };
   }, []);
 
-  function initializeSocket(id: string, accountIds: string[]) {
-    socketRef.current.emit('initialize', { userId: id, accountIds });
+  function initializeSocket(id: string, email: string, accountIds: string[]) {
+    socketRef.current.emit('initialize', { userId: id, email, accountIds });
   }
 
   function deinitializeSocket(id: string, accountIds: string[]) {

@@ -1,9 +1,16 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Activity, Settings, Users, SquareUser, Bell, LogOut } from 'lucide-react';
+import { LayoutDashboard, Activity, Settings, Users, SquareUser, Bell, LogOut, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useEffect } from 'react';
 import logo from '@/assets/logo.png';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -21,7 +28,6 @@ const Navbar = () => {
     // user page
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, role: 'all' },
     { path: '/strategies', label: 'Strategies', icon: Activity, role: 'user' },
-    { path: '/profile', label: 'Profile', icon: SquareUser, role: 'user' },
 
     // admin page
     { path: '/user-management', label: 'Users', icon: Users, role: 'admin' },
@@ -81,10 +87,28 @@ const Navbar = () => {
               </Button>
             )}
             {isSignedIn ? (
-              <Button variant="destructive" size="sm" onClick={() => signOut()}>
-                <LogOut />
-                Sign Out
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <SquareUser className="h-4 w-4 mr-2" />
+                    {user.fullName}
+                    <ChevronDown className="h-4 w-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center">
+                      <SquareUser className="h-4 w-4 mr-2" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => signOut()} className="text-red-600 focus:text-red-600">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <Link to="/auth">
                 <Button variant="default" size="sm" className="shadow-glow-primary">

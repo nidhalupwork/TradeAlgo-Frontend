@@ -43,10 +43,10 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   });
 
   useEffect(() => {
-    checkExistingToken();
+    refresh();
   }, []);
 
-  async function checkExistingToken() {
+  async function refresh() {
     const isSignedIn = localStorage.getItem('isSignedIn');
 
     if (isSignedIn) {
@@ -58,10 +58,12 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
           setStrategies(data.strategies);
           setGlobalSetting(data.setting);
 
-          const accountIds = data.user.accounts.reduce((acc, cur) => {
-            return [...acc, cur.accountId];
-          }, []);
-          initializeSocket(data.user._id, accountIds);
+          if (data.user.role === 'user') {
+            const accountIds = data.user.accounts.reduce((acc, cur) => {
+              return [...acc, cur.accountId];
+            }, []);
+            initializeSocket(data.user._id, data.user.email, accountIds);
+          }
         } else {
           navigate('/auth');
         }

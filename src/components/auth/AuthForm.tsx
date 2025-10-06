@@ -64,7 +64,7 @@ export const AuthForm = () => {
             }, []);
 
             if (data.user.role === 'user') {
-              initializeSocket(data.user._id, accountIds);
+              initializeSocket(data.user._id, data.user.email, accountIds);
               navigate('/dashboard');
             } else {
               setUsers(data.users);
