@@ -22,7 +22,10 @@ const Navbar = () => {
     if (isSignedIn !== 'true' && location.pathname !== '/' && location.pathname !== '/2fa') {
       navigate('/auth');
     }
-  }, [location.pathname]);
+    if (isSignedIn === 'true' && location.pathname === '/auth') {
+      navigate('/dashboard');
+    }
+  }, [location.pathname, isSignedIn]);
 
   const navItems = [
     // user page
@@ -57,7 +60,7 @@ const Navbar = () => {
                       return <div key={item.path}></div>;
                     } else {
                       return (
-                        <Link key={item.path} to={item.path}>
+                        <Link key={item.path} to={item.path} className="hover:cursor-pointer">
                           <Button
                             variant={isActive ? 'default' : 'ghost'}
                             size="sm"
@@ -97,13 +100,13 @@ const Navbar = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem asChild>
-                    <Link to="/profile" className="flex items-center">
+                    <Link to="/profile" className="flex items-center hover:cursor-pointer">
                       <SquareUser className="h-4 w-4 mr-2" />
                       Profile
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => signOut()} className="text-red-600 focus:text-red-600">
+                  <DropdownMenuItem onClick={() => signOut()} className="text-red-600 focus:text-red-600 hover:cursor-pointer ">
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out
                   </DropdownMenuItem>
