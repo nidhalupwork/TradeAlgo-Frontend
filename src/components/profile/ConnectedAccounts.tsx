@@ -145,7 +145,7 @@ export const ConnectedAccounts = () => {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {user.accounts.length === 3 && (
+        {user.plan === 'basic' && user.accounts.length === 3 && (
           <div className="border border-gold rounded-lg p-2 bg-gold/40">
             <p className="text-gold text-sm">
               You have reached the maximum accounts that you can connect to our platform. To connect more please contact

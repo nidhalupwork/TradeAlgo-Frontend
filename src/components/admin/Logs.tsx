@@ -3,7 +3,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Activity, AlertCircle, TrendingUp, User, Mail, Hash, CircleCheck, CircleAlert, ShieldCheck } from 'lucide-react';
+import {
+  Search,
+  Activity,
+  AlertCircle,
+  TrendingUp,
+  User,
+  Mail,
+  Hash,
+  CircleCheck,
+  CircleAlert,
+  ShieldCheck,
+} from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Navbar from '../Navbar';
 import Api from '@/services/Api';
@@ -148,20 +159,20 @@ const Logs = () => {
                           <div className="flex flex-col">
                             <div className="flex items-center gap-1.5 font-medium">
                               <User className="h-3.5 w-3.5 text-muted-foreground" />
-                              {log.userId.fullName}
-                              {log.userId.status === 'active' && (
+                              {log.userId?.fullName}
+                              {log.userId?.status === 'active' && (
                                 <span className="text-profit text-[10px]">Active</span>
                               )}
-                              {log.userId.status === 'suspended' && <span className="text-loss">Suspended</span>}
-                              {log.userId.status === 'pending' && (
+                              {log.userId?.status === 'suspended' && <span className="text-loss">Suspended</span>}
+                              {log.userId?.status === 'pending' && (
                                 <span className="text-gold text-[10px]">Pending</span>
                               )}
                             </div>
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                               <Mail className="h-3 w-3" />
-                              {log.userId.email}
-                              {log.userId.emailVerified && <CircleCheck size={12} className="text-primary" />}
-                              {!log.userId.emailVerified && <CircleAlert size={12} className="text-destructive" />}
+                              {log.userId?.email}
+                              {log.userId?.emailVerified && <CircleCheck size={12} className="text-primary" />}
+                              {!log.userId?.emailVerified && <CircleAlert size={12} className="text-destructive" />}
                             </div>
                           </div>
                         )}
