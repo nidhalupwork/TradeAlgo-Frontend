@@ -242,7 +242,9 @@ export default function StrategyManagement() {
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalStrategies}</div>
                 <p className="text-xs text-muted-foreground">
-                  <span className="text-warning">Enabled:</span> {stats.enabeldStrategies}
+                  <span className="text-profit">
+                    Enabled: {stats.enabeldStrategies} {stats.enabeldStrategies > 1 ? 'strategies' : 'strategy'}
+                  </span>
                 </p>
               </CardContent>
             </Card>
@@ -265,7 +267,9 @@ export default function StrategyManagement() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-warning">{stats.pausedStrategies}</div>
-                <p className="text-xs text-warning">{roundUp(stats.pausedStrategies / stats.totalStrategies, 2)}%</p>
+                <p className="text-xs text-warning">
+                  {roundUp((stats.pausedStrategies / stats.totalStrategies) * 100, 2)}%
+                </p>
               </CardContent>
             </Card>
 
@@ -276,7 +280,9 @@ export default function StrategyManagement() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-primary">{stats.devStrategies}</div>
-                <p className="text-xs text-primary">{roundUp(stats.devStrategies / stats.totalStrategies, 2)}%</p>
+                <p className="text-xs text-primary">
+                  {roundUp((stats.devStrategies / stats.totalStrategies) * 100, 2)}%
+                </p>
               </CardContent>
             </Card>
           </div>

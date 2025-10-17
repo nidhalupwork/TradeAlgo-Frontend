@@ -1,13 +1,27 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  ReferenceLine,
+  Area,
+  AreaChart,
+} from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useState } from 'react';
 import { Button } from '../ui/button';
 import { ConnectAccount } from '@/lib/types';
 
 interface TradingChartProps {
-  data: any[];
+  data: any;
   selectedAccounts: { accountId: string; name: string }[];
+  selectedAccount: { accountId: string; name: string };
   accounts: ConnectAccount[];
+  range: '1m' | '3m' | '1y';
+  setRange: React.Dispatch<React.SetStateAction<'3m' | '1y' | '1m'>>;
 }
 
 const accountColors = [
@@ -33,14 +47,15 @@ const accountColors = [
   'hsl(var(--chart-20))',
 ];
 
-const CustomTooltip = ({ active, payload, label, accounts }: any) => {
+const CustomTooltip = ({ active, payload, label, accounts, account }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="rounded-lg border bg-card p-3 shadow-md">
         <p className="text-sm font-medium text-card-foreground mb-2">{label}</p>
         {payload.map((entry: any, index: number) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
-            {accounts.find((a) => a.accountId === entry.dataKey).name}: ${entry.value.toLocaleString()}
+            {/* {accounts.find((a) => a.accountId === entry.dataKey)?.name}: ${entry.value.toLocaleString()} */}
+            {account?.name}: ${entry.value.toLocaleString()}
           </p>
         ))}
       </div>
@@ -49,25 +64,75 @@ const CustomTooltip = ({ active, payload, label, accounts }: any) => {
   return null;
 };
 
-export const TradingChart = ({ data, selectedAccounts, accounts }: TradingChartProps) => {
-  const [range, setRange] = useState<'1m' | '3m' | '1y'>('1m');
+const CustomizedDot = ({ cx, cy, stroke, payload, value, index, data, accountId }: any) => {
+  const prevValue = index > 0 ? data[index - 1][accountId] : 0;
+  const fillColor = prevValue !== null && value[value.length - 1] < prevValue ? 'red' : 'hsl(var(--chart-3))';
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      strokeLinecap="round"
+      strokeWidth="2"
+      strokeLinejoin="round"
+      className="lucide lucide-dot-icon lucide-dot"
+      x={cx - 10}
+      y={cy - 10}
+      width={20}
+      height={20}
+      fill={fillColor}
+    >
+      <circle cx="12" cy="12" r="5" />
+    </svg>
+  );
+};
 
+export const TradingChart = ({
+  data,
+  selectedAccounts,
+  selectedAccount,
+  accounts,
+  range,
+  setRange,
+}: TradingChartProps) => {
   // Choose XAxis tick formatter and ticks interval based on range
   let tickFormatter;
   let interval;
   if (range === '1m') {
     tickFormatter = (val) => {
-      return new Date(val).toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+      return new Date(val).toLocaleString('en-US', { day: 'numeric', month: 'short', timeZone: 'UTC' });
     };
-    interval = 2; // show all or every tick
+    interval = 1; // show all or every tick
   } else if (range === '3m') {
-    tickFormatter = (val) => new Date(val).toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
-    interval = 3; // show every 3rd tick
+    tickFormatter = (val) => new Date(val).toLocaleString('en-US', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+    interval = 4; // show every 3rd tick
   } else if (range === '1y') {
     tickFormatter = (val) =>
-      new Date(val).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-    interval = 5; // show every 6th tick
+      new Date(val).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+    interval = 31; // show every 6th tick
   }
+
+  // const [off, setOff] = useState(0);
+  // useEffect(() => {
+  //   if (data) {
+  //     setOff(gradientOffset() ?? 0);
+  //   }
+  // }, [selectedAccount]);
+
+  // const gradientOffset = () => {
+  //   const dataMax = Math.max(...data.map((i) => i[selectedAccount.accountId]));
+  //   const dataMin = Math.min(...data.map((i) => i[selectedAccount.accountId]));
+
+  //   if (Number.isNaN(dataMax) || Number.isNaN(dataMin)) {
+  //     return 1;
+  //   }
+  //   // if (dataMax <= 5000) {
+  //   //   return 0;
+  //   // }
+  //   // if (dataMin >= 5000) {
+  //   //   return 1;
+  //   // }
+
+  //   return dataMax / (dataMax - dataMin);
+  // };
 
   return (
     <Card className="w-full">
@@ -88,8 +153,8 @@ export const TradingChart = ({ data, selectedAccounts, accounts }: TradingChartP
       <CardContent>
         <div className="h-[248px]">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+            <AreaChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" opacity={0.2} />
               <XAxis
                 dataKey="date"
                 stroke="hsl(var(--muted-foreground))"
@@ -106,26 +171,42 @@ export const TradingChart = ({ data, selectedAccounts, accounts }: TradingChartP
                 axisLine={true}
                 tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
               />
-              <Tooltip content={<CustomTooltip accounts={selectedAccounts} />} />
-              {/* <Legend
-                wrapperStyle={{ paddingTop: '20px' }}
-                iconType="line"
-                formatter={(value) => accountNames[value as keyof typeof accountNames]}
-              /> */}
-
-              {selectedAccounts.map((a, index) => (
+              <Tooltip content={<CustomTooltip accounts={selectedAccounts} account={selectedAccount} />} />
+              {/* {data && ( */}
+              {/* <defs>
+                <linearGradient id="splitColor" x1="-1" y1="0" x2="1" y2="0">
+                  <stop offset={off} stopColor="hsl(var(--chart-3))" stopOpacity={1} />
+                  <stop offset={off} stopColor="hsl(var(--chart-1))" stopOpacity={1} />
+                </linearGradient>
+              </defs> */}
+              {/* )} */}
+              {selectedAccount && (
+                <Area
+                  type="monotone"
+                  className="relative"
+                  dataKey={selectedAccount.accountId}
+                  stroke={accountColors[2]}
+                  strokeWidth={1}
+                  dot={{ r: 2, stroke: accountColors[2], strokeWidth: 4, fill: accountColors[2] }}
+                  activeDot={{ r: 6, stroke: accountColors[2], strokeWidth: 2, fill: 'hsl(var(--background))' }}
+                  fill={accountColors[2]}
+                  // dot={<CustomizedDot data={data} accountId={selectedAccount.accountId} />}
+                  // fill="url(#splitColor)"
+                />
+              )}
+              {/* {selectedAccounts.map((a, index) => (
                 <Line
                   key={index}
-                  type="monotone"
+                  type='monotone'
                   dataKey={a.accountId}
                   stroke={accountColors[index]}
                   // hide={!selectedAccounts.some((sa) => sa.accountId === a.accountId)}
                   strokeWidth={3}
-                  dot={false}
+                  // dot={false}
                   activeDot={{ r: 6, stroke: accountColors[index], strokeWidth: 2, fill: 'hsl(var(--background))' }}
                 />
-              ))}
-            </LineChart>
+              ))} */}
+            </AreaChart>
           </ResponsiveContainer>
         </div>
       </CardContent>

@@ -3,20 +3,22 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
-import { TrendingUp, BarChart3, Clock, Users, Star, Info, Check, Settings, CircleAlert } from 'lucide-react';
+import { TrendingUp, BarChart3, Clock, Users, Star, Info, Check, Settings, CircleAlert, Activity } from 'lucide-react';
 import Api from '@/services/Api';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { RiskConfigModal } from './RiskConfigModal';
 import { RiskSettingsInterface, StrategyInterface } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { RiskSettingModal } from './RiskSettingModal';
+import Announcement from './Announcement';
 
 const StrategyMarketplace = () => {
   const { toast } = useToast();
   const { user, setUser } = useAuth();
   const [strategies, setStrategies] = useState<StrategyInterface[]>([]);
   const [strategy, setStrategy] = useState<StrategyInterface | null>(null);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<'Global' | 'Strategy' | ''>('');
   const [selectedSetting, setSelectedSetting] = useState<RiskSettingsInterface | null>(null);
   const [stats, setStats] = useState({
     count: 0,
@@ -74,7 +76,7 @@ const StrategyMarketplace = () => {
   }
 
   function onConfigModalOpen(strat: any) {
-    setOpen(true);
+    setOpen('Strategy');
     const userSetting = user?.strategySetting.find((s) => s.title === strat.title);
 
     if (userSetting) {
@@ -83,14 +85,14 @@ const StrategyMarketplace = () => {
       setSelectedSetting({
         strategyId: strat.id,
         title: strat.title,
-        dailyLossCurrency: 'amount',
-        dailyLossLimit: 0,
-        maxLossCurrency: 'amount',
-        maxLossLimit: 0,
-        isCloseAllPositions: false,
-        isPauseTrading: false,
-        isSendNotification: false,
-        maxCurrentPositions: 0,
+        // dailyLossCurrency: 'amount',
+        // dailyLossLimit: 0,
+        // maxLossCurrency: 'amount',
+        // maxLossLimit: 0,
+        // isCloseAllPositions: false,
+        // isPauseTrading: false,
+        // isSendNotification: false,
+        // maxCurrentPositions: 0,
         riskPerTrade: 2,
       } as RiskSettingsInterface);
     }
@@ -98,7 +100,7 @@ const StrategyMarketplace = () => {
   }
 
   function onConfigModalClose() {
-    setOpen(false);
+    setOpen('');
     setSelectedSetting(null);
     setStrategy(null);
   }
@@ -109,31 +111,43 @@ const StrategyMarketplace = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-2">Strategy Marketplace</h1>
-          <p className="text-muted-foreground">Choose from proven trading strategies or create your own</p>
+          <p className="text-muted-foreground">Select, connect and configure your automated trading strategies.</p>
         </div>
-      </div>
 
+        <Button variant="gold" onClick={() => setOpen('Global')}>
+          Update RiskSettings
+        </Button>
+      </div>
+      {/* {user.status === 'pending' && <Announcement />} */}
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
           <div className="flex items-center gap-3">
-            <BarChart3 className="h-8 w-8 text-primary" />
-            <div>
-              <p className="text-2xl font-bold">{stats.count.toLocaleString()}</p>
-              <p className="text-sm text-muted-foreground">Available Strategies</p>
-            </div>
+            <Activity className="h-8 w-8 text-primary" />
+            {user.status === 'active' && (
+              <div>
+                <p className="text-2xl font-bold">{stats.count.toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground">Available Strategies</p>
+              </div>
+            )}
+            {user.status === 'pending' && (
+              <div>
+                <p className="text-2xl font-bold">Not Available</p>
+                <p className="text-sm text-muted-foreground">Required account approval</p>
+              </div>
+            )}
           </div>
         </Card>
 
-        <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
-          <div className="flex items-center gap-3">
-            <Users className="h-8 w-8 text-profit" />
+        {/* <Card className='p-4 bg-card/50 backdrop-blur-sm border-border/50'>
+          <div className='flex items-center gap-3'>
+            <Users className='h-8 w-8 text-profit' />
             <div>
-              <p className="text-2xl font-bold">{stats.activeUsersCount.toLocaleString()}</p>
-              <p className="text-sm text-muted-foreground">Available Markets</p>
+              <p className='text-2xl font-bold'>{stats.activeUsersCount.toLocaleString()}</p>
+              <p className='text-sm text-muted-foreground'>Available Markets</p>
             </div>
           </div>
-        </Card>
+        </Card> */}
 
         {/* <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
           <div className="flex items-center gap-3">
@@ -145,7 +159,6 @@ const StrategyMarketplace = () => {
           </div>
         </Card> */}
       </div>
-
       {/* Strategy Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {strategies.map((strategy) => (
@@ -219,12 +232,10 @@ const StrategyMarketplace = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4 text-muted-foreground text-sm">
                     {user?.accounts.map((acc) => {
-                      const sSetting = user?.strategySetting?.find((ss) => ss.strategyId === strategy._id);
-                      const isSubscribed = sSetting && sSetting.subscribed.includes(acc.accountId);
                       return (
                         <div key={acc.accountId} className="flex gap-2 items-center mt-1">
                           <Checkbox
-                            checked={isSubscribed}
+                            checked={acc.strategySettings.find((ss) => ss.strategyId === strategy._id)?.subscribed}
                             onClick={() => {
                               subscribeStrategy(strategy._id, acc.accountId, '');
                             }}
@@ -236,10 +247,10 @@ const StrategyMarketplace = () => {
                     {user?.accounts?.length > 1 && (
                       <div className="flex gap-2 items-center mt-1">
                         <Checkbox
-                          checked={
-                            user.accounts.length ===
-                            user?.strategySetting?.find((ss) => ss.strategyId === strategy._id)?.subscribed?.length
-                          }
+                          checked={user.accounts.every(
+                            (account) =>
+                              account?.strategySettings?.find((ss) => ss.strategyId === strategy._id)?.subscribed
+                          )}
                           onClick={() => {
                             subscribeStrategy(strategy._id, '', 'All');
                           }}
@@ -268,12 +279,16 @@ const StrategyMarketplace = () => {
         ))}
       </div>
 
+      {/* For each account */}
       <RiskConfigModal
         open={open}
         onConfigModalClose={onConfigModalClose}
         setting={selectedSetting}
         strategy={strategy}
       />
+
+      {/* For whole accounts */}
+      <RiskSettingModal open={open} onModalClose={() => setOpen('')} />
     </div>
   );
 };

@@ -1,17 +1,18 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Save } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Edit3, Save, X } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import Api from '@/services/Api';
 import { useToast } from '@/hooks/use-toast';
-// import { Switch } from '../ui/switch';
 
 export const PersonalInfo = () => {
-  const { user, setUser } = useAuth();
+  const navigate = useNavigate();
+  const { user, setUser, setUrlAccess } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [personalInfo, setPersonalInfo] = useState({
@@ -79,19 +80,16 @@ export const PersonalInfo = () => {
 
   async function saveChanges() {
     try {
-      const data = await Api.post('/users/update-profile', personalInfo);
+      const data = await Api.post('/users/update-profile', { email: personalInfo.email });
       if (data?.success) {
-        setUser({
-          ...user,
-          fullName: data.fullName,
-          email: data.email,
-          phoneNumber: data.phoneNumber,
-        });
+        setUser(data.user);
+        setUrlAccess(true);
+        navigate('/2fa');
       }
     } catch (error) {
       console.error('Error in saving changes:', error);
       toast({
-        title: 'Profile update failed',
+        title: 'Error',
         description: error?.response?.data?.message ?? 'Unexpected error',
         variant: 'destructive',
       });
@@ -101,12 +99,15 @@ export const PersonalInfo = () => {
   return (
     <Card className="shadow-card">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-xl">Update Password</CardTitle>
-        {/* <CardTitle className="text-xl">Personal Information</CardTitle> */}
-        {/* <Button
+        <CardTitle className="text-xl">Personal Information</CardTitle>
+        <Button
           variant={isEditing ? 'outline' : 'ghost'}
           size="sm"
-          onClick={() => setIsEditing(!isEditing)}
+          onClick={() => {
+            const newValue = !isEditing;
+            setIsEditing(newValue);
+            if (!newValue) setPersonalInfo({ ...personalInfo, email: user.email });
+          }}
           className="gap-2"
         >
           {isEditing ? (
@@ -120,16 +121,16 @@ export const PersonalInfo = () => {
               Edit
             </>
           )}
-        </Button> */}
+        </Button>
       </CardHeader>
 
       <CardContent className="space-y-4">
         {/* First name and last name */}
-        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="firstName">First Name</Label>
+        {/* <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className='space-y-2'>
+            <Label htmlFor='firstName'>First Name</Label>
             <Input
-              id="firstName"
+              id='firstName'
               value={personalInfo?.firstName || ''}
               disabled={!isEditing}
               className={!isEditing ? 'bg-muted' : ''}
@@ -138,10 +139,10 @@ export const PersonalInfo = () => {
               }}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="lastName">Last Name</Label>
+          <div className='space-y-2'>
+            <Label htmlFor='lastName'>Last Name</Label>
             <Input
-              id="lastName"
+              id='lastName'
               value={personalInfo?.lastName || ''}
               disabled={!isEditing}
               className={!isEditing ? 'bg-muted' : ''}
@@ -153,8 +154,8 @@ export const PersonalInfo = () => {
         </div> */}
 
         {/* Email and phone number */}
-        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2 col-span-2">
             <Label htmlFor="email">Email Address</Label>
             <Input
               id="email"
@@ -167,11 +168,11 @@ export const PersonalInfo = () => {
               }}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Phone Number</Label>
+          {/* <div className='space-y-2'>
+            <Label htmlFor='email'>Phone Number</Label>
             <Input
-              id="phone"
-              type="text"
+              id='phone'
+              type='text'
               value={personalInfo.phoneNumber}
               disabled={!isEditing}
               className={!isEditing ? 'bg-muted' : ''}
@@ -179,8 +180,8 @@ export const PersonalInfo = () => {
                 setPersonalInfo({ ...personalInfo, phoneNumber: e.target.value });
               }}
             />
-          </div>
-        </div> */}
+          </div> */}
+        </div>
 
         {/* Phone number and timezone */}
         {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -209,20 +210,31 @@ export const PersonalInfo = () => {
           </div>
         </div> */}
 
-        {/* {isEditing && (
+        {isEditing && (
           <div className="flex gap-3 pt-4">
-            <Button className="gap-2" onClick={saveChanges}>
+            <Button
+              className="gap-2"
+              onClick={saveChanges}
+              disabled={personalInfo.email === user.email || personalInfo.email === ''}
+            >
               <Save className="h-4 w-4" />
               Save Changes
             </Button>
-            <Button variant="outline" onClick={() => setIsEditing(false)}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEditing(false);
+                setPersonalInfo({ ...personalInfo, email: user.email });
+              }}
+            >
               Cancel
             </Button>
           </div>
-        )} */}
+        )}
 
+        <CardTitle className="pt-2 border-t-2 text-xl mt-2">Update Password</CardTitle>
         {/* Previous Password */}
-        <div className="space-y-2 border-t-2 pt-2">
+        <div className="space-y-2 ">
           <Label htmlFor="lastPassword">Last Password</Label>
           <Input
             id="past password"

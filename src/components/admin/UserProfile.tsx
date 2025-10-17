@@ -15,12 +15,10 @@ import {
 import {
   User,
   Calendar,
-  Clock,
   Activity,
   AlertTriangle,
   UserCheck,
   MoreHorizontal,
-  ExternalLink,
   Verified,
   RotateCcw,
 } from 'lucide-react';
@@ -373,9 +371,9 @@ export default function UserProfile() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Strategy</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>MT Account</TableHead>
+                      <TableHead>Subscribed</TableHead>
                       <TableHead>Risk per trade</TableHead>
-                      <TableHead>Max Positions</TableHead>
                       <TableHead>Daily Loss Limit</TableHead>
                       <TableHead>Max Loss Limit</TableHead>
                       <TableHead>Actions</TableHead>
@@ -387,40 +385,47 @@ export default function UserProfile() {
                       ?.filter((s) => s.subscribers.includes(user._id))
                       ?.map((strategy) => {
                         const setting = user?.strategySetting?.find((ss) => ss.strategyId === strategy._id);
-                        return (
-                          <TableRow key={strategy._id}>
-                            <TableCell className="font-medium">{strategy.title}</TableCell>
-                            <TableCell>{getStrategyStatusBadge(strategy.status)}</TableCell>
-                            {/* <TableCell
+                        return user.accounts.map((account) => {
+                          const accSetting = account.strategySettings.find((ss) => ss.strategyId === strategy._id);
+                          return (
+                            <TableRow key={strategy._id + account.accountId}>
+                              <TableCell className="font-medium">{strategy.title}</TableCell>
+                              <TableCell>
+                                {account.name}{' '}
+                                <span className="text-muted-foreground text-xs">({account.platform})</span>
+                              </TableCell>
+                              {/* <TableCell>{getStrategyStatusBadge(strategy.status)}</TableCell> */}
+                              <TableCell>{accSetting?.subscribed ? 'Yes' : 'No'}</TableCell>
+                              {/* <TableCell
                             className={`font-medium ${strategy.profit >= 0 ? 'text-success' : 'text-destructive'}`}
                           >
                             ${strategy.profit.toFixed(2)}
                           </TableCell>
                           <TableCell>{strategy.trades}</TableCell> */}
-                            <TableCell>{setting?.riskPerTrade}%</TableCell>
-                            <TableCell>{setting?.maxCurrentPositions}</TableCell>
-                            <TableCell>
-                              {setting?.dailyLossCurrency == 'amount' && '$'}
-                              {setting?.dailyLossLimit}
-                              {setting?.dailyLossCurrency == 'percentage' && '%'}
-                            </TableCell>
-                            <TableCell>
-                              {setting?.maxLossCurrency == 'amount' && '$'}
-                              {setting?.maxLossLimit}
-                              {setting?.maxLossCurrency == 'percentage' && '%'}
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => onResetRiskClick(user._id, strategy._id)}
-                              >
-                                <RotateCcw className="h-4 w-4" />
-                                Reset Risk
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        );
+                              <TableCell>{accSetting?.riskPerTrade}%</TableCell>
+                              <TableCell>
+                                {user.globalSetting?.dailyLossCurrency == 'amount' && '$'}
+                                {user.globalSetting?.dailyLossLimit}
+                                {user.globalSetting?.dailyLossCurrency == 'percentage' && '%'}
+                              </TableCell>
+                              <TableCell>
+                                {user.globalSetting?.maxLossCurrency == 'amount' && '$'}
+                                {user.globalSetting?.maxLossLimit}
+                                {user.globalSetting?.maxLossCurrency == 'percentage' && '%'}
+                              </TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => onResetRiskClick(user._id, strategy._id)}
+                                >
+                                  <RotateCcw className="h-4 w-4" />
+                                  Reset Risk
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        });
                       })}
                   </TableBody>
                 </Table>

@@ -23,6 +23,7 @@ import { AccountSelector } from './AccountSelector';
 import { TradingChart } from './Chart';
 import Api from '@/services/Api';
 import { transformData } from '@/utils/utils';
+import { roundUp } from '@/lib/utils';
 
 const TradingDashboard = () => {
   const { user } = useAuth();
@@ -36,20 +37,23 @@ const TradingDashboard = () => {
     open: 0,
     closed: 0,
   });
-  const [unrealizedPnl, setUnrealizedPnl] = useState(0);
-  const [unrealizedPnlPercentage, setUnrealizedPnlPercentage] = useState(0);
-  const [pnl, setPnl] = useState(0);
-  const [pnlPercentage, setPnlPercentage] = useState(0);
-  const [balance, setBalance] = useState({
-    total: 0,
-    mt4: 0,
-    mt5: 0,
+  const [pnlObj, setPnlObj] = useState({
+    pnl: 0,
+    pnlPercentage: 0,
+    unrealizedPnl: 0,
+    unrealizedPnlPercentage: 0,
+  });
+  const [balance, setBalance] = useState(0);
+  const [selectedAccount, setSelectedAccount] = useState({
+    accountId: '',
+    name: '',
   });
   const [selectedAccounts, setSelectedAccounts] = useState([]);
   const [charts, setCharts] = useState([]);
+  const [range, setRange] = useState<'1m' | '3m' | '1y'>('1m');
 
   useEffect(() => {
-    if (stats) {
+    if (stats && selectedAccount.accountId !== '') {
       let temps = [];
       if (activeTab === 'Open') {
         temps = [...stats?.openPositions];
@@ -60,31 +64,47 @@ const TradingDashboard = () => {
       }
 
       setPositions(
-        temps.sort((a, b) => {
-          if (typeof a[filter] === 'number' && typeof b[filter] === 'number') {
-            return (a[filter] - b[filter]) * filterPrefix;
-          }
-          return (a[filter] as string)?.localeCompare(b[filter] as string) * filterPrefix;
-        })
+        temps
+          .sort((a, b) => {
+            if (typeof a[filter] === 'number' && typeof b[filter] === 'number') {
+              return (a[filter] - b[filter]) * filterPrefix;
+            }
+            return (a[filter] as string)?.localeCompare(b[filter] as string) * filterPrefix;
+          })
+          .filter((t) => t.accountId === selectedAccount.accountId)
       );
       setPositionCount({
-        all: [...stats?.openPositions, ...stats?.closedPositions].length,
-        open: stats?.openPositions.length,
-        closed: stats?.closedPositions.length,
+        all: [...stats?.openPositions, ...stats?.closedPositions].filter(
+          (t) => t.accountId === selectedAccount.accountId
+        ).length,
+        open: stats?.openPositions.filter((t) => t.accountId === selectedAccount.accountId).length,
+        closed: stats?.closedPositions.filter((t) => t.accountId === selectedAccount.accountId).length,
       });
-      setBalance({
-        mt4: stats?.balance?.mt4 || 0,
-        mt5: stats?.balance?.mt5 || 0,
-        total: stats?.balance?.mt4 + stats?.balance?.mt5 || 0,
-      });
-      setUnrealizedPnl(stats.unrealizedPnl);
-      setUnrealizedPnlPercentage(stats.unrealizedPnlPercentage);
-      setPnl(stats.pnl);
-      setPnlPercentage(stats.pnlPercentage);
+      const tempBalance = stats.accountInformation.find((a) => a.accountId === selectedAccount.accountId)?.balance ?? 0;
+      setBalance(tempBalance);
+      const openSum = stats.openPositions
+        .filter((o) => o.accountId === selectedAccount.accountId)
+        .reduce((sum, cur) => {
+          return sum + cur.profit;
+        }, 0);
 
+      const closedSum = stats.closedPositions
+        .filter((o) => o.accountId === selectedAccount.accountId)
+        .reduce((sum, cur) => {
+          return sum + cur.profit;
+        }, 0);
+      setPnlObj({
+        pnl: closedSum,
+        pnlPercentage: roundUp((closedSum / tempBalance) * 100, 2),
+        unrealizedPnl: openSum,
+        unrealizedPnlPercentage: roundUp((openSum / tempBalance) * 100, 2),
+      });
       console.log('Positions updated');
     }
-  }, [stats, filter, filterPrefix, activeTab]);
+
+    if (selectedAccount.accountId === '') {
+    }
+  }, [stats, filter, filterPrefix, activeTab, selectedAccount]);
 
   useEffect(() => {
     fetchPortfolio();
@@ -110,18 +130,22 @@ const TradingDashboard = () => {
       const data = await Api.get('/users/portfolio');
       console.log('data for portfolio:', data);
       if (data?.success) {
-        const result = transformData(data.data.sort((a, b) => a.accountId.localeCompare(b.accountId)));
-        setCharts(result);
+        setCharts(data.data.sort((a, b) => a.accountId.localeCompare(b.accountId)));
+        setSelectedAccount({
+          accountId: user.accounts[0]?.accountId ?? '',
+          name: user.accounts[0]?.name ?? '',
+        });
       }
     } catch (error) {}
   }
 
   const handleAccountToggle = (accountId: string, name: string) => {
-    setSelectedAccounts((prev) =>
-      prev.some((p) => p.accountId === accountId)
-        ? prev.filter((p) => p.accountId !== accountId)
-        : [...prev, { accountId, name }]
-    );
+    // setSelectedAccounts((prev) =>
+    //   prev.some((p) => p.accountId === accountId)
+    //     ? prev.filter((p) => p.accountId !== accountId)
+    //     : [...prev, { accountId, name }]
+    // );
+    setSelectedAccount({ accountId, name });
   };
 
   const ths = [
@@ -158,13 +182,13 @@ const TradingDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Account Balance</p>
-              <p className="text-2xl font-bold">${balance.total.toLocaleString()}</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-2xl font-bold">${balance.toLocaleString()}</p>
+              {/* <p className="text-sm text-muted-foreground">
                 MetaTrader 5: <span className="text-white">${balance.mt5.toLocaleString()}</span>
               </p>
               <p className="text-sm text-muted-foreground">
                 MetaTrader 4: <span className="text-white">${balance.mt4.toLocaleString()}</span>
-              </p>
+              </p> */}
             </div>
             <DollarSign className="h-8 w-8 text-primary" />
           </div>
@@ -175,16 +199,20 @@ const TradingDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">P&L</p>
-              <p className={`text-2xl font-bold ${pnl >= 0 ? 'text-profit' : 'text-loss'}`}>
-                ${pnl >= 0 ? '+' : ''}
-                {pnl.toFixed(2)}
+              <p className={`text-2xl font-bold ${pnlObj.pnl >= 0 ? 'text-profit' : 'text-loss'}`}>
+                ${pnlObj.pnl >= 0 ? '+' : ''}
+                {pnlObj.pnl.toFixed(2)}
               </p>
-              <p className={`text-sm ${pnl >= 0 ? 'text-profit' : 'text-loss'}`}>
-                {pnl >= 0 ? '+' : ''}
-                {pnlPercentage}%
+              <p className={`text-sm ${pnlObj.pnl >= 0 ? 'text-profit' : 'text-loss'}`}>
+                {pnlObj.pnl >= 0 ? '+' : ''}
+                {pnlObj.pnlPercentage}%
               </p>
             </div>
-            {pnl >= 0 ? <TrendingUp className="h-8 w-8 text-profit" /> : <TrendingDown className="h-8 w-8 text-loss" />}
+            {pnlObj.pnl >= 0 ? (
+              <TrendingUp className="h-8 w-8 text-profit" />
+            ) : (
+              <TrendingDown className="h-8 w-8 text-loss" />
+            )}
           </div>
         </Card>
 
@@ -192,9 +220,9 @@ const TradingDashboard = () => {
         <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">All Positions</p>
-              <p className="text-2xl font-bold">{positionCount.all}</p>
-              <p className="text-sm text-muted-foreground">3 strategies active</p>
+              <p className="text-sm text-muted-foreground">Open Positions</p>
+              <p className="text-2xl font-bold">{positionCount.open}</p>
+              {/* <p className='text-sm text-muted-foreground'>3 strategies active</p> */}
             </div>
             <Activity className="h-8 w-8 text-gold" />
           </div>
@@ -205,16 +233,16 @@ const TradingDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Unrealized PNL</p>
-              <p className={`text-2xl font-bold ${unrealizedPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
-                ${unrealizedPnl >= 0 ? '+' : ''}
-                {unrealizedPnl.toFixed(2)}
+              <p className={`text-2xl font-bold ${pnlObj.unrealizedPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
+                ${pnlObj.unrealizedPnl >= 0 ? '+' : ''}
+                {pnlObj.unrealizedPnl.toFixed(2)}
               </p>
-              <p className={`text-sm ${unrealizedPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
-                {unrealizedPnl >= 0 ? '+' : ''}
-                {unrealizedPnlPercentage}%
+              <p className={`text-sm ${pnlObj.unrealizedPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
+                {pnlObj.unrealizedPnl >= 0 ? '+' : ''}
+                {pnlObj.unrealizedPnlPercentage}%
               </p>
             </div>
-            {unrealizedPnl >= 0 ? (
+            {pnlObj.unrealizedPnl >= 0 ? (
               <TrendingUp className="h-8 w-8 text-profit" />
             ) : (
               <TrendingDown className="h-8 w-8 text-loss" />
@@ -228,12 +256,20 @@ const TradingDashboard = () => {
           <AccountSelector
             accounts={user.accounts}
             selectedAccounts={selectedAccounts}
+            selectedAccount={selectedAccount}
             onAccountToggle={handleAccountToggle}
           />
         </div>
 
         <div className="lg:col-span-3">
-          <TradingChart data={charts} selectedAccounts={selectedAccounts} accounts={user.accounts} />
+          <TradingChart
+            data={transformData(charts, range)}
+            selectedAccounts={selectedAccounts}
+            selectedAccount={selectedAccount}
+            accounts={user.accounts}
+            range={range}
+            setRange={setRange}
+          />
         </div>
       </div>
 

@@ -1,9 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ConnectAccount } from '@/lib/types';
+import { RadioGroupItem } from '../ui/radio-group';
 
 interface AccountSelectorProps {
   accounts: ConnectAccount[];
+  selectedAccount: { accountId: string; name: string };
   selectedAccounts: { accountId: string; name: string }[];
   onAccountToggle: (accountId: string, name: string) => void;
 }
@@ -31,39 +33,54 @@ const accountColors = [
   'border-[hsl(var(--chart-20))] bg-[hsl(var(--chart-20))]',
 ];
 
-export const AccountSelector = ({ accounts, selectedAccounts, onAccountToggle }: AccountSelectorProps) => {
+export const AccountSelector = ({
+  accounts,
+  selectedAccounts,
+  selectedAccount,
+  onAccountToggle,
+}: AccountSelectorProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">Trading Accounts</CardTitle>
-        <p className="text-sm text-muted-foreground">Select accounts to display on the chart</p>
+        <CardTitle className='text-lg font-semibold'>Trading Accounts</CardTitle>
+        <p className='text-sm text-muted-foreground'>Select accounts to display on the chart</p>
       </CardHeader>
       <CardContent>
-        <div className="h-56 space-y-2 scroll-smooth overflow-auto">
+        <div className='h-56 space-y-2 scroll-smooth overflow-auto'>
           {accounts
             .sort((a, b) => a.accountId.localeCompare(b.accountId))
             .map((account, index) => (
               <div
                 key={account.accountId}
-                className="flex items-center justify-between p-3 rounded-lg border bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer"
+                className='flex items-center justify-between p-3 rounded-lg border bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer'
                 onClick={() => onAccountToggle(account.accountId, account.name)}
               >
-                <div className="flex items-center space-x-3 w-full">
-                  <Checkbox
+                <div className='flex items-center space-x-3 w-full'>
+                  {/* <Checkbox
                     id={account.accountId}
                     checked={selectedAccounts.some((s) => s.accountId === account.accountId)}
                     // onCheckedChange={() => onAccountToggle(account.accountId, account.name)}
-                    className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                  />
-                  <div className="flex justify-between items-center w-full">
+                    className='data-[state=checked]:bg-primary data-[state=checked]:border-primary'
+                  /> */}
+                  {/* <input
+                    type='radio'
+                    value='test'
+                    checked={selectedAccount?.accountId === account?.accountId}
+                  /> */}
+                  <div className='flex justify-between items-center w-full'>
                     <label htmlFor={account.accountId} className={`text-sm font-medium `}>
                       {account.name}
                     </label>
                     <div
                       className={`w-4 h-4 rounded-full border-2 ${
-                        accountColors[selectedAccounts.findIndex((s) => s.accountId === account.accountId)]
+                        selectedAccount?.accountId === account?.accountId ? 'border-[hsl(var(--chart-3))] bg-[hsl(var(--chart-3))]' : ''
                       }`}
                     />
+                    {/* <div
+                      className={`w-4 h-4 rounded-full border-2 ${
+                        accountColors[selectedAccounts.findIndex((s) => s.accountId === account.accountId)]
+                      }`}
+                    /> */}
                   </div>
                 </div>
               </div>

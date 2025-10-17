@@ -1,45 +1,112 @@
 import { DataItem } from '@/lib/types';
 
-export function transformData(items: DataItem[]) {
-  // Find the max length of history arrays
-  const maxLength = Math.max(...items.map((item) => item.history.length));
+export function transformData(items: DataItem[], range: '1m' | '3m' | '1y') {
+  // Calculate the start date based on range
+  const now = new Date();
+  const startDate = new Date();
 
-  // Result array
-  const result = [];
+  switch (range) {
+    case '1m':
+      startDate.setDate(now.getDate() - 30);
+      break;
+    case '3m':
+      startDate.setMonth(now.getMonth() - 3);
+      break;
+    case '1y':
+      startDate.setFullYear(now.getFullYear() - 1);
+      break;
+  }
+  startDate.setUTCHours(0, 0, 0, 0);
 
-  // Prepare padded histories for each item
-  const paddedHistories = items.map((item) => {
-    const diff = maxLength - item.history.length;
-    if (diff > 0) {
-      // Create padding with zero quantity and undefined/null dates, or use some default date like 0 or earliest date
-      const padding = Array(diff).fill({ quantity: 0, date: 0 });
-      // Prepend padding to the original history array
-      return padding.concat(item.history);
-    }
-    return item.history;
+  // Filter and process each account's data
+  const processedAccounts = items.map((item) => {
+    // Filter data within the date range and sort by date
+    const filteredHistory = item.history
+      .filter((entry) => {
+        const entryDate = new Date(entry.date);
+        // console.log('======', entry, '------', entryDate);
+        return entryDate >= startDate && entryDate <= now;
+      })
+      .sort((a, b) => a.date - b.date);
+
+    // Find the first data point date within the range
+    const firstDataDate = filteredHistory.length > 0 ? new Date(filteredHistory[0].date) : null;
+
+    // Create a map for quick lookup
+    const historyMap = new Map();
+    filteredHistory.forEach((entry) => {
+      const dateKey = new Date(entry.date).toDateString();
+      historyMap.set(dateKey, entry.quantity);
+    });
+
+    return {
+      accountId: item.accountId,
+      historyMap,
+      firstDataDate,
+      lastKnownQuantity: filteredHistory.length > 0 ? filteredHistory[filteredHistory.length - 1].quantity : 0,
+    };
   });
 
-  // Loop over each index up to maxLength
-  for (let i = 0; i < maxLength; i++) {
-    // Object to hold date and aggregated quantities
-    const record: any = { date: '' };
+  // Generate continuous daily data
+  const result = [];
+  const currentDate = new Date(startDate);
 
-    // For each item (account)
-    for (let j = 0; j < items.length; j++) {
-      const paddedHistory = paddedHistories[j];
-      const item = items[j];
+  while (currentDate <= now) {
+    const dateKey = currentDate.toDateString();
+    const record: any = {
+      date: currentDate.toISOString().split('T')[0], // YYYY-MM-DD format
+    };
 
-      // For padded entries, date might be 0 or dummy, so set date from first real history item if not set
-      if (paddedHistory[i]) {
-        if (!record.date) {
-          // Use null or empty string for padding dates (date=0), otherwise convert
-          record.date = paddedHistory[i].date ? new Date(paddedHistory[i].date).toISOString() : '';
+    // For each account, get the quantity for this date or use the appropriate fallback
+    processedAccounts.forEach((account) => {
+      if (account.historyMap.has(dateKey)) {
+        // Use the actual quantity for this date
+        record[account.accountId] = account.historyMap.get(dateKey);
+        // Update last known quantity for future missing dates
+        account.lastKnownQuantity = account.historyMap.get(dateKey);
+      } else {
+        // Check if current date is before the first data point
+        if (account.firstDataDate && currentDate < account.firstDataDate) {
+          // Use 0 for dates before the first data point
+          record[account.accountId] = 0;
+        } else {
+          // Use the last known quantity for missing dates after first data point
+          record[account.accountId] = account.lastKnownQuantity;
         }
-        record[item.accountId] = paddedHistory[i].quantity || 0;
       }
-    }
+    });
 
     result.push(record);
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  // Ensure we have exactly the right number of days for the range
+  const expectedDays = Math.ceil((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+
+  // If we have fewer days than expected, pad with 0 values at the beginning
+  if (result.length < expectedDays) {
+    const missingDays = expectedDays - result.length;
+    const paddedResult = [];
+
+    // Add 0 values for missing days at the beginning
+    for (let i = 0; i < missingDays; i++) {
+      const paddedDate = new Date(startDate);
+      paddedDate.setDate(paddedDate.getDate() - missingDays + i);
+
+      const paddedRecord: any = {
+        date: paddedDate.toISOString().split('T')[0],
+      };
+
+      // All accounts get 0 for these padded days
+      processedAccounts.forEach((account) => {
+        paddedRecord[account.accountId] = 0;
+      });
+
+      paddedResult.push(paddedRecord);
+    }
+
+    // Combine padded data with actual data
+    return [...paddedResult, ...result];
   }
 
   return result;

@@ -5,7 +5,7 @@ export interface UserInterface {
   fullName: string;
   phoneNumber: string;
   role: 'user' | 'admin' | 'owner' | '';
-  plan: 'premium' | 'default' | '';
+  plan: 'premium' | 'basic' | '';
   mt5AccountId: string;
   riskSettings: RiskSettingsInterface;
   isPausedTradingForDay: boolean;
@@ -20,6 +20,26 @@ export interface UserInterface {
   status: 'active' | 'pending' | 'suspended' | '';
   twoFA: boolean;
   emailVerified: boolean;
+  globalSetting: GlobalRiskSetting;
+}
+
+export interface GlobalRiskSetting {
+  dailyLossLimit: number;
+  dailyLossCurrency: 'amount' | 'percentage';
+  maxLossLimit: number;
+  maxLossCurrency: 'amount' | 'percentage';
+}
+
+export interface StrategySetting {
+  strategyId: string;
+  title: string;
+  riskPerTrade: number;
+  subscribed: boolean;
+  // maxCurrentPositions: number;
+  // isCloseAllPositions: boolean;
+  // isPauseTrading: boolean;
+  // isSendNotification: boolean;
+  // subscribed: string[];
 }
 
 export interface ConnectAccount {
@@ -30,6 +50,7 @@ export interface ConnectAccount {
   brokerage: string;
   accountId: string;
   active: boolean;
+  strategySettings: StrategySetting[];
   subscribedStrategies: string[];
 }
 
@@ -76,15 +97,15 @@ export interface RiskSettingsInterface {
   strategyId: string;
   title?: string;
   riskPerTrade: number;
-  maxCurrentPositions: number;
-  dailyLossLimit: number;
-  dailyLossCurrency: 'percentage' | 'amount';
-  maxLossLimit: number;
-  maxLossCurrency: string;
+  // maxCurrentPositions: number;
+  // dailyLossLimit: number;
+  // dailyLossCurrency: 'percentage' | 'amount';
+  // maxLossLimit: number;
+  // maxLossCurrency: string;
   // maximumDrawdown: number;
-  isCloseAllPositions: boolean;
-  isPauseTrading: boolean;
-  isSendNotification: boolean;
+  // isCloseAllPositions: boolean;
+  // isPauseTrading: boolean;
+  // isSendNotification: boolean;
   subscribed: string[];
 }
 

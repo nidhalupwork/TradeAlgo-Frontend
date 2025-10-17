@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Activity, Settings, Users, SquareUser, Bell, LogOut, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, Activity, Settings, Users, SquareUser, Bell, LogOut, ChevronDown, Logs } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useEffect } from 'react';
 import logo from '@/assets/logo.png';
@@ -35,6 +35,7 @@ const Navbar = () => {
     // admin page
     { path: '/user-management', label: 'Users', icon: Users, role: 'admin' },
     { path: '/strategy-management', label: 'Strategy', icon: Activity, role: 'admin' },
+    { path: '/logs', label: 'Logs', icon: Logs, role: 'admin' },
   ];
 
   return (
@@ -78,17 +79,17 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            {isSignedIn === 'true' && (
+            {/* {isSignedIn === 'true' && (
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
               </Button>
-            )}
-            {isSignedIn === 'true' && (
+            )} */}
+            {/* {isSignedIn === 'true' && (
               <Button variant="outline" size="sm">
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
               </Button>
-            )}
+            )} */}
             {isSignedIn ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

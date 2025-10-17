@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
@@ -8,10 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Shield, AlertTriangle, Lock, Calculator, Settings, TrendingUp } from 'lucide-react';
+import { Shield, AlertTriangle, Lock, Calculator, Settings, TrendingUp, Loader2 } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
-import { RiskSettingsInterface } from '@/lib/types';
+import { ConnectAccount, RiskSettingsInterface } from '@/lib/types';
 import apiClient from '@/services/Api';
+import { useToast } from '@/hooks/use-toast';
 
 export const RiskConfigModal = ({
   open,
@@ -19,81 +20,119 @@ export const RiskConfigModal = ({
   setting,
   strategy,
 }: {
-  open: boolean;
+  open: 'Global' | 'Strategy' | '';
   onConfigModalClose: () => void;
   setting: any;
   strategy: any;
 }) => {
-  const { setUser } = useAuth();
-
-  const [riskSettings, setRiskSettings] = useState<RiskSettingsInterface | null>(null);
+  const { user, setUser } = useAuth();
+  const { toast } = useToast();
+  const [selectedAccount, setSelectedAccount] = useState<ConnectAccount | null>(null);
+  const [accounts, setAccounts] = useState<ConnectAccount[]>([]);
   const [quickTemplate, setQuickTemplate] = useState<'Conservative' | 'Balanced' | 'Aggressive' | ''>(''); // Conservative, Balanced, Aggressive
+  const riskPerTrade = useMemo(() => {
+    return selectedAccount?.strategySettings?.find((ss) => ss.strategyId === strategy?._id)?.riskPerTrade;
+  }, [selectedAccount, open]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (open === '') {
+      setAccounts([]);
+      setSelectedAccount(null);
+    } else if (open === 'Strategy') {
+      setAccounts([...user.accounts]);
+      setSelectedAccount({
+        ...user.accounts[0],
+        strategySettings: user.accounts[0].strategySettings.map((ss) => ({ ...ss })),
+      });
+    }
+  }, [open]);
 
   function onTemplateClick(template: 'Conservative' | 'Balanced' | 'Aggressive' | '') {
     setQuickTemplate(template);
+    let risk = 0.5;
     if (template === 'Conservative') {
-      setRiskSettings({
-        ...riskSettings,
-        riskPerTrade: 0.5,
-        maxCurrentPositions: 2,
-        dailyLossLimit: 2,
-        dailyLossCurrency: 'percentage',
-        maxLossLimit: 5,
-        maxLossCurrency: 'percentage',
-      });
+      risk = 0.5;
     } else if (template === 'Balanced') {
-      setRiskSettings({
-        ...riskSettings,
-        riskPerTrade: 1,
-        maxCurrentPositions: 3,
-        dailyLossLimit: 3,
-        dailyLossCurrency: 'percentage',
-        maxLossLimit: 10,
-        maxLossCurrency: 'percentage',
-      });
+      risk = 1;
     } else if (template === 'Aggressive') {
-      setRiskSettings({
-        ...riskSettings,
-        riskPerTrade: 2,
-        maxCurrentPositions: 4,
-        dailyLossLimit: 6,
-        dailyLossCurrency: 'percentage',
-        maxLossLimit: 15,
-        maxLossCurrency: 'percentage',
-      });
+      risk = 2;
     }
+
+    updateAccountAndAccounts(risk);
   }
 
-  useEffect(() => {
-    if (setting) {
-      setRiskSettings(setting);
-    }
-  }, [setting]);
+  function updateAccountAndAccounts(risk: number) {
+    const updatedStrategySettings = selectedAccount.strategySettings.map((ss) =>
+      ss.strategyId === strategy?._id ? { ...ss, riskPerTrade: risk } : ss
+    );
+    const updatedAccount = {
+      ...selectedAccount,
+      strategySettings: updatedStrategySettings,
+    };
+    const updatedAccounts = accounts.map((account) =>
+      account.accountId === updatedAccount.accountId ? updatedAccount : account
+    );
+    setSelectedAccount(updatedAccount);
+    setAccounts(updatedAccounts);
+  }
 
-  function onRiskSettingsChange(key: string, value: string | boolean | number) {
-    setRiskSettings({
-      ...riskSettings,
-      [key]: value,
-    });
+  function hasAccountsChanged(accounts1, accounts2) {
+    if (accounts1.length !== accounts2.length) return true;
+
+    for (let i = 0; i < accounts1.length; i++) {
+      const a1 = accounts1[i];
+      const a2 = accounts2.find((acc) => acc.accountId === a1.accountId);
+      if (!a2) return true;
+
+      // Compare strategySettings length or other key properties if needed
+      if (JSON.stringify(a1.strategySettings) !== JSON.stringify(a2.strategySettings)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   async function onSaveClick() {
+    if (!hasAccountsChanged(accounts, user.accounts)) {
+      toast({
+        title: 'No changes detected',
+        description: 'Please update accounts before saving.',
+        variant: 'warn',
+      });
+      return;
+    }
+    setIsLoading(true);
     try {
       const data = await apiClient.post('/users/strategy/update-setting', {
         title: strategy?.title,
-        ...riskSettings,
+        accounts,
       });
       console.log('Data:', data);
-      setUser(data.user);
-      onConfigModalClose();
+      if (data?.success) {
+        setUser(data.user);
+        onConfigModalClose();
+        toast({
+          title: 'Success',
+          description: 'Successfully updated account risk settings',
+          variant: 'profit',
+        });
+      }
     } catch (error) {
       console.error('Error while saving:', error);
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message ?? 'Unexpected error',
+        variant: 'destructive',
+      });
     }
+    setIsLoading(false);
   }
 
   return (
-    <Dialog open={open} onOpenChange={() => onConfigModalClose()}>
-      <DialogContent className="sm:max-w-3xl">
+    <Dialog open={open === 'Strategy'} onOpenChange={() => onConfigModalClose()}>
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
@@ -103,7 +142,7 @@ export const RiskConfigModal = ({
           </DialogTitle>
         </DialogHeader>
 
-        <div>
+        <div className="space-y-3">
           {/* Risk Templates */}
           <Card className="bg-card/50 backdrop-blur-sm border-border/50">
             <div className="p-6 py-2">
@@ -118,7 +157,7 @@ export const RiskConfigModal = ({
                 >
                   <div className="text-left">
                     <p className="font-semibold mb-1">Conservative</p>
-                    <p className="text-xs text-muted-foreground">1% risk, strict limits</p>
+                    <p className="text-xs text-muted-foreground">0.5% risk, strict limits</p>
                   </div>
                 </Button>
                 <Button
@@ -130,7 +169,7 @@ export const RiskConfigModal = ({
                 >
                   <div className="text-left">
                     <p className="font-semibold mb-1">Balanced</p>
-                    <p className="text-xs text-muted-foreground">2% risk, moderate limits</p>
+                    <p className="text-xs text-muted-foreground">1% risk, moderate limits</p>
                   </div>
                 </Button>
                 <Button
@@ -142,7 +181,7 @@ export const RiskConfigModal = ({
                 >
                   <div className="text-left">
                     <p className="font-semibold mb-1">Aggressive</p>
-                    <p className="text-xs text-muted-foreground">3% risk, flexible limits</p>
+                    <p className="text-xs text-muted-foreground">2% risk, flexible limits</p>
                   </div>
                 </Button>
               </div>
@@ -158,15 +197,15 @@ export const RiskConfigModal = ({
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <Label>Risk Per Trade</Label>
-                    <span className="text-sm font-medium text-primary">{riskSettings?.riskPerTrade}%</span>
+                    <span className="text-sm font-medium text-primary">{riskPerTrade}%</span>
                   </div>
                   <Slider
-                    value={[riskSettings?.riskPerTrade]}
+                    value={[riskPerTrade]}
                     max={5}
-                    step={0.5}
+                    step={0.1}
                     className="mb-2"
                     onValueChange={(value) => {
-                      onRiskSettingsChange('riskPerTrade', value[0].toString());
+                      updateAccountAndAccounts(value[0]);
                     }}
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
@@ -176,35 +215,58 @@ export const RiskConfigModal = ({
                   </div>
                 </div>
 
+                <div className="space-y-1">
+                  {accounts.map((account) => {
+                    return (
+                      <div
+                        key={account.accountId}
+                        className="flex gap-2 text-sm hover:cursor-pointer text-muted-foreground hover:text-muted-foreground/80 transition-all"
+                        onClick={() => setSelectedAccount(account)}
+                      >
+                        <div
+                          className={`w-5 h-5 rounded-full ${
+                            selectedAccount.accountId === account.accountId ? 'bg-profit' : 'bg-muted'
+                          }`}
+                        />
+                        <p>{account.name}</p>
+                        <p>
+                          Risk Selected ={' '}
+                          {account?.strategySettings?.find((ss) => ss.strategyId === strategy?._id)?.riskPerTrade}%
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+
                 {/* Max Positions */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
+                {/* <div>
+                  <div className='flex items-center justify-between mb-2'>
                     <Label>Max Concurrent Positions</Label>
-                    <span className="text-sm font-medium text-primary">{riskSettings?.maxCurrentPositions}</span>
+                    <span className='text-sm font-medium text-primary'>{riskSettings?.maxCurrentPositions}</span>
                   </div>
                   <Slider
                     min={1}
                     max={10}
                     step={1}
-                    className="mb-2"
+                    className='mb-2'
                     value={[riskSettings?.maxCurrentPositions]}
                     onValueChange={(value) => {
                       onRiskSettingsChange('maxCurrentPositions', value[0].toString());
                     }}
                   />
-                  <div className="flex justify-between text-xs text-muted-foreground">
+                  <div className='flex justify-between text-xs text-muted-foreground'>
                     <span>1</span>
                     <span>10</span>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Daily Loss Limit */}
-                <div>
+                {/* <div>
                   <Label>Daily Loss Limit</Label>
-                  <div className="flex gap-2 mt-2">
+                  <div className='flex gap-2 mt-2'>
                     <Input
-                      placeholder="1000"
-                      className="flex-1"
+                      placeholder='1000'
+                      className='flex-1'
                       value={riskSettings?.dailyLossLimit ?? ''}
                       onChange={(e) => onRiskSettingsChange('dailyLossLimit', e.target.value)}
                     />
@@ -212,24 +274,24 @@ export const RiskConfigModal = ({
                       value={riskSettings?.dailyLossCurrency ?? 'percentage'}
                       onValueChange={(value) => onRiskSettingsChange('dailyLossCurrency', value)}
                     >
-                      <SelectTrigger className="w-32">
+                      <SelectTrigger className='w-32'>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="amount">USD</SelectItem>
-                        <SelectItem value="percentage">%</SelectItem>
+                        <SelectItem value='amount'>USD</SelectItem>
+                        <SelectItem value='percentage'>%</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Maximum Loss Limit */}
-                <div>
+                {/* <div>
                   <Label>Maximum Loss Limit</Label>
-                  <div className="flex gap-2 mt-2">
+                  <div className='flex gap-2 mt-2'>
                     <Input
-                      placeholder="1000"
-                      className="flex-1"
+                      placeholder='1000'
+                      className='flex-1'
                       value={riskSettings?.maxLossLimit ?? ''}
                       onChange={(e) => onRiskSettingsChange('maxLossLimit', e.target.value)}
                     />
@@ -237,21 +299,30 @@ export const RiskConfigModal = ({
                       value={riskSettings?.maxLossCurrency ?? 'percentage'}
                       onValueChange={(value) => onRiskSettingsChange('maxLossCurrency', value)}
                     >
-                      <SelectTrigger className="w-32">
+                      <SelectTrigger className='w-32'>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="amount">USD</SelectItem>
-                        <SelectItem value="percentage">%</SelectItem>
+                        <SelectItem value='amount'>USD</SelectItem>
+                        <SelectItem value='percentage'>%</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Actions on Limit Breach */}
-                <div className="space-y-3">
+                {/* <div className='space-y-3'>
                   <Label>Actions on Limit Breach</Label>
-                  <div className="space-y-3 mt-2">
+                  <div className='space-y-3 mt-2'>
+                    <div className='flex items-center justify-between p-3 bg-background/50 rounded-lg'>
+                      <div className='flex items-center gap-2'>
+                        <AlertTriangle className='h-4 w-4 text-warning' />
+                        <span className='text-sm'>
+                          Will close all open positions, pause trading for the day and you will receive a notification
+                          alerting you of this action
+                        </span>
+                      </div>
+                    </div>
                     <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
                       <div className="flex items-center gap-2">
                         <AlertTriangle className="h-4 w-4 text-warning" />
@@ -283,14 +354,15 @@ export const RiskConfigModal = ({
                       />
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </Card>
         </div>
 
         <DialogFooter>
-          <Button variant="gold" onClick={() => onSaveClick()}>
+          <Button variant="gold" disabled={isLoading} onClick={() => onSaveClick()}>
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save Settings
           </Button>
         </DialogFooter>

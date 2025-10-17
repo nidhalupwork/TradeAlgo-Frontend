@@ -1,18 +1,14 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { io, Socket } from "socket.io-client";
-import { useAuth } from "./AuthProvider";
-import { roundUp } from "@/lib/utils";
-import { BACKEND_ENDPOINT } from "@/config/config";
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { io, Socket } from 'socket.io-client';
+import { useAuth } from './AuthProvider';
+import { roundUp } from '@/lib/utils';
+import { BACKEND_ENDPOINT } from '@/config/config';
 
 interface StatsInterface {
   balance: any;
   openPositions: any[];
   closedPositions: any[];
   accountInformation: any[];
-  unrealizedPnl: number;
-  unrealizedPnlPercentage: number;
-  pnl: number;
-  pnlPercentage: number;
 }
 
 interface SocketContextInterface {
@@ -29,56 +25,52 @@ const SocketContext = createContext<SocketContextInterface>(null);
 export const SocketProvider = ({ children }) => {
   const socketRef = useRef<Socket>(null);
   const [connected, setConnected] = useState(false);
-  const [googleId, setGoogleId] = useState(localStorage.getItem("googleId"));
+  const [googleId, setGoogleId] = useState(localStorage.getItem('googleId'));
   const [stats, setStats] = useState({
     balance: {},
     openPositions: [],
     closedPositions: [],
     accountInformation: [],
-    unrealizedPnl: 0,
-    unrealizedPnlPercentage: 0,
-    pnl: 0,
-    pnlPercentage: 0,
   });
 
   useEffect(() => {
-    let temp = localStorage.getItem("googleId");
+    let temp = localStorage.getItem('googleId');
     if (!temp) {
       temp = Math.random().toString(36).substring(2, 15);
-      localStorage.setItem("googleId", temp);
+      localStorage.setItem('googleId', temp);
     }
     setGoogleId(temp);
-    console.log("googleId:", temp);
+    console.log('googleId:', temp);
 
     // Connect once when provider mounts
     socketRef.current = io(BACKEND_ENDPOINT);
-    console.log("Socket is connected");
+    console.log('Socket is connected');
 
-    socketRef.current.on("connect", () => {
+    socketRef.current.on('connect', () => {
       setConnected(true);
-      console.log("Connected to socket:", socketRef.current.id);
+      console.log('Connected to socket:', socketRef.current.id);
     });
 
-    socketRef.current.on("disconnect", () => {
+    socketRef.current.on('disconnect', () => {
       setConnected(false);
-      console.log("Disconnected from socket");
+      console.log('Disconnected from socket');
     });
 
-    socketRef.current.on("stats", (data) => {
+    socketRef.current.on('stats', (data) => {
       // console.log('Received from socket connection!');
       processStatsData(data);
     });
 
     return () => {
       // Cleanup on unmount
-      console.log("Socket is disconnected");
+      console.log('Socket is disconnected');
       socketRef.current.disconnect();
     };
   }, []);
 
   function initializeSocket(id: string, email: string, accountIds: string[]) {
-    console.log("initializeSocket is called");
-    socketRef.current.emit("initialize", {
+    console.log('initializeSocket is called');
+    socketRef.current.emit('initialize', {
       userId: id,
       email,
       accountIds,
@@ -87,21 +79,21 @@ export const SocketProvider = ({ children }) => {
   }
 
   function deinitializeSocket(id: string, accountIds: string[]) {
-    console.log("deinitializeSocket is called");
-    socketRef.current.emit("deinitialize", { userId: id, accountIds });
+    console.log('deinitializeSocket is called');
+    socketRef.current.emit('deinitialize', { userId: id, accountIds });
   }
 
   function signOutSocket(id: string, email: string) {
-    console.log("signOutSocket is called");
-    socketRef.current.emit("signOut", { userId: id, email, googleId });
+    console.log('signOutSocket is called');
+    socketRef.current.emit('signOut', { userId: id, email, googleId });
   }
 
   function processStatsData(data: any) {
     const balance: { mt4: number; mt5: number } = data.accountInfos.reduce(
       (bal, info) => {
-        if (info?.platform === "mt4") {
+        if (info?.platform === 'mt4') {
           return { ...bal, mt4: bal.mt4 + info.balance };
-        } else if (info?.platform === "mt5") {
+        } else if (info?.platform === 'mt5') {
           return { ...bal, mt5: bal.mt5 + info.balance };
         }
       },
@@ -113,33 +105,28 @@ export const SocketProvider = ({ children }) => {
 
     const closedPositions = [];
     deals.map((deal) => {
-      if (
-        deals.filter((d) => d.positionId && d.positionId === deal.positionId)
-          .length === 2
-      ) {
+      if (deals.filter((d) => d.positionId && d.positionId === deal.positionId).length === 2) {
         const temp = {
-          accountId: "",
-          brokerTime: "",
+          accountId: '',
+          brokerTime: '',
           openPrice: 0,
           profit: 0,
           currentPrice: 0,
-          type: "buy",
-          symbol: "",
-          platform: "",
+          type: 'buy',
+          symbol: '',
+          platform: '',
           volume: 0,
           magic: 0,
           positionId: deal.positionId,
-          entryType: "",
-          closedTime: "",
+          entryType: '',
+          closedTime: '',
         };
 
         if (!closedPositions.find((cp) => cp.positionId === deal.positionId)) {
           closedPositions.push(temp);
         }
-        const pos = closedPositions.find(
-          (cp) => cp.positionId === deal.positionId
-        );
-        if (deal.entryType === "DEAL_ENTRY_IN") {
+        const pos = closedPositions.find((cp) => cp.positionId === deal.positionId);
+        if (deal.entryType === 'DEAL_ENTRY_IN') {
           pos.accountId = deal.accountId;
           pos.brokerTime = deal.brokerTime;
           pos.openPrice = deal.price;
@@ -148,40 +135,20 @@ export const SocketProvider = ({ children }) => {
           pos.platform = deal.platform;
           pos.volume = deal.volume;
           pos.magic = deal.magic;
-        } else if (deal.entryType === "DEAL_ENTRY_OUT") {
+        } else if (deal.entryType === 'DEAL_ENTRY_OUT') {
           pos.profit = deal.profit;
           pos.currentPrice = deal.price;
-          pos.status = "Closed";
+          pos.status = 'Closed';
           pos.closedTime = deal.brokerTime;
         }
       }
     });
-
-    // console.log('balance:', balance);
-
-    const openSum = [...positions].reduce((sum, cur) => {
-      return sum + cur.profit;
-    }, 0);
-
-    const closedSum = closedPositions.reduce((sum, cur) => {
-      return sum + cur.profit;
-    }, 0);
 
     setStats({
       openPositions: positions,
       closedPositions,
       balance,
       accountInformation: data.accountInfos,
-      unrealizedPnl: openSum,
-      unrealizedPnlPercentage: roundUp(
-        (openSum / (balance.mt4 + balance.mt5)) * 100,
-        2
-      ),
-      pnl: closedSum,
-      pnlPercentage: roundUp(
-        (closedSum / (balance.mt4 + balance.mt5)) * 100,
-        2
-      ),
     });
   }
 

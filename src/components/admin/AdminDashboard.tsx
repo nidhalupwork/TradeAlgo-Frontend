@@ -18,12 +18,17 @@ import {
 import { useAdmin } from '@/providers/AdminProvider';
 import Api from '@/services/Api';
 import { useToast } from '@/hooks/use-toast';
+import { ConfirmModal } from './ConfirmModal';
+import { useState } from 'react';
 
 export default function AdminDashboard() {
   const { users, strategies, globalSetting, setGlobalSetting, setStrategies } = useAdmin();
   const { toast } = useToast();
+  const [open, setOpen] = useState<'stop' | 'start' | 'live' | 'maintain' | ''>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  async function manageAllTrading(type: string) {
+  async function manageAllTrading(type: 'stop' | 'start') {
+    setIsLoading(true);
     try {
       const data = await Api.post('/admin/manage-trading', { type });
       console.log('stop-trading:', data);
@@ -43,9 +48,11 @@ export default function AdminDashboard() {
         variant: 'destructive',
       });
     }
+    setIsLoading(false);
   }
 
   async function changeMode(type: 'maintain' | 'live') {
+    setIsLoading(true);
     try {
       const data = await Api.post('/admin/change-mode', { type });
       console.log('change mode data:', data);
@@ -66,6 +73,16 @@ export default function AdminDashboard() {
         duration: 2000,
       });
     }
+    setIsLoading(false);
+  }
+
+  async function confirmDelete() {
+    if (open === 'start' || open === 'stop') {
+      await manageAllTrading(open);
+    } else if (open === 'maintain' || open === 'live') {
+      await changeMode(open);
+    }
+    setOpen('');
   }
 
   return (
@@ -99,7 +116,7 @@ export default function AdminDashboard() {
               variant="destructive"
               size="lg"
               className="h-20 bg-destructive/70 shadow-danger hover:bg-destructive/80"
-              onClick={() => manageAllTrading('stop')}
+              onClick={() => setOpen('stop')}
             >
               <div className="flex flex-col items-center gap-1">
                 <Power className="h-6 w-6" />
@@ -108,11 +125,7 @@ export default function AdminDashboard() {
               </div>
             </Button>
           ) : (
-            <Button
-              className="w-full h-20 bg-green-600 hover:bg-green-700"
-              size="lg"
-              onClick={() => manageAllTrading('start')}
-            >
+            <Button className="w-full h-20 bg-green-600 hover:bg-green-700" size="lg" onClick={() => setOpen('start')}>
               <div className="flex flex-col items-center gap-1">
                 <Play className="h-6 w-6" />
                 <div className="font-bold">START GLOBAL TRADING</div>
@@ -126,7 +139,7 @@ export default function AdminDashboard() {
               variant="outline"
               size="lg"
               className="h-20 border-profit text-profit hover:bg-profit/10"
-              onClick={() => changeMode('live')}
+              onClick={() => setOpen('live')}
             >
               <div className="flex flex-col items-center gap-1">
                 <TvMinimalPlay className="h-6 w-6" />
@@ -139,7 +152,7 @@ export default function AdminDashboard() {
               variant="outline"
               size="lg"
               className="h-20 border-warning text-warning hover:bg-warning/10"
-              onClick={() => changeMode('maintain')}
+              onClick={() => setOpen('maintain')}
             >
               <div className="flex flex-col items-center gap-1">
                 <Pause className="h-6 w-6" />
@@ -311,6 +324,8 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div> */}
+
+      <ConfirmModal open={open} onOpenChange={setOpen} isLoading={isLoading} confirmDelete={confirmDelete} />
     </div>
   );
 }

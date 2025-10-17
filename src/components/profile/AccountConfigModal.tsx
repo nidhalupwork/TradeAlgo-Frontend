@@ -13,7 +13,7 @@ import { useAuth } from '@/providers/AuthProvider';
 
 interface AccountConfigModalProps {
   account: ConnectAccount;
-  open: 'Delete' | 'Account' | '';
+  open: 'Delete' | 'Account' | 'Token' | '';
   modalType: 'Details' | 'Connect';
   onOpenChange: (open: 'Delete' | 'Account' | '') => void;
 }

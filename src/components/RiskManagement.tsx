@@ -322,7 +322,7 @@ const RiskManagement = () => {
                 <div className="space-y-3">
                   <Label>Actions on Limit Breach</Label>
                   <div className="space-y-3 mt-2">
-                    <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
+                    {/* <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
                       <div className="flex items-center gap-2">
                         <AlertTriangle className="h-4 w-4 text-warning" />
                         <span className="text-sm">Close all positions</span>
@@ -351,7 +351,7 @@ const RiskManagement = () => {
                         checked={!!riskSettings?.isSendNotification}
                         onCheckedChange={(value) => onRiskSettingsChange('tradingLimits', 'isSendNotification', value)}
                       />
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>

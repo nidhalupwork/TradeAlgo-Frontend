@@ -19,7 +19,7 @@ export const ConnectedAccounts = () => {
   const { user, setUser } = useAuth();
   const [accounts, setAccounts] = useState<ConnectAccount[]>();
   const [selectedAccount, setSelectedAccount] = useState(null);
-  const [modalOpen, setModalOpen] = useState<'Delete' | 'Account' | ''>('');
+  const [modalOpen, setModalOpen] = useState<'Delete' | 'Account' | 'Token' | ''>('');
   const [modalType, setModalType] = useState<'Details' | 'Connect'>('Details');
   const [metaToken, setMetaToken] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -54,6 +54,7 @@ export const ConnectedAccounts = () => {
   }
 
   async function handleSaveToken() {
+    setIsLoading(true);
     try {
       const data = await Api.post('/users/meta-token', { token: metaToken });
       if (data?.success) {
@@ -61,9 +62,10 @@ export const ConnectedAccounts = () => {
         setIsEditing(false);
         toast({
           title: 'Success',
-          description: 'Successfully updated meta API token',
+          description: data.message ?? 'Successfully updated meta API token',
           variant: 'profit',
         });
+        setModalOpen('');
       }
     } catch (error) {
       toast({
@@ -72,14 +74,13 @@ export const ConnectedAccounts = () => {
         variant: 'destructive',
       });
     }
+    setIsLoading(false);
   }
 
   async function deleteAccount(accountId: string) {
     setIsLoading(true);
     try {
-      console.log('Deletion of accountid:', accountId);
       const data = await Api.delete(`/users/account/${accountId}`);
-      console.log('Result of deletion:', data);
       if (data.success) {
         setUser(data.user);
         toast({
@@ -97,6 +98,14 @@ export const ConnectedAccounts = () => {
       });
     }
     setIsLoading(false);
+  }
+
+  async function confirmDelete() {
+    if (modalOpen === 'Delete') {
+      deleteAccount(selectedAccount?.accountId);
+    } else if (modalOpen === 'Token') {
+      handleSaveToken();
+    }
   }
 
   return (
@@ -123,10 +132,12 @@ export const ConnectedAccounts = () => {
                 name: '',
                 platform: '-',
                 subscribedStrategies: [],
+                strategySettings: [],
               },
               'Connect'
             )
           }
+          disabled={user.status !== 'active'}
         >
           <Plus className="h-4 w-4" />
           Add Account
@@ -134,6 +145,14 @@ export const ConnectedAccounts = () => {
       </CardHeader>
 
       <CardContent className="space-y-4">
+        {user.accounts.length === 3 && (
+          <div className="border border-gold rounded-lg p-2 bg-gold/40">
+            <p className="text-gold text-sm">
+              You have reached the maximum accounts that you can connect to our platform. To connect more please contact
+              to support team.
+            </p>
+          </div>
+        )}
         {accounts?.map((account, idx) => (
           <div key={idx} className="flex items-center justify-between p-2 rounded-lg border bg-gradient-subtle">
             <div className="flex items-center gap-4">
@@ -220,11 +239,21 @@ export const ConnectedAccounts = () => {
 
         {isEditing && (
           <div className="flex gap-3">
-            <Button className="gap-2" onClick={() => handleSaveToken()}>
+            <Button
+              className="gap-2"
+              onClick={() => setModalOpen('Token')}
+              disabled={metaToken === user.metaApiToken || metaToken === ''}
+            >
               <Save className="h-4 w-4" />
               Save
             </Button>
-            <Button variant="outline" onClick={() => setIsEditing(false)}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEditing(false);
+                setMetaToken(user.metaApiToken);
+              }}
+            >
               Cancel
             </Button>
           </div>
@@ -238,13 +267,7 @@ export const ConnectedAccounts = () => {
         modalType={modalType}
       />
 
-      <DeleteModal
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        isLoading={isLoading}
-        confirmDelete={deleteAccount}
-        accountId={selectedAccount?.accountId}
-      />
+      <DeleteModal open={modalOpen} onOpenChange={setModalOpen} isLoading={isLoading} confirmDelete={confirmDelete} />
     </Card>
   );
 };
