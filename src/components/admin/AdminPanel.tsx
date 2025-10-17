@@ -32,6 +32,7 @@ import { useToast } from '@/hooks/use-toast';
 import Api from '@/services/Api';
 import { Link } from 'react-router-dom';
 import { roundUp } from '@/lib/utils';
+import { FRONTEND_ENDPOINT } from '@/config/config';
 
 const AdminPanel = () => {
   const { toast } = useToast();
@@ -381,7 +382,7 @@ const AdminPanel = () => {
                             {/* <DropdownMenuItem> */}
                             <Link
                               className="flex items-center py-1.5 px-2 w-full hover:text-blue-700 hover:underline transition-all text-sm"
-                              to={`http://localhost:8080/users/${user._id}`}
+                              to={`${FRONTEND_ENDPOINT}/users/${user._id}`}
                               target="_blank"
                             >
                               <Eye className="mr-2 h-4 w-4" />
