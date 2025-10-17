@@ -19,10 +19,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Navbar from '../Navbar';
 import Api from '@/services/Api';
 
+type SearchType = 'name' | 'email' | 'accountName';
+
 const Logs = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState('all');
-  const [activities, setActivities] = useState([]);
+  const [filterType, setFilterType] = useState<SearchType>('name');
+  const [logs, setLogs] = useState([]);
+  const [filteredLogs, setFilteredLogs] = useState([]);
 
   const getLevelBadge = (level: string) => {
     const variants: Record<string, { className: string; text: string }> = {
@@ -37,6 +40,26 @@ const Logs = () => {
   };
 
   useEffect(() => {
+    filterLogs(logs);
+  }, [searchQuery, filterType]);
+
+  function filterLogs(activities: any[]) {
+    if (searchQuery === '') {
+      setFilteredLogs(activities);
+      return;
+    }
+    if (filterType === 'accountName') {
+      setFilteredLogs(activities.filter((log) => log?.accountName?.toLowerCase().includes(searchQuery.toLowerCase())));
+    } else if (filterType === 'name') {
+      setFilteredLogs(
+        activities.filter((log) => log?.userId?.fullName?.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    } else {
+      setFilteredLogs(activities.filter((log) => log?.userId?.email?.toLowerCase().includes(searchQuery.toLowerCase())));
+    }
+  }
+
+  useEffect(() => {
     fetchLogs();
   }, []);
 
@@ -45,7 +68,8 @@ const Logs = () => {
       const data = await Api.get('/admin/logs?skip=0&limit=100');
       console.log('Data for fetching logs:', data);
       if (data?.success) {
-        setActivities(data.activities);
+        setLogs(data.activities);
+        filterLogs(data.activities);
       }
     } catch (error) {
       console.error('Error while fetching logs:', error);
@@ -110,7 +134,7 @@ const Logs = () => {
               </div>
 
               {/* Search and Filter Controls */}
-              {/* <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <div className="relative w-full sm:w-64">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -121,18 +145,18 @@ const Logs = () => {
                   />
                 </div>
 
-                <Select value={filterType} onValueChange={setFilterType}>
+                <Select value={filterType} onValueChange={(value: SearchType) => setFilterType(value)}>
                   <SelectTrigger className="w-full sm:w-40">
                     <SelectValue placeholder="Filter by" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Logs</SelectItem>
-                    <SelectItem value="user">By User</SelectItem>
+                    {/* <SelectItem value="all">All Logs</SelectItem> */}
+                    <SelectItem value="name">By User</SelectItem>
                     <SelectItem value="email">By Email</SelectItem>
-                    <SelectItem value="mt">By MT Account</SelectItem>
+                    <SelectItem value="accountName">By MT Account</SelectItem>
                   </SelectContent>
                 </Select>
-              </div> */}
+              </div>
             </div>
           </CardHeader>
 
@@ -151,7 +175,7 @@ const Logs = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {activities.map((log) => (
+                  {filteredLogs.map((log) => (
                     <TableRow key={log._id}>
                       <TableCell className="font-mono text-sm">{log.time}</TableCell>
                       <TableCell>
@@ -186,7 +210,7 @@ const Logs = () => {
                       <TableCell>
                         <div className="flex items-center gap-1.5 font-mono text-sm">
                           {log?.mtAccountId && <Hash className="h-3.5 w-3.5 text-muted-foreground" />}
-                          {log?.mtAccountId ?? '-'}
+                          {log?.accountName ? log?.accountName + `(${log?.accountId})` : '-'}
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">

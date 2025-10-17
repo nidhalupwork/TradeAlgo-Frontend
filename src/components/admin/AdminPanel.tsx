@@ -33,10 +33,16 @@ import Api from '@/services/Api';
 import { Link } from 'react-router-dom';
 import { roundUp } from '@/lib/utils';
 import { FRONTEND_ENDPOINT } from '@/config/config';
+import { DeleteModal } from './DeleteModal';
+import { useState } from 'react';
+import { UserInterface } from '@/lib/types';
 
 const AdminPanel = () => {
   const { toast } = useToast();
   const { users, setUsers } = useAdmin();
+  const [selectedUser, setSelectedUser] = useState<UserInterface>(null);
+  const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   // const [selectedUsers, setSelectedUsers] = useState<UserInterface[]>([]);
   // const [showButton, setShowButton] = useState(false);
 
@@ -76,6 +82,7 @@ const AdminPanel = () => {
   }
 
   async function deleteUser(id: string) {
+    setIsLoading(true);
     try {
       const data = await Api.delete('/admin/' + id);
       console.log('Deleting user:', data);
@@ -87,6 +94,7 @@ const AdminPanel = () => {
           variant: 'profit',
           duration: 2000,
         });
+        setOpen(false);
       }
     } catch (error) {
       toast({
@@ -96,6 +104,7 @@ const AdminPanel = () => {
         duration: 2000,
       });
     }
+    setIsLoading(false);
   }
 
   async function changePlan(userId: string, plan: 'basic' | 'premium') {
@@ -120,47 +129,6 @@ const AdminPanel = () => {
       });
     }
   }
-
-  // async function manageBatchAccounts(type: 'Approve' | 'Suspend' | 'Activate') {
-  //   try {
-  //     const batchUsers = selectedUsers.reduce((ra, cur) => {
-  //       return [...ra, cur._id];
-  //     }, []);
-  //     const data = await Api.post('/admin/manage-users', { users: batchUsers, type });
-  //     console.log('user management data:', data);
-
-  //     setUsers((prevUsers) => prevUsers.map((user) => (user._id === data.user._id ? data.user : user)));
-  //     toast({
-  //       title: type + ' succeeded',
-  //       description: '',
-  //       variant: 'default',
-  //       duration: 2000,
-  //     });
-  //   } catch (error) {
-  //     toast({
-  //       title: type + ' failed',
-  //       description: '',
-  //       variant: 'destructive',
-  //       duration: 2000,
-  //     });
-  //   }
-  // }
-
-  // function onCheckedChange(value: CheckedState, user: UserInterface) {
-  //   let temp = [];
-  //   if (value) {
-  //     temp = [...selectedUsers, user];
-  //     setSelectedUsers(temp);
-  //   } else {
-  //     temp = selectedUsers.filter((su) => su._id !== user._id);
-  //     setSelectedUsers(temp);
-  //   }
-  //   if (temp.length === 0) {
-  //     setShowButton(false);
-  //   } else {
-  //     setShowButton(!temp.some((t) => t.status !== temp[0].status));
-  //   }
-  // }
 
   return (
     <div className="p-6 space-y-6">
@@ -444,7 +412,10 @@ const AdminPanel = () => {
                             )}
                             <DropdownMenuItem
                               className="text-destructive hover:cursor-pointer hover:!bg-destructive"
-                              onClick={() => deleteUser(user._id)}
+                              onClick={() => {
+                                setOpen(true);
+                                setSelectedUser(user);
+                              }}
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Delete Account
@@ -460,6 +431,13 @@ const AdminPanel = () => {
           </div>
         </div>
       </Card>
+
+      <DeleteModal
+        open={open}
+        confirmDelete={() => deleteUser(selectedUser._id)}
+        onOpenChange={setOpen}
+        isLoading={isLoading}
+      />
 
       {/* Quick Actions */}
       {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

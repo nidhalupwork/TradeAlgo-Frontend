@@ -12,16 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  User,
-  Calendar,
-  Activity,
-  AlertTriangle,
-  UserCheck,
-  MoreHorizontal,
-  Verified,
-  RotateCcw,
-} from 'lucide-react';
+import { User, Calendar, Activity, AlertTriangle, UserCheck, MoreHorizontal, Verified, RotateCcw } from 'lucide-react';
 import Navbar from '../Navbar';
 import { useAdmin } from '@/providers/AdminProvider';
 import { UserInterface } from '@/lib/types';
@@ -103,7 +94,7 @@ export default function UserProfile() {
     try {
       const data = await Api.post('/admin/reset-risk', { userId, strategyId });
       if (data?.success) {
-        setUsers((prevUsers) => prevUsers.map((u) => (u._id === data.user._id ? data.user : u)));
+        setUsers((prevUsers) => prevUsers.map((u) => (u?._id === data.user?._id ? data.user : u)));
         setUser(data.user);
 
         toast({
@@ -382,13 +373,13 @@ export default function UserProfile() {
                   </TableHeader>
                   <TableBody>
                     {strategies
-                      ?.filter((s) => s.subscribers.includes(user._id))
+                      ?.filter((s) => s.subscribers.includes(user?._id))
                       ?.map((strategy) => {
-                        const setting = user?.strategySetting?.find((ss) => ss.strategyId === strategy._id);
+                        const setting = user?.strategySetting?.find((ss) => ss.strategyId === strategy?._id);
                         return user.accounts.map((account) => {
-                          const accSetting = account.strategySettings?.find((ss) => ss.strategyId === strategy._id);
+                          const accSetting = account.strategySettings?.find((ss) => ss.strategyId === strategy?._id);
                           return (
-                            <TableRow key={strategy._id + account.accountId}>
+                            <TableRow key={strategy?._id + account.accountId}>
                               <TableCell className="font-medium">{strategy.title}</TableCell>
                               <TableCell>
                                 {account.name}{' '}
@@ -417,7 +408,7 @@ export default function UserProfile() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => onResetRiskClick(user._id, strategy._id)}
+                                  onClick={() => onResetRiskClick(user?._id, strategy?._id)}
                                 >
                                   <RotateCcw className="h-4 w-4" />
                                   Reset Risk

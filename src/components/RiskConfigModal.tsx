@@ -3,14 +3,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Shield, AlertTriangle, Lock, Calculator, Settings, TrendingUp, Loader2 } from 'lucide-react';
+import { TrendingUp, Loader2 } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
-import { ConnectAccount, RiskSettingsInterface } from '@/lib/types';
+import { ConnectAccount } from '@/lib/types';
 import apiClient from '@/services/Api';
 import { useToast } from '@/hooks/use-toast';
 
@@ -31,7 +28,7 @@ export const RiskConfigModal = ({
   const [accounts, setAccounts] = useState<ConnectAccount[]>([]);
   const [quickTemplate, setQuickTemplate] = useState<'Conservative' | 'Balanced' | 'Aggressive' | ''>(''); // Conservative, Balanced, Aggressive
   const riskPerTrade = useMemo(() => {
-    return selectedAccount?.strategySettings?.find((ss) => ss.strategyId === strategy?._id)?.riskPerTrade;
+    return selectedAccount?.strategySettings?.find((ss) => ss.strategyId === strategy?._id)?.riskPerTrade ?? 0;
   }, [selectedAccount, open]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -63,18 +60,57 @@ export const RiskConfigModal = ({
   }
 
   function updateAccountAndAccounts(risk: number) {
-    const updatedStrategySettings = selectedAccount.strategySettings.map((ss) =>
-      ss.strategyId === strategy?._id ? { ...ss, riskPerTrade: risk } : ss
-    );
-    const updatedAccount = {
-      ...selectedAccount,
-      strategySettings: updatedStrategySettings,
-    };
-    const updatedAccounts = accounts.map((account) =>
-      account.accountId === updatedAccount.accountId ? updatedAccount : account
-    );
-    setSelectedAccount(updatedAccount);
-    setAccounts(updatedAccounts);
+    if (selectedAccount.strategySettings.some((ss) => ss.strategyId === strategy._id)) {
+      const updatedStrategySettings = selectedAccount.strategySettings.map((ss) =>
+        ss.strategyId === strategy?._id ? { ...ss, riskPerTrade: risk } : ss
+      );
+      const updatedAccount = {
+        ...selectedAccount,
+        strategySettings: updatedStrategySettings,
+      };
+      const updatedAccounts = accounts.map((account) =>
+        account.accountId === updatedAccount.accountId ? updatedAccount : account
+      );
+      setSelectedAccount(updatedAccount);
+      setAccounts(updatedAccounts);
+    } else {
+      // Update selectedAccount immutably
+      const updatedSelectedAccount = selectedAccount
+        ? {
+            ...selectedAccount,
+            strategySettings: [
+              ...selectedAccount.strategySettings,
+              {
+                strategyId: strategy._id,
+                title: strategy.title,
+                riskPerTrade: risk,
+                subscribed: false,
+              },
+            ],
+          }
+        : null;
+
+      // Update accounts immutably
+      const updatedAccounts = accounts.map((account) =>
+        account.accountId === updatedSelectedAccount.accountId
+          ? {
+              ...account,
+              strategySettings: [
+                ...account.strategySettings,
+                {
+                  strategyId: strategy._id,
+                  title: strategy.title,
+                  riskPerTrade: risk,
+                  subscribed: false,
+                },
+              ],
+            }
+          : account
+      );
+
+      setSelectedAccount(updatedSelectedAccount);
+      setAccounts(updatedAccounts);
+    }
   }
 
   function hasAccountsChanged(accounts1, accounts2) {
