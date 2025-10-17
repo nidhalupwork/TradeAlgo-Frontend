@@ -376,8 +376,8 @@ export default function UserProfile() {
                       <TableHead>Risk per trade</TableHead>
                       <TableHead>Daily Loss Limit</TableHead>
                       <TableHead>Max Loss Limit</TableHead>
-                      <TableHead>Actions</TableHead>
-                      <TableHead className="w-[50px]"></TableHead>
+                      {/* <TableHead>Actions</TableHead> */}
+                      {/* <TableHead className="w-[50px]"></TableHead> */}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -413,7 +413,7 @@ export default function UserProfile() {
                                 {user.globalSetting?.maxLossLimit}
                                 {user.globalSetting?.maxLossCurrency == 'percentage' && '%'}
                               </TableCell>
-                              <TableCell>
+                              {/* <TableCell>
                                 <Button
                                   variant="ghost"
                                   size="sm"
@@ -422,7 +422,7 @@ export default function UserProfile() {
                                   <RotateCcw className="h-4 w-4" />
                                   Reset Risk
                                 </Button>
-                              </TableCell>
+                              </TableCell> */}
                             </TableRow>
                           );
                         });
