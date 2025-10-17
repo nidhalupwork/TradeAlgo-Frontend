@@ -386,7 +386,7 @@ export default function UserProfile() {
                       ?.map((strategy) => {
                         const setting = user?.strategySetting?.find((ss) => ss.strategyId === strategy._id);
                         return user.accounts.map((account) => {
-                          const accSetting = account.strategySettings.find((ss) => ss.strategyId === strategy._id);
+                          const accSetting = account.strategySettings?.find((ss) => ss.strategyId === strategy._id);
                           return (
                             <TableRow key={strategy._id + account.accountId}>
                               <TableCell className="font-medium">{strategy.title}</TableCell>
