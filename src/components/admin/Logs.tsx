@@ -110,7 +110,7 @@ const Logs = () => {
               </div>
 
               {/* Search and Filter Controls */}
-              <div className="flex flex-col gap-2 sm:flex-row">
+              {/* <div className="flex flex-col gap-2 sm:flex-row">
                 <div className="relative w-full sm:w-64">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -132,7 +132,7 @@ const Logs = () => {
                     <SelectItem value="mt">By MT Account</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
             </div>
           </CardHeader>
 
