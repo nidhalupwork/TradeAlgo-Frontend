@@ -52,6 +52,10 @@ export interface ConnectAccount {
   active: boolean;
   strategySettings: StrategySetting[];
   subscribedStrategies: string[];
+  dailyLossCurrency: 'percentage' | 'amount';
+  dailyLossLimit: number;
+  maxLossCurrency: 'percentage' | 'amount';
+  maxLossLimit: number;
 }
 
 export interface PositionSize {

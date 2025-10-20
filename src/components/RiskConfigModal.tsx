@@ -14,12 +14,10 @@ import { useToast } from '@/hooks/use-toast';
 export const RiskConfigModal = ({
   open,
   onConfigModalClose,
-  setting,
   strategy,
 }: {
   open: 'Global' | 'Strategy' | '';
   onConfigModalClose: () => void;
-  setting: any;
   strategy: any;
 }) => {
   const { user, setUser } = useAuth();
@@ -27,8 +25,8 @@ export const RiskConfigModal = ({
   const [selectedAccount, setSelectedAccount] = useState<ConnectAccount | null>(null);
   const [accounts, setAccounts] = useState<ConnectAccount[]>([]);
   const [quickTemplate, setQuickTemplate] = useState<'Conservative' | 'Balanced' | 'Aggressive' | ''>(''); // Conservative, Balanced, Aggressive
-  const riskPerTrade = useMemo(() => {
-    return selectedAccount?.strategySettings?.find((ss) => ss.strategyId === strategy?._id)?.riskPerTrade ?? 0;
+  const setting = useMemo(() => {
+    return selectedAccount?.strategySettings?.find((ss) => ss.strategyId === strategy?._id);
   }, [selectedAccount, open]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -233,10 +231,10 @@ export const RiskConfigModal = ({
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <Label>Risk Per Trade</Label>
-                    <span className="text-sm font-medium text-primary">{riskPerTrade}%</span>
+                    <span className="text-sm font-medium text-primary">{setting?.riskPerTrade ?? 0}%</span>
                   </div>
                   <Slider
-                    value={[riskPerTrade]}
+                    value={[setting?.riskPerTrade ?? 0]}
                     max={5}
                     step={0.1}
                     className="mb-2"
@@ -264,11 +262,11 @@ export const RiskConfigModal = ({
                             selectedAccount.accountId === account.accountId ? 'bg-profit' : 'bg-muted'
                           }`}
                         />
-                        <p>{account.name}</p>
                         <p>
-                          Risk Selected ={' '}
-                          {account?.strategySettings?.find((ss) => ss.strategyId === strategy?._id)?.riskPerTrade}%
+                          {account.name}{' '}
+                          <span className="text-xs">({setting?.subscribed ? 'Subscribed' : 'Unsubscribed'})</span>:
                         </p>
+                        <p>Risk Selected = {setting?.riskPerTrade}%</p>
                       </div>
                     );
                   })}

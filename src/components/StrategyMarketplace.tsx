@@ -19,7 +19,6 @@ const StrategyMarketplace = () => {
   const [strategies, setStrategies] = useState<StrategyInterface[]>([]);
   const [strategy, setStrategy] = useState<StrategyInterface | null>(null);
   const [open, setOpen] = useState<'Global' | 'Strategy' | ''>('');
-  const [selectedSetting, setSelectedSetting] = useState<RiskSettingsInterface | null>(null);
   const [stats, setStats] = useState({
     count: 0,
     avgMonthlyReturn: 0,
@@ -77,31 +76,11 @@ const StrategyMarketplace = () => {
 
   function onConfigModalOpen(strat: any) {
     setOpen('Strategy');
-    const userSetting = user?.strategySetting.find((s) => s.title === strat.title);
-
-    if (userSetting) {
-      setSelectedSetting(userSetting);
-    } else {
-      setSelectedSetting({
-        strategyId: strat.id,
-        title: strat.title,
-        // dailyLossCurrency: 'amount',
-        // dailyLossLimit: 0,
-        // maxLossCurrency: 'amount',
-        // maxLossLimit: 0,
-        // isCloseAllPositions: false,
-        // isPauseTrading: false,
-        // isSendNotification: false,
-        // maxCurrentPositions: 0,
-        riskPerTrade: 2,
-      } as RiskSettingsInterface);
-    }
     setStrategy(strat);
   }
 
   function onConfigModalClose() {
     setOpen('');
-    setSelectedSetting(null);
     setStrategy(null);
   }
 
@@ -280,12 +259,7 @@ const StrategyMarketplace = () => {
       </div>
 
       {/* For each account */}
-      <RiskConfigModal
-        open={open}
-        onConfigModalClose={onConfigModalClose}
-        setting={selectedSetting}
-        strategy={strategy}
-      />
+      <RiskConfigModal open={open} onConfigModalClose={onConfigModalClose} strategy={strategy} />
 
       {/* For whole accounts */}
       <RiskSettingModal open={open} onModalClose={() => setOpen('')} />

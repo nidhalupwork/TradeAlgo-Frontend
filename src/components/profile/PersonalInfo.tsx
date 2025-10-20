@@ -81,7 +81,7 @@ export const PersonalInfo = () => {
   async function saveChanges() {
     try {
       const data = await Api.post('/users/update-profile', { email: personalInfo.email });
-      console.log('data for update email:', data)
+      console.log('data for update email:', data);
       if (data?.success) {
         setUser(data.user);
         setUrlAccess(true);

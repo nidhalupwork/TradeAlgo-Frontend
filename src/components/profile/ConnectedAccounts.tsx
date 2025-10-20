@@ -58,7 +58,7 @@ export const ConnectedAccounts = () => {
     try {
       const data = await Api.post('/users/meta-token', { token: metaToken });
       if (data?.success) {
-        setUser(data.user);
+        setUser({ ...data.user, metaApiToken: metaToken });
         setIsEditing(false);
         toast({
           title: 'Success',
@@ -133,6 +133,10 @@ export const ConnectedAccounts = () => {
                 platform: '-',
                 subscribedStrategies: [],
                 strategySettings: [],
+                dailyLossCurrency: 'percentage',
+                dailyLossLimit: 0,
+                maxLossCurrency: 'percentage',
+                maxLossLimit: 0,
               },
               'Connect'
             )
