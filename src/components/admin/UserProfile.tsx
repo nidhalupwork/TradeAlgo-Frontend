@@ -12,7 +12,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, Calendar, Activity, AlertTriangle, UserCheck, MoreHorizontal, Verified, RotateCcw } from 'lucide-react';
+import {
+  User,
+  Calendar,
+  Activity,
+  AlertTriangle,
+  UserCheck,
+  MoreHorizontal,
+  Verified,
+  RotateCcw,
+  Users,
+  ShieldCheck,
+} from 'lucide-react';
 import Navbar from '../Navbar';
 import { useAdmin } from '@/providers/AdminProvider';
 import { UserInterface } from '@/lib/types';
@@ -51,6 +62,8 @@ export default function UserProfile() {
         return <Badge className="bg-gold/20 text-gold border-gold/30">Pending</Badge>;
       case 'suspended':
         return <Badge variant="destructive">Suspended</Badge>;
+      case 'deleted':
+        return <Badge variant="destructive">Deleted</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -63,7 +76,7 @@ export default function UserProfile() {
       case 'pro':
         return <Badge className="bg-accent/20 text-accent border-accent/30">Pro</Badge>;
       case 'basic':
-        return <Badge variant="outline">Basic</Badge>;
+        return <Badge className="bg-gold/20 text-gold border-gold/30">Basic</Badge>;
       default:
         return <Badge variant="secondary">{tier}</Badge>;
     }
@@ -174,7 +187,10 @@ export default function UserProfile() {
               </DropdownMenuItem> */}
               <DropdownMenuSeparator />
               {user?.status === 'pending' && (
-                <DropdownMenuItem className="text-success hover:cursor-pointer">
+                <DropdownMenuItem
+                  className="text-success hover:cursor-pointer"
+                  onClick={() => manageAccount(user._id, 'Approve')}
+                >
                   <UserCheck className="mr-2 h-4 w-4" />
                   Approve Account
                 </DropdownMenuItem>
@@ -217,7 +233,7 @@ export default function UserProfile() {
               <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
                 <div>
                   <p className="">Phone</p>
-                  <p>{user?.phoneNumber}</p>
+                  <p className='text-foreground'>{user?.phoneNumber}</p>
                 </div>
                 {/* <div>
                   <p className="text-muted-foreground">Country</p>
@@ -227,6 +243,13 @@ export default function UserProfile() {
                   <p className="text-muted-foreground">Timezone</p>
                   <p>{user?.timezone}</p>
                 </div> */}
+                <div>
+                  <p>Role</p>
+                  <div className="flex gap-1 items-center text-foreground">
+                    {user?.role === 'user' ? <Users size={16} /> : <ShieldCheck size={16} />}
+                    <p className="text-sm">{user?.role}</p>
+                  </div>
+                </div>
                 <div>
                   <p>Account Tier</p>
                   <div>{getTierBadge(user?.plan)}</div>
@@ -243,16 +266,16 @@ export default function UserProfile() {
                 </div>
                 <div>
                   <p>Registered</p>
-                  <p className="flex items-center gap-2">
+                  <p className="flex items-center gap-2 text-foreground">
                     <Calendar className="h-4 w-4" />
                     {user?.createdAt?.toString().slice(0, 10) ?? ''}
                   </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Last Login</p>
-                  <p className="flex items-center gap-2">
+                  <p className="flex items-center gap-2 text-foreground">
                     <Calendar className="h-4 w-4" />
-                    {user?.lastLogin?.toString().slice(0, 10) ?? ''}
+                    {user?.lastLogin?.toString().slice(0, 10) ?? user?.createdAt?.toString().slice(0, 10) ?? ''}
                   </p>
                 </div>
               </div>
