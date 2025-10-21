@@ -282,7 +282,7 @@ const AdminPanel = () => {
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Account Tier</th>
                   {/* <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Balance</th> */}
                   {/* <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Positions</th> */}
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Accounts</th> 
+                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Accounts</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Registration</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Last Login</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Actions</th>
@@ -443,16 +443,18 @@ const AdminPanel = () => {
                                 Activate Account
                               </DropdownMenuItem>
                             )}
-                            <DropdownMenuItem
-                              className="text-destructive hover:cursor-pointer hover:!bg-destructive"
-                              onClick={() => {
-                                setOpen(true);
-                                setSelectedUser(user);
-                              }}
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete Account
-                            </DropdownMenuItem>
+                            {user.status !== 'deleted' && (
+                              <DropdownMenuItem
+                                className="text-destructive hover:cursor-pointer hover:!bg-destructive"
+                                onClick={() => {
+                                  setOpen(true);
+                                  setSelectedUser(user);
+                                }}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Account
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>

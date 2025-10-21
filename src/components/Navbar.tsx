@@ -29,6 +29,13 @@ const Navbar = () => {
   const isSignedIn = localStorage.getItem('isSignedIn');
   const navigate = useNavigate();
 
+  const roleWeights = {
+    user: 1,
+    support: 2,
+    admin: 3,
+    owner: 4,
+  };
+
   useEffect(() => {
     if (isSignedIn !== 'true' && location.pathname !== '/' && location.pathname !== '/2fa') {
       navigate('/auth');
@@ -36,18 +43,34 @@ const Navbar = () => {
     if (isSignedIn === 'true' && location.pathname === '/auth') {
       navigate('/dashboard');
     }
-  }, [location.pathname, isSignedIn]);
+
+    const navItem = navItems.find((ni) => ni.path === location.pathname);
+    if (roleWeights[user?.role] < navItem?.minRole) {
+      navigate(-1);
+    }
+  }, [location.pathname, isSignedIn, user]);
 
   const navItems = [
-    // user and admin page
-    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, role: 'all' },
-    { path: '/strategies', label: 'Strategies', icon: Activity, role: 'all' },
+    {
+      path: '/dashboard',
+      label: 'Dashboard',
+      icon: LayoutDashboard,
+      role: ['owner', 'admin', 'support', 'user'],
+      minRole: 1,
+    },
+    {
+      path: '/strategies',
+      label: 'Strategies',
+      icon: Activity,
+      role: ['owner', 'admin', 'support', 'user'],
+      minRole: 1,
+    },
 
-    // admin only page
-    { path: '/control', label: 'Admin Control', icon: UserCog, role: 'admin' },
-    { path: '/user-management', label: 'Users', icon: Users, role: 'admin' },
-    { path: '/strategy-management', label: 'Strategy', icon: Activity, role: 'admin' },
-    { path: '/logs', label: 'Logs', icon: Logs, role: 'admin' },
+    { path: '/control', label: 'Admin Control', icon: UserCog, role: ['admin', 'owner'], minRole: 3 },
+    { path: '/strategy-management', label: 'Strategy', icon: Activity, role: ['owner', 'admin'], minRole: 3 },
+
+    { path: '/user-management', label: 'Users', icon: Users, role: ['owner', 'admin', 'support'], minRole: 2 },
+    { path: '/logs', label: 'Logs', icon: Logs, role: ['owner', 'admin', 'support'], minRole: 2 },
   ];
 
   return (
@@ -64,7 +87,7 @@ const Navbar = () => {
             {isSignedIn === 'true' && (
               <div className="hidden md:flex items-center space-x-1">
                 {navItems
-                  .filter((ni) => ni?.role === user?.role || ni?.role === 'all')
+                  .filter((ni) => ni?.role?.includes(user?.role))
                   .map((item) => {
                     const Icon = item.icon;
                     const isActive = location.pathname === item.path;

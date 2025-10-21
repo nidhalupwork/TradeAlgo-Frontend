@@ -1,7 +1,7 @@
 import { AuthForm } from '@/components/auth/AuthForm';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import authHeroImage from '@/assets/auth-hero.jpg';
+import authHeroImage from '@/assets/back2.jpg';
 import Navbar from '@/components/Navbar';
 
 const Auth = () => {
@@ -14,7 +14,7 @@ const Auth = () => {
           backgroundImage: `url(${authHeroImage})`,
         }}
       >
-        <div className='absolute inset-0 bg-background/80 backdrop-blur-sm w-screen'></div>
+        <div className='absolute inset-0 w-screen'></div>
       </div>
 
       {/* Gradient Overlay */}
