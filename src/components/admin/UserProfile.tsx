@@ -403,7 +403,7 @@ export default function UserProfile() {
                   </TableHeader>
                   <TableBody>
                     {strategies?.map((strategy, index) => {
-                      return user.accounts.map((account) => {
+                      return user?.accounts?.map((account) => {
                         const accSetting = account.strategySettings?.find((ss) => ss.strategyId === strategy?._id);
                         return (
                           <TableRow

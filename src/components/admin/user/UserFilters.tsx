@@ -121,27 +121,33 @@ export const UserFilters = ({
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-4">
-        <div className="relative flex-1">
-          <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="date"
-            placeholder="From date"
-            value={dateFrom}
-            onChange={(e) => onDateFromChange(e.target.value)}
-            className="pl-10"
-          />
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-4 flex-wrap">
+        <div className="flex items-center gap-4 flex-1">
+          <p className="text-muted-foreground text-sm whitespace-nowrap">Registration Date From:</p>
+          <div className="relative flex-1">
+            <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="date"
+              placeholder="From date"
+              value={dateFrom}
+              onChange={(e) => onDateFromChange(e.target.value)}
+              className="pl-10"
+            />
+          </div>
         </div>
 
-        <div className="relative flex-1">
-          <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="date"
-            placeholder="To date"
-            value={dateTo}
-            onChange={(e) => onDateToChange(e.target.value)}
-            className="pl-10"
-          />
+        <div className="flex items-center gap-4 flex-1">
+          <p className="text-muted-foreground text-sm whitespace-nowrap">Registration Date To:</p>
+          <div className="relative flex-1">
+            <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="date"
+              placeholder="To date"
+              value={dateTo}
+              onChange={(e) => onDateToChange(e.target.value)}
+              className="pl-10"
+            />
+          </div>
         </div>
 
         <Select value={roleFilter} onValueChange={onRoleFilterChange}>

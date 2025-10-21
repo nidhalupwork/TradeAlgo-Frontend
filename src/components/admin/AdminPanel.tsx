@@ -281,7 +281,7 @@ const AdminPanel = () => {
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Status</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Account Tier</th>
                   {/* <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Balance</th> */}
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Positions</th>
+                  {/* <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Positions</th> */}
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Accounts</th> 
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Registration</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Last Login</th>
@@ -347,9 +347,9 @@ const AdminPanel = () => {
                     {/* <td className="py-3 px-4">
                       <p className="font-medium">${user.balance.toLocaleString()}</p>
                     </td> */}
-                    <td className="py-3 px-4">
+                    {/* <td className="py-3 px-4">
                       <p className="font-medium">{user?.trades?.length}</p>
-                    </td>
+                    </td> */}
                     <td className="py-3 px-4">
                       {/* <p className={`font-medium ${user.dailyPnL >= 0 ? 'text-profit' : 'text-loss'}`}>
                         ${user.dailyPnL >= 0 ? '+' : ''}
