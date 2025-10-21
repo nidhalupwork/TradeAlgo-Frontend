@@ -58,9 +58,7 @@ const Navbar = () => {
             <Link to="/" className="flex items-center space-x-2">
               <img src={logo} className="h-8 w-8 text-primary" alt="TradeAlgo logo" />
               {/* <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-gray-700 via-gray-600 to-gray-200"> */}
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-br text-gray-200">
-                TradeAlgorithm
-              </span>
+              <span className="text-xl font-bold text-gray-200">TradeAlgorithm</span>
             </Link>
 
             {isSignedIn === 'true' && (
