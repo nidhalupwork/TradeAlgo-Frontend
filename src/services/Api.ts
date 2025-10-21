@@ -25,7 +25,10 @@ class ApiClient {
     this.axiosInstance.interceptors.response.use(
       (response) => response,
       (error) => {
-        if (error?.status === 429) {
+        if (error.status === 401) {
+          localStorage.removeItem('isSignedIn');
+          window.location.href = '/auth';
+        } else if (error?.status === 429) {
           toast({
             variant: 'warn',
             title: 'Too many request',
@@ -35,8 +38,9 @@ class ApiClient {
         } else if (error.status === 403) {
           toast({
             variant: 'warn',
-            title: 'Forbidden',
+            title: error?.response?.data?.title ?? 'Forbidden',
             description: error?.response?.data?.message ?? 'Permission denied',
+            duration: 24 * 60 * 60 * 1000,
           });
           return Promise.resolve(error?.response);
         } else {
@@ -52,10 +56,6 @@ class ApiClient {
       const response = await this.axiosInstance.get(path, config);
       return response.data;
     } catch (error) {
-      if (error.status === 401) {
-        localStorage.removeItem('isSignedIn');
-        window.location.href = '/auth';
-      }
       throw error;
     }
   }
@@ -68,12 +68,7 @@ class ApiClient {
       return response.data;
     } catch (error) {
       console.error(error);
-      if (error.status === 401) {
-        localStorage.removeItem('isSignedIn');
-        window.location.href = '/auth';
-      } else {
-        throw error;
-      }
+      throw error;
     }
   }
 
@@ -84,10 +79,6 @@ class ApiClient {
       console.log('response:', response);
       return response.data;
     } catch (error) {
-      if (error.status === 401) {
-        localStorage.removeItem('isSignedIn');
-        window.location.href = '/auth';
-      }
       throw error;
     }
   }

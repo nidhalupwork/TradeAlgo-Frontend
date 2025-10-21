@@ -44,6 +44,7 @@ const TradingDashboard = () => {
     unrealizedPnlPercentage: 0,
   });
   const [balance, setBalance] = useState(0);
+  const [currency, setCurrency] = useState('USD');
   const [selectedAccount, setSelectedAccount] = useState({
     accountId: '',
     name: '',
@@ -80,8 +81,9 @@ const TradingDashboard = () => {
         open: stats?.openPositions.filter((t) => t.accountId === selectedAccount.accountId).length,
         closed: stats?.closedPositions.filter((t) => t.accountId === selectedAccount.accountId).length,
       });
-      const tempBalance = stats.accountInformation.find((a) => a.accountId === selectedAccount.accountId)?.balance ?? 0;
-      setBalance(tempBalance);
+      const accountInfo = stats.accountInformation.find((a) => a.accountId === selectedAccount.accountId);
+      setBalance(accountInfo?.balance ?? 0);
+      setCurrency(accountInfo?.currency ?? 'USD');
       const openSum = stats.openPositions
         .filter((o) => o.accountId === selectedAccount.accountId)
         .reduce((sum, cur) => {
@@ -95,9 +97,9 @@ const TradingDashboard = () => {
         }, 0);
       setPnlObj({
         pnl: closedSum,
-        pnlPercentage: roundUp((closedSum / tempBalance) * 100, 2),
+        pnlPercentage: roundUp((closedSum / (accountInfo?.balance ?? 0)) * 100, 2) ?? 0,
         unrealizedPnl: openSum,
-        unrealizedPnlPercentage: roundUp((openSum / tempBalance) * 100, 2),
+        unrealizedPnlPercentage: roundUp((openSum / (accountInfo?.balance ?? 0)) * 100, 2) ?? 0,
       });
       console.log('Positions updated');
     }
@@ -182,7 +184,9 @@ const TradingDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Account Balance</p>
-              <p className="text-2xl font-bold">${balance.toLocaleString()}</p>
+              <p className="text-2xl font-bold">
+                {balance.toLocaleString()} {currency}
+              </p>
               {/* <p className="text-sm text-muted-foreground">
                 MetaTrader 5: <span className="text-white">${balance.mt5.toLocaleString()}</span>
               </p>

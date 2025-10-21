@@ -174,7 +174,7 @@ export default function AdminDashboard() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        {/* <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -182,10 +182,10 @@ export default function AdminDashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{users.length}</div>
             <p className="text-xs text-muted-foreground">
-              {/* <span className="text-success">+12.3%</span> from last month */}
+              <span className="text-success">+12.3%</span> from last month
             </p>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -200,18 +200,18 @@ export default function AdminDashboard() {
           </CardContent>
         </Card> */}
 
-        <Card>
+        {/* <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Strategies</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{strategies.length}</div>
+            <div className="text-2xl font-bold">{strategies?.length}</div>
             <p className="text-xs text-muted-foreground">
-              {/* <span className="text-warning">-2</span> disabled today */}
+              <span className="text-warning">-2</span> disabled today
             </p>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

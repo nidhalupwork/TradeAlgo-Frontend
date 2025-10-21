@@ -54,12 +54,12 @@ const TwoFactorAuth = () => {
           setUser(data.user);
           localStorage.setItem('isSignedIn', 'true');
 
-          if (data.user.role === 'user') {
-            const accountIds = data?.user?.accounts?.reduce((acc, cur) => {
-              return [...acc, cur.accountId];
-            }, []);
+          const accountIds = data?.user?.accounts?.reduce((acc, cur) => {
+            return [...acc, cur.accountId];
+          }, []);
 
-            initializeSocket(data.user._id, data.user.email, accountIds);
+          initializeSocket(data.user._id, data.user.email, accountIds);
+          if (data.user.role === 'user') {
             navigate('/dashboard');
           } else {
             setUsers(data.users);
@@ -109,59 +109,59 @@ const TwoFactorAuth = () => {
   };
 
   return (
-    <div className='min-h-screen bg-background flex items-center justify-center p-4'>
-      <Card className='w-full max-w-md'>
-        <CardHeader className='text-center space-y-4'>
-          <div className='flex justify-center'>
-            <div className='p-3 rounded-full bg-primary/10'>
-              <Shield className='h-8 w-8 text-primary' />
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center space-y-4">
+          <div className="flex justify-center">
+            <div className="p-3 rounded-full bg-primary/10">
+              <Shield className="h-8 w-8 text-primary" />
             </div>
           </div>
           <div>
-            <CardTitle className='text-2xl font-bold'>Two-Factor Authentication</CardTitle>
-            <CardDescription className='mt-2'>
+            <CardTitle className="text-2xl font-bold">Two-Factor Authentication</CardTitle>
+            <CardDescription className="mt-2">
               Enter the 6-digit verification code from your email address
             </CardDescription>
           </div>
         </CardHeader>
 
-        <CardContent className='space-y-6'>
-          <form onSubmit={handleSubmit} className='space-y-6'>
-            <div className='space-y-2'>
-              <Label htmlFor='otp' className='text-center block'>
+        <CardContent className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="otp" className="text-center block">
                 Verification Code
               </Label>
-              <div className='flex justify-center'>
-                <InputOTP maxLength={6} value={otp} onChange={setOtp} className='gap-2'>
+              <div className="flex justify-center">
+                <InputOTP maxLength={6} value={otp} onChange={setOtp} className="gap-2">
                   <InputOTPGroup>
-                    <InputOTPSlot index={0} className='border border-gray-600 border-r-0' />
-                    <InputOTPSlot index={1} className='border border-gray-600 border-r-0' />
-                    <InputOTPSlot index={2} className='border border-gray-600' />
+                    <InputOTPSlot index={0} className="border border-gray-600 border-r-0" />
+                    <InputOTPSlot index={1} className="border border-gray-600 border-r-0" />
+                    <InputOTPSlot index={2} className="border border-gray-600" />
                   </InputOTPGroup>
                   <InputOTPGroup>
-                    <InputOTPSlot index={3} className='border border-gray-600 border-r-0' />
-                    <InputOTPSlot index={4} className='border border-gray-600 border-r-0' />
-                    <InputOTPSlot index={5} className='border border-gray-600' />
+                    <InputOTPSlot index={3} className="border border-gray-600 border-r-0" />
+                    <InputOTPSlot index={4} className="border border-gray-600 border-r-0" />
+                    <InputOTPSlot index={5} className="border border-gray-600" />
                   </InputOTPGroup>
                 </InputOTP>
               </div>
             </div>
 
-            <Button type='submit' className='w-full' disabled={isLoading || otp.length !== 6}>
+            <Button type="submit" className="w-full" disabled={isLoading || otp.length !== 6}>
               {isLoading ? 'Verifying...' : 'Verify Code'}
             </Button>
           </form>
 
-          <div className='flex flex-col space-y-4'>
-            <div className='text-center text-sm text-muted-foreground'>Didn't receive a code?</div>
+          <div className="flex flex-col space-y-4">
+            <div className="text-center text-sm text-muted-foreground">Didn't receive a code?</div>
 
-            <Button variant='outline' onClick={handleResend} disabled={resendLoading} className='w-full'>
+            <Button variant="outline" onClick={handleResend} disabled={resendLoading} className="w-full">
               <RefreshCcw className={`h-4 w-4 mr-2 ${resendLoading ? 'animate-spin' : ''}`} />
               {resendLoading ? 'Sending...' : 'Resend Code'}
             </Button>
 
-            <Button variant='ghost' onClick={handleBack} className='w-full'>
-              <ArrowLeft className='h-4 w-4 mr-2' />
+            <Button variant="ghost" onClick={handleBack} className="w-full">
+              <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Login
             </Button>
           </div>

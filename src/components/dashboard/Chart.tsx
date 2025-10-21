@@ -1,19 +1,8 @@
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-  ReferenceLine,
-  Area,
-  AreaChart,
-} from 'recharts';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '../ui/button';
 import { ConnectAccount } from '@/lib/types';
+import { useMemo } from 'react';
 
 interface TradingChartProps {
   data: any;
@@ -64,9 +53,10 @@ const CustomTooltip = ({ active, payload, label, accounts, account }: any) => {
   return null;
 };
 
-const CustomizedDot = ({ cx, cy, stroke, payload, value, index, data, accountId }: any) => {
+const CustomizedDot = ({ cx, cy, stroke, payload, value, index, data, accountId, interval }: any) => {
   const prevValue = index > 0 ? data[index - 1][accountId] : 0;
-  const fillColor = prevValue !== null && value[value.length - 1] < prevValue ? 'red' : 'hsl(var(--chart-3))';
+  // const fillColor = prevValue !== null && value[value.length - 1] < prevValue ? 'red' : 'hsl(var(--chart-3))';
+  if (index % interval !== 0) return null;
   return (
     <svg
       viewBox="0 0 24 24"
@@ -78,7 +68,7 @@ const CustomizedDot = ({ cx, cy, stroke, payload, value, index, data, accountId 
       y={cy - 10}
       width={20}
       height={20}
-      fill={fillColor}
+      fill="hsl(var(--chart-3))"
     >
       <circle cx="12" cy="12" r="5" />
     </svg>
@@ -94,21 +84,39 @@ export const TradingChart = ({
   setRange,
 }: TradingChartProps) => {
   // Choose XAxis tick formatter and ticks interval based on range
-  let tickFormatter;
-  let interval;
-  if (range === '1m') {
-    tickFormatter = (val) => {
-      return new Date(val).toLocaleString('en-US', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-    };
-    interval = 1; // show all or every tick
-  } else if (range === '3m') {
-    tickFormatter = (val) => new Date(val).toLocaleString('en-US', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-    interval = 4; // show every 3rd tick
-  } else if (range === '1y') {
-    tickFormatter = (val) =>
-      new Date(val).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
-    interval = 31; // show every 6th tick
-  }
+  const { tickFormatter, interval } = useMemo(() => {
+    if (range === '1m') {
+      return {
+        tickFormatter: (val: number) =>
+          new Date(val).toLocaleString('en-US', { day: 'numeric', month: 'short', timeZone: 'UTC' }),
+        interval: 1,
+      };
+    } else if (range === '3m') {
+      return {
+        tickFormatter: (val: number) =>
+          new Date(val).toLocaleString('en-US', { day: 'numeric', month: 'short', timeZone: 'UTC' }),
+        interval: 4,
+      };
+    } else if (range === '1y') {
+      return {
+        tickFormatter: (val: number) =>
+          new Date(val).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }),
+        interval: 31,
+      };
+    } else {
+      return {
+        tickFormatter: (val: number) => new Date(val).toLocaleString(),
+        interval: 1,
+      };
+    }
+  }, [range]);
+
+  const { min, max } = useMemo(() => {
+    const min = Math.min(...data.map((d) => d[selectedAccount?.accountId]));
+    const max = Math.max(...data.map((d) => d[selectedAccount?.accountId]));
+    const padding = (max - min) * 0.1;
+    return { min: (min >= padding ? min : padding) - padding, max: max + padding };
+  }, [data, selectedAccount]);
 
   // const [off, setOff] = useState(0);
   // useEffect(() => {
@@ -116,11 +124,9 @@ export const TradingChart = ({
   //     setOff(gradientOffset() ?? 0);
   //   }
   // }, [selectedAccount]);
-
   // const gradientOffset = () => {
   //   const dataMax = Math.max(...data.map((i) => i[selectedAccount.accountId]));
   //   const dataMin = Math.min(...data.map((i) => i[selectedAccount.accountId]));
-
   //   if (Number.isNaN(dataMax) || Number.isNaN(dataMin)) {
   //     return 1;
   //   }
@@ -130,7 +136,6 @@ export const TradingChart = ({
   //   // if (dataMin >= 5000) {
   //   //   return 1;
   //   // }
-
   //   return dataMax / (dataMax - dataMin);
   // };
 
@@ -169,7 +174,8 @@ export const TradingChart = ({
                 fontSize={12}
                 tickLine={true}
                 axisLine={true}
-                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                tickFormatter={(value) => (min > 1000 ? `$${(value / 1000).toFixed(0)}k` : `$${Math.floor(value)}`)}
+                domain={[min, max]}
               />
               <Tooltip content={<CustomTooltip accounts={selectedAccounts} account={selectedAccount} />} />
               {/* {data && ( */}
@@ -187,25 +193,11 @@ export const TradingChart = ({
                   dataKey={selectedAccount.accountId}
                   stroke={accountColors[2]}
                   strokeWidth={1}
-                  dot={{ r: 2, stroke: accountColors[2], strokeWidth: 4, fill: accountColors[2] }}
                   activeDot={{ r: 6, stroke: accountColors[2], strokeWidth: 2, fill: 'hsl(var(--background))' }}
                   fill={accountColors[2]}
-                  // dot={<CustomizedDot data={data} accountId={selectedAccount.accountId} />}
-                  // fill="url(#splitColor)"
+                  // dot={<CustomizedDot data={data} accountId={selectedAccount.accountId} interval={interval} />}
                 />
               )}
-              {/* {selectedAccounts.map((a, index) => (
-                <Line
-                  key={index}
-                  type='monotone'
-                  dataKey={a.accountId}
-                  stroke={accountColors[index]}
-                  // hide={!selectedAccounts.some((sa) => sa.accountId === a.accountId)}
-                  strokeWidth={3}
-                  // dot={false}
-                  activeDot={{ r: 6, stroke: accountColors[index], strokeWidth: 2, fill: 'hsl(var(--background))' }}
-                />
-              ))} */}
             </AreaChart>
           </ResponsiveContainer>
         </div>

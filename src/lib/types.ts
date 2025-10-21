@@ -4,7 +4,7 @@ export interface UserInterface {
   username: string;
   fullName: string;
   phoneNumber: string;
-  role: 'user' | 'admin' | 'owner' | '';
+  role: 'user' | 'admin' | 'owner' | 'support' | '';
   plan: 'premium' | 'basic' | '';
   mt5AccountId: string;
   riskSettings: RiskSettingsInterface;
@@ -17,7 +17,7 @@ export interface UserInterface {
   strategySetting: RiskSettingsInterface[];
   metaApiToken: string;
   trades?: any[] | undefined;
-  status: 'active' | 'pending' | 'suspended' | '';
+  status: 'active' | 'pending' | 'suspended' | 'deleted' | '';
   twoFA: boolean;
   emailVerified: boolean;
   globalSetting: GlobalRiskSetting;

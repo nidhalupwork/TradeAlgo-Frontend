@@ -201,45 +201,47 @@ export const ConnectedAccounts = () => {
             </div>
           </div>
         ))}
-        <div className="space-y-2 border-t-2 pt-2">
-          <div className="flex justify-between items-center">
-            <Label>Meta API token</Label>
-            <Button
-              variant={isEditing ? 'outline' : 'ghost'}
-              size="sm"
-              onClick={() => setIsEditing(!isEditing)}
-              className="gap-2"
-            >
-              {isEditing ? (
-                <>
-                  <X className="h-4 w-4" />
-                  Cancel
-                </>
-              ) : (
-                <>
-                  <Edit3 className="h-4 w-4" />
-                  Edit
-                </>
-              )}
-            </Button>
+        {user.status === 'active' && (
+          <div className="space-y-2 border-t-2 pt-2">
+            <div className="flex justify-between items-center">
+              <Label>Meta API token</Label>
+              <Button
+                variant={isEditing ? 'outline' : 'ghost'}
+                size="sm"
+                onClick={() => setIsEditing(!isEditing)}
+                className="gap-2"
+              >
+                {isEditing ? (
+                  <>
+                    <X className="h-4 w-4" />
+                    Cancel
+                  </>
+                ) : (
+                  <>
+                    <Edit3 className="h-4 w-4" />
+                    Edit
+                  </>
+                )}
+              </Button>
+            </div>
+            <div className="relative">
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                value={metaToken}
+                disabled={!isEditing}
+                className="pr-8"
+                onChange={(e) => setMetaToken(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute  right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
-          <div className="relative">
-            <Input
-              type={showPassword ? 'text' : 'password'}
-              value={metaToken}
-              disabled={!isEditing}
-              className="pr-8"
-              onChange={(e) => setMetaToken(e.target.value)}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute  right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          </div>
-        </div>
+        )}
 
         {isEditing && (
           <div className="flex gap-3">
@@ -269,6 +271,8 @@ export const ConnectedAccounts = () => {
         open={modalOpen}
         onOpenChange={setModalOpen}
         modalType={modalType}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
       />
 
       <DeleteModal open={modalOpen} onOpenChange={setModalOpen} isLoading={isLoading} confirmDelete={confirmDelete} />

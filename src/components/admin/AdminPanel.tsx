@@ -34,8 +34,9 @@ import { Link } from 'react-router-dom';
 import { roundUp } from '@/lib/utils';
 import { FRONTEND_ENDPOINT } from '@/config/config';
 import { DeleteModal } from './DeleteModal';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { UserInterface } from '@/lib/types';
+import { UserFilters } from './user/UserFilters';
 
 const AdminPanel = () => {
   const { toast } = useToast();
@@ -43,9 +44,15 @@ const AdminPanel = () => {
   const [selectedUser, setSelectedUser] = useState<UserInterface>(null);
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  // const [selectedUsers, setSelectedUsers] = useState<UserInterface[]>([]);
-  // const [showButton, setShowButton] = useState(false);
-
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [roleFilter, setRoleFilter] = useState<'user' | 'admin' | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState<'active' | 'pending' | 'suspended' | 'deleted' | 'all'>('all');
+  const [planFilter, setPlanFilter] = useState<'premium' | 'basic' | 'all'>('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [brokersMin, setBrokersMin] = useState('');
+  const [brokersMax, setBrokersMax] = useState('');
   const userStatusCounts = users?.reduce(
     (acc, u) => {
       if (u.status === 'active') acc.active += 1;
@@ -55,8 +62,44 @@ const AdminPanel = () => {
     },
     { active: 0, pending: 0, suspended: 0 }
   ) ?? { active: 0, pending: 0, suspended: 0 };
-
   const { active: activeUsers, pending: pendingUsers, suspended: suspendedUsers } = userStatusCounts;
+
+  useEffect(() => {
+    console.log('name:', name);
+    console.log('email:', email);
+    console.log('roleFilter:', roleFilter);
+    console.log('statusFilter:', statusFilter);
+    console.log('planFilter:', planFilter);
+    console.log('dateFrom:', dateFrom);
+    console.log('dateTo:', dateTo);
+    console.log('brokersMin:', brokersMin);
+    console.log('brokersMax:', brokersMax);
+    fetchUsers();
+  }, [name, email, roleFilter, statusFilter, planFilter, dateFrom, dateTo, brokersMin, brokersMax]);
+
+  async function fetchUsers() {
+    setIsLoading(true);
+    try {
+      const data = await Api.post('/admin/users', {
+        name,
+        email,
+        role: roleFilter,
+        status: statusFilter,
+        plan: planFilter,
+        dateFrom,
+        dateTo,
+        brokersMax,
+        brokersMin,
+      });
+      console.log('Data to fetch users by filter:', data);
+      if (data?.success) {
+        setUsers(data.users);
+      }
+    } catch (error) {
+      console.error('Error while fetching users by filter');
+    }
+    setIsLoading(false);
+  }
 
   async function manageAccount(id: string, type: 'Approve' | 'Suspend' | 'Activate') {
     try {
@@ -87,7 +130,7 @@ const AdminPanel = () => {
       const data = await Api.delete('/admin/' + id);
       console.log('Deleting user:', data);
       if (data?.success) {
-        setUsers((prevUsers) => prevUsers.filter((u) => u._id !== id));
+        setUsers((prevUsers) => prevUsers.map((user) => (user._id === data.user._id ? data.user : user)));
         toast({
           title: 'Success',
           description: 'Successfully deleted',
@@ -188,51 +231,35 @@ const AdminPanel = () => {
         </Card>
       </div>
 
+      <div className="rounded-xl border bg-card p-6 shadow-sm">
+        <UserFilters
+          name={name}
+          setName={setName}
+          email={email}
+          setEmail={setEmail}
+          roleFilter={roleFilter}
+          onRoleFilterChange={setRoleFilter}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+          planFilter={planFilter}
+          onPlanFilterChange={setPlanFilter}
+          dateFrom={dateFrom}
+          onDateFromChange={setDateFrom}
+          dateTo={dateTo}
+          onDateToChange={setDateTo}
+          brokersMin={brokersMin}
+          onBrokersMinChange={setBrokersMin}
+          brokersMax={brokersMax}
+          onBrokersMaxChange={setBrokersMax}
+        />
+      </div>
+
       {/* User Management */}
       <Card className="bg-card/50 backdrop-blur-sm border-border/50">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold">User Management</h2>
             <div className="flex items-center gap-3">
-              {/* {showButton && selectedUsers[0]?.status === 'active' && (
-                <Button
-                  className="text-success"
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => manageBatchAccounts('Suspend')}
-                >
-                  <AlertTriangle className="h-4 w-4" />
-                  Suspend
-                </Button>
-              )}
-              {showButton && selectedUsers[0]?.status === 'pending' && (
-                <Button
-                  className="text-success"
-                  size="sm"
-                  variant="profit"
-                  onClick={() => manageBatchAccounts('Approve')}
-                >
-                  <UserCheck className="h-4 w-4" />
-                  Approve
-                </Button>
-              )}
-              {showButton && selectedUsers[0]?.status === 'suspended' && (
-                <Button
-                  className="text-success"
-                  size="sm"
-                  variant="default"
-                  onClick={() => manageBatchAccounts('Activate')}
-                >
-                  <UserCheck className="h-4 w-4" />
-                  Activate
-                </Button>
-              )}
-              {selectedUsers.length > 0 && (
-                <Button size="sm">
-                  <RotateCcw className="h-4 w-4" />
-                  Reset Risk
-                </Button>
-              )} */}
               {/* <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Search users..." className="pl-10 w-64" />
@@ -291,6 +318,12 @@ const AdminPanel = () => {
                         <Badge className="bg-profit/20 text-profit">
                           <CheckCircle className="h-3 w-3 mr-1" />
                           Active
+                        </Badge>
+                      )}
+                      {user.status === 'deleted' && (
+                        <Badge className="bg-destructive/20 text-destructive">
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Deleted
                         </Badge>
                       )}
                       {user.status === 'suspended' && (
@@ -403,7 +436,7 @@ const AdminPanel = () => {
                             )}
                             {user.status === 'suspended' && (
                               <DropdownMenuItem
-                                className="text-success hover:cursor-pointer"
+                                className="text-profit hover:cursor-pointer hover:!bg-profit"
                                 onClick={() => manageAccount(user._id, 'Activate')}
                               >
                                 <UserCheck className="mr-2 h-4 w-4" />

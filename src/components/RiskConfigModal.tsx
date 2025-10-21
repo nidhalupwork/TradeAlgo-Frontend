@@ -15,10 +15,14 @@ export const RiskConfigModal = ({
   open,
   onConfigModalClose,
   strategy,
+  isLoading,
+  setIsLoading,
 }: {
   open: 'Global' | 'Strategy' | '';
   onConfigModalClose: () => void;
   strategy: any;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const { user, setUser } = useAuth();
   const { toast } = useToast();
@@ -28,7 +32,6 @@ export const RiskConfigModal = ({
   const setting = useMemo(() => {
     return selectedAccount?.strategySettings?.find((ss) => ss.strategyId === strategy?._id);
   }, [selectedAccount, open]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (open === '') {
@@ -251,6 +254,7 @@ export const RiskConfigModal = ({
 
                 <div className="space-y-1">
                   {accounts.map((account) => {
+                    const accSetting = account?.strategySettings?.find((ss) => ss.strategyId === strategy?._id);
                     return (
                       <div
                         key={account.accountId}
@@ -264,9 +268,9 @@ export const RiskConfigModal = ({
                         />
                         <p>
                           {account.name}{' '}
-                          <span className="text-xs">({setting?.subscribed ? 'Subscribed' : 'Unsubscribed'})</span>:
+                          <span className="text-xs">({accSetting?.subscribed ? 'Subscribed' : 'Unsubscribed'})</span>:
                         </p>
-                        <p>Risk Selected = {setting?.riskPerTrade}%</p>
+                        <p>Risk Selected = {accSetting?.riskPerTrade}%</p>
                       </div>
                     );
                   })}

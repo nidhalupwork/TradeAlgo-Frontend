@@ -11,43 +11,77 @@ import { useAuth } from '@/providers/AuthProvider';
 import { ConnectAccount } from '@/lib/types';
 import apiClient from '@/services/Api';
 import { useToast } from '@/hooks/use-toast';
+import { useSocket } from '@/providers/SocketProvider';
 
 export const RiskSettingModal = ({
   open,
   onModalClose,
+  isLoading,
+  setIsLoading,
 }: {
   open: 'Global' | 'Strategy' | '';
   onModalClose: () => void;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const { toast } = useToast();
+  const { stats } = useSocket();
   const { user, setUser } = useAuth();
   const [accounts, setAccounts] = useState<ConnectAccount[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<ConnectAccount | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [selectedAccount1, setSelectedAccount1] = useState<ConnectAccount | null>(null);
+  const [currency, setCurrency] = useState<string>('USD');
+  const [currency1, setCurrency1] = useState<string>('USD');
 
   useEffect(() => {
     if (open === '') {
       setAccounts([]);
       setSelectedAccount(null);
+      setSelectedAccount1(null);
     } else if (open === 'Global') {
       setAccounts([...user.accounts]);
       setSelectedAccount({
         ...user.accounts[0],
         strategySettings: user.accounts[0].strategySettings.map((ss) => ({ ...ss })),
       });
+      setSelectedAccount1({
+        ...user.accounts[0],
+        strategySettings: user.accounts[0].strategySettings.map((ss) => ({ ...ss })),
+      });
     }
   }, [open]);
 
-  function onRiskSettingsChange(key: string, value: string | boolean | number) {
-    const updatedAccount = {
-      ...selectedAccount,
-      [key]: value,
-    };
-    const updatedAccounts = accounts.map((account) =>
-      account.accountId === updatedAccount.accountId ? updatedAccount : account
-    );
-    setSelectedAccount(updatedAccount);
-    setAccounts(updatedAccounts);
+  useEffect(() => {
+    const accountInfo = stats?.accountInformation?.find((a) => a?.accountId === selectedAccount?.accountId);
+    setCurrency(accountInfo?.currency ?? 'USD');
+  }, [selectedAccount]);
+  useEffect(() => {
+    const accountInfo = stats?.accountInformation?.find((a) => a?.accountId === selectedAccount1?.accountId);
+    setCurrency1(accountInfo?.currency ?? 'USD');
+  }, [selectedAccount1]);
+
+  function onRiskSettingsChange(key: string, value: string | boolean | number, type: 0 | 1) {
+    if (type === 0) {
+      const updatedAccount = {
+        ...selectedAccount,
+        [key]: value,
+      };
+      const updatedAccounts = accounts.map((account) =>
+        account.accountId === updatedAccount.accountId ? updatedAccount : account
+      );
+      setSelectedAccount(updatedAccount);
+      setAccounts(updatedAccounts);
+    } else {
+      const updatedAccount = {
+        ...selectedAccount1,
+        [key]: value,
+      };
+      const updatedAccounts = accounts.map((account) =>
+        account.accountId === updatedAccount.accountId ? updatedAccount : account
+      );
+      setSelectedAccount1(updatedAccount);
+      setAccounts(updatedAccounts);
+    }
   }
 
   function hasAccountsChanged(accounts1, accounts2) {
@@ -110,7 +144,7 @@ export const RiskSettingModal = ({
             <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
               <TrendingUp className="h-4 w-4 text-primary-foreground" />
             </div>
-            Global Risk Setting
+            Account Risk Setting
           </DialogTitle>
         </DialogHeader>
 
@@ -123,68 +157,23 @@ export const RiskSettingModal = ({
                 placeholder="1000"
                 className="flex-1"
                 value={selectedAccount?.dailyLossLimit ?? ''}
-                onChange={(e) => onRiskSettingsChange('dailyLossLimit', e.target.value)}
+                onChange={(e) => onRiskSettingsChange('dailyLossLimit', e.target.value, 0)}
               />
               <Select
                 value={selectedAccount?.dailyLossCurrency ?? 'percentage'}
-                onValueChange={(value) => onRiskSettingsChange('dailyLossCurrency', value)}
+                onValueChange={(value) => onRiskSettingsChange('dailyLossCurrency', value, 0)}
               >
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="amount">USD</SelectItem>
+                  <SelectItem value="amount">{currency}</SelectItem>
                   <SelectItem value="percentage">%</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          {/* Maximum Loss Limit */}
-          <div>
-            <Label>Maximum Loss Limit</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                placeholder="1000"
-                className="flex-1"
-                value={selectedAccount?.maxLossLimit ?? ''}
-                onChange={(e) => onRiskSettingsChange('maxLossLimit', e.target.value)}
-              />
-              <Select
-                value={selectedAccount?.maxLossCurrency ?? 'percentage'}
-                onValueChange={(value) => onRiskSettingsChange('maxLossCurrency', value)}
-              >
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="amount">USD</SelectItem>
-                  <SelectItem value="percentage">%</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Actions on Limit Breach */}
-          <div className="space-y-3">
-            <Label>Actions on Limit Breach</Label>
-            <div className="mt-2">
-              <div className="flex items-center justify-between bg-background/50 rounded-lg">
-                <div className="flex items-start gap-2">
-                  {/* <AlertTriangle className='h-4 text-warning' /> */}
-                  <span className="text-sm pl-2">
-                    Will close all open positions, pause trading for the day and you will receive a notification
-                    alerting you of this action
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* <div>
-            <p>Close All Trades</p>
-            <span></span>
-          </div> */}
           <div className="space-y-1">
             {accounts.map((account) => {
               return (
@@ -199,10 +188,76 @@ export const RiskSettingModal = ({
                     }`}
                   />
                   <p>
-                    {account.name} <span className="text-xs">({account.platform})</span>: Daily ={' '}
+                    {account.name} <span className="text-xs">({account.platform})</span>: Daily Loss Limit ={' '}
                     {account.dailyLossCurrency === 'amount' && '$'}
                     {account.dailyLossLimit}
-                    {account.dailyLossCurrency === 'percentage' && '%'} Max ={' '}
+                    {account.dailyLossCurrency === 'percentage' && '%'}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Actions on Limit Breach */}
+          <div className="space-y-3">
+            <Label>Actions on Limit Breach</Label>
+            <div className="mt-2">
+              <div className="flex items-center justify-between bg-background/50 rounded-lg">
+                <div className="flex items-start gap-2">
+                  {/* <AlertTriangle className='h-4 text-warning' /> */}
+                  <span className="text-sm pl-2">
+                    All open positions will be automatically closed, and trading activity will be paused for the
+                    remainder of the day. Trading will resume the following day.
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Maximum Loss Limit */}
+          <div>
+            <Label>Maximum Loss Limit</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                placeholder="1000"
+                className="flex-1"
+                value={selectedAccount1?.maxLossLimit ?? ''}
+                onChange={(e) => onRiskSettingsChange('maxLossLimit', e.target.value, 1)}
+              />
+              <Select
+                value={selectedAccount1?.maxLossCurrency ?? 'percentage'}
+                onValueChange={(value) => onRiskSettingsChange('maxLossCurrency', value, 1)}
+              >
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="amount">{currency1}</SelectItem>
+                  <SelectItem value="percentage">%</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* <div>
+            <p>Close All Trades</p>
+            <span></span>
+          </div> */}
+          <div className="space-y-1">
+            {accounts.map((account) => {
+              return (
+                <div
+                  key={account.accountId}
+                  className="flex gap-2 text-sm hover:cursor-pointer text-muted-foreground hover:text-muted-foreground/80 transition-all"
+                  onClick={() => setSelectedAccount1(account)}
+                >
+                  <div
+                    className={`w-5 h-5 rounded-full ${
+                      selectedAccount1.accountId === account.accountId ? 'bg-profit' : 'bg-muted'
+                    }`}
+                  />
+                  <p>
+                    {account.name} <span className="text-xs">({account.platform})</span>: Max Loss Limit ={' '}
                     {account.maxLossCurrency === 'amount' && '$'}
                     {account.maxLossLimit}
                     {account.maxLossCurrency === 'percentage' && '%'}
@@ -210,6 +265,22 @@ export const RiskSettingModal = ({
                 </div>
               );
             })}
+          </div>
+
+          {/* Actions on Limit Breach */}
+          <div className="space-y-3">
+            <Label>Actions on Limit Breach</Label>
+            <div className="mt-2">
+              <div className="flex items-center justify-between bg-background/50 rounded-lg">
+                <div className="flex items-start gap-2">
+                  {/* <AlertTriangle className='h-4 text-warning' /> */}
+                  <span className="text-sm pl-2">
+                    All open positions will be automatically closed, and trading will remain paused until strategies are
+                    manually reactivated.
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

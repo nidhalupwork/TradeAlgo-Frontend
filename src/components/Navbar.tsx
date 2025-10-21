@@ -28,11 +28,12 @@ const Navbar = () => {
   }, [location.pathname, isSignedIn]);
 
   const navItems = [
-    // user page
-    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, role: 'all' },
-    { path: '/strategies', label: 'Strategies', icon: Activity, role: 'user' },
-
-    // admin page
+    // user and admin page
+    { path: '/dashboard', label: 'User Dashboard', icon: LayoutDashboard, role: 'all' },
+    { path: '/strategies', label: 'Strategies', icon: Activity, role: 'all' },
+    
+    // admin only page
+    { path: '/control', label: 'Control', icon: LayoutDashboard, role: 'admin' },
     { path: '/user-management', label: 'Users', icon: Users, role: 'admin' },
     { path: '/strategy-management', label: 'Strategy', icon: Activity, role: 'admin' },
     { path: '/logs', label: 'Logs', icon: Logs, role: 'admin' },

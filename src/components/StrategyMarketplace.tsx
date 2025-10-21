@@ -19,6 +19,7 @@ const StrategyMarketplace = () => {
   const [strategies, setStrategies] = useState<StrategyInterface[]>([]);
   const [strategy, setStrategy] = useState<StrategyInterface | null>(null);
   const [open, setOpen] = useState<'Global' | 'Strategy' | ''>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [stats, setStats] = useState({
     count: 0,
     avgMonthlyReturn: 0,
@@ -80,6 +81,9 @@ const StrategyMarketplace = () => {
   }
 
   function onConfigModalClose() {
+    if (isLoading) {
+      return;
+    }
     setOpen('');
     setStrategy(null);
   }
@@ -94,7 +98,7 @@ const StrategyMarketplace = () => {
         </div>
 
         <Button variant="gold" onClick={() => setOpen('Global')}>
-          Update RiskSettings
+          Account Risk Settings
         </Button>
       </div>
       {/* {user.status === 'pending' && <Announcement />} */}
@@ -109,7 +113,7 @@ const StrategyMarketplace = () => {
                 <p className="text-sm text-muted-foreground">Available Strategies</p>
               </div>
             )}
-            {user.status === 'pending' && (
+            {user.status !== 'active' && (
               <div>
                 <p className="text-2xl font-bold">Not Available</p>
                 <p className="text-sm text-muted-foreground">Required account approval</p>
@@ -140,40 +144,41 @@ const StrategyMarketplace = () => {
       </div>
       {/* Strategy Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {strategies.map((strategy) => (
-          <Card
-            key={strategy?.title}
-            className={`bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all ${
-              strategy?.enabled ? 'ring-2 ring-profit/20' : ''
-            }`}
-          >
-            <div className="p-6">
-              {/* Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div className=" w-full">
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-semibold">{strategy?.title}</h3>
-                      <Badge
-                        className={
-                          strategy?.status === 'Live'
-                            ? 'bg-profit/20 text-profit'
-                            : strategy?.status === 'Paused'
-                            ? 'bg-gold/20 text-gold'
-                            : 'bg-primary/20 text-primary'
-                        }
-                      >
-                        {strategy?.status}
-                      </Badge>
+        {user.status === 'active' &&
+          strategies.map((strategy) => (
+            <Card
+              key={strategy?.title}
+              className={`bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all ${
+                strategy?.enabled ? 'ring-2 ring-profit/20' : ''
+              }`}
+            >
+              <div className="p-6">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className=" w-full">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold">{strategy?.title}</h3>
+                        <Badge
+                          className={
+                            strategy?.status === 'Live'
+                              ? 'bg-profit/20 text-profit'
+                              : strategy?.status === 'Paused'
+                              ? 'bg-gold/20 text-gold'
+                              : 'bg-primary/20 text-primary'
+                          }
+                        >
+                          {strategy?.status}
+                        </Badge>
+                      </div>
+                      {user?.role === 'admin' && <Switch checked={strategy?.enabled} />}
                     </div>
-                    {user?.role === 'admin' && <Switch checked={strategy?.enabled} />}
+                    <p className="text-sm text-muted-foreground">{strategy?.description}</p>
                   </div>
-                  <p className="text-sm text-muted-foreground">{strategy?.description}</p>
                 </div>
-              </div>
 
-              {/* Stats Grid */}
-              {/* <div className="grid grid-cols-2 gap-3 mb-4">
+                {/* Stats Grid */}
+                {/* <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="bg-background/50 rounded p-2">
                   <p className="text-xs text-muted-foreground">Win Rate</p>
                   <p className="text-lg font-semibold text-profit">{strategy.winRate}%</p>
@@ -192,8 +197,8 @@ const StrategyMarketplace = () => {
                 </div>
               </div> */}
 
-              {/* Markets and Timeframe */}
-              {/* <div className="flex flex-wrap gap-2 mb-4">
+                {/* Markets and Timeframe */}
+                {/* <div className="flex flex-wrap gap-2 mb-4">
                 {strategy.tags.map((market) => (
                   <Badge key={market} variant="outline" className="text-xs">
                     {market}
@@ -205,64 +210,75 @@ const StrategyMarketplace = () => {
                 </Badge>
               </div> */}
 
-              {/* Footer */}
-              <div className="pt-2 border-t border-border">
-                <p className="text-sm text-muted-foreground">Select the account to subscribe this strategy.</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-muted-foreground text-sm">
-                    {user?.accounts.map((acc) => {
-                      return (
-                        <div key={acc.accountId} className="flex gap-2 items-center mt-1">
+                {/* Footer */}
+                <div className="pt-2 border-t border-border">
+                  <p className="text-sm text-muted-foreground">Select the account to subscribe this strategy.</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 text-muted-foreground text-sm">
+                      {user?.accounts.map((acc) => {
+                        return (
+                          <div key={acc.accountId} className="flex gap-2 items-center mt-1">
+                            <Checkbox
+                              checked={acc.strategySettings.find((ss) => ss.strategyId === strategy._id)?.subscribed}
+                              onClick={() => {
+                                subscribeStrategy(strategy._id, acc.accountId, '');
+                              }}
+                            />
+                            {acc.name}
+                          </div>
+                        );
+                      })}
+                      {user?.accounts?.length > 1 && (
+                        <div className="flex gap-2 items-center mt-1">
                           <Checkbox
-                            checked={acc.strategySettings.find((ss) => ss.strategyId === strategy._id)?.subscribed}
+                            checked={user.accounts.every(
+                              (account) =>
+                                account?.strategySettings?.find((ss) => ss.strategyId === strategy._id)?.subscribed
+                            )}
                             onClick={() => {
-                              subscribeStrategy(strategy._id, acc.accountId, '');
+                              subscribeStrategy(strategy._id, '', 'All');
                             }}
-                          />
-                          {acc.name}
+                          />{' '}
+                          All
                         </div>
-                      );
-                    })}
-                    {user?.accounts?.length > 1 && (
-                      <div className="flex gap-2 items-center mt-1">
-                        <Checkbox
-                          checked={user.accounts.every(
-                            (account) =>
-                              account?.strategySettings?.find((ss) => ss.strategyId === strategy._id)?.subscribed
-                          )}
-                          onClick={() => {
-                            subscribeStrategy(strategy._id, '', 'All');
-                          }}
-                        />{' '}
-                        All
-                      </div>
-                    )}
-                    {user?.accounts?.length === 0 && (
-                      <div className="flex gap-2 items-center mt-1">
-                        <CircleAlert color="gold" size={20} />
-                        <p className="text-muted-foreground text-sm">You have no account</p>
+                      )}
+                      {user?.accounts?.length === 0 && (
+                        <div className="flex gap-2 items-center mt-1">
+                          <CircleAlert color="gold" size={20} />
+                          <p className="text-muted-foreground text-sm">You have no account</p>
+                        </div>
+                      )}
+                    </div>
+                    {user?.status === 'active' && user?.accounts?.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => onConfigModalOpen(strategy)}>
+                          <Settings />
+                        </Button>
                       </div>
                     )}
                   </div>
-                  {user?.status === 'active' && user?.accounts?.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => onConfigModalOpen(strategy)}>
-                        <Settings />
-                      </Button>
-                    </div>
-                  )}
                 </div>
               </div>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          ))}
       </div>
 
       {/* For each account */}
-      <RiskConfigModal open={open} onConfigModalClose={onConfigModalClose} strategy={strategy} />
+      <RiskConfigModal
+        open={open}
+        onConfigModalClose={onConfigModalClose}
+        strategy={strategy}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
+      />
 
       {/* For whole accounts */}
-      <RiskSettingModal open={open} onModalClose={() => setOpen('')} />
+      <RiskSettingModal
+        open={open}
+        onModalClose={() => setOpen('')}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
+      />
     </div>
   );
 };

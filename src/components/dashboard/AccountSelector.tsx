@@ -42,20 +42,20 @@ export const AccountSelector = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className='text-lg font-semibold'>Trading Accounts</CardTitle>
-        <p className='text-sm text-muted-foreground'>Select accounts to display on the chart</p>
+        <CardTitle className="text-lg font-semibold">Trading Accounts</CardTitle>
+        <p className="text-sm text-muted-foreground">Select accounts to display on the chart</p>
       </CardHeader>
       <CardContent>
-        <div className='h-56 space-y-2 scroll-smooth overflow-auto'>
+        <div className="h-56 space-y-2 scroll-smooth overflow-auto">
           {accounts
             .sort((a, b) => a.accountId.localeCompare(b.accountId))
             .map((account, index) => (
               <div
                 key={account.accountId}
-                className='flex items-center justify-between p-3 rounded-lg border bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer'
+                className="flex items-center justify-between p-3 rounded-lg border bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer"
                 onClick={() => onAccountToggle(account.accountId, account.name)}
               >
-                <div className='flex items-center space-x-3 w-full'>
+                <div className="flex items-center space-x-3 w-full">
                   {/* <Checkbox
                     id={account.accountId}
                     checked={selectedAccounts.some((s) => s.accountId === account.accountId)}
@@ -67,13 +67,15 @@ export const AccountSelector = ({
                     value='test'
                     checked={selectedAccount?.accountId === account?.accountId}
                   /> */}
-                  <div className='flex justify-between items-center w-full'>
+                  <div className="flex justify-between items-center w-full">
                     <label htmlFor={account.accountId} className={`text-sm font-medium `}>
-                      {account.name}
+                      {account.name} - {account.login}
                     </label>
                     <div
                       className={`w-4 h-4 rounded-full border-2 ${
-                        selectedAccount?.accountId === account?.accountId ? 'border-[hsl(var(--chart-3))] bg-[hsl(var(--chart-3))]' : ''
+                        selectedAccount?.accountId === account?.accountId
+                          ? 'border-[hsl(var(--chart-3))] bg-[hsl(var(--chart-3))]'
+                          : ''
                       }`}
                     />
                     {/* <div

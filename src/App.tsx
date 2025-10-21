@@ -19,6 +19,7 @@ import TwoFactorAuth from './components/auth/TwoFactorAuth';
 import './App.css';
 import ResetPassword from './pages/ResetPassword';
 import Logs from './components/admin/Logs';
+import AdminDashboard from './pages/AdminDashboard';
 
 const queryClient = new QueryClient();
 
@@ -33,21 +34,22 @@ const App = () => {
             <AdminContextProvider>
               <AuthContextProvider>
                 <Routes>
-                  <Route path='/' element={<Index />} />
-                  <Route path='/auth' element={<Auth />} />
-                  <Route path='/2fa' element={<TwoFactorAuth />} />
-                  <Route path='/reset-password' element={<ResetPassword />} />
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/2fa" element={<TwoFactorAuth />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
 
-                  <Route path='/user-management' element={<Admin />} />
-                  <Route path='/strategy-management' element={<StrategyManagement />} />
-                  <Route path='/users/:userId' element={<UserProfile />} />
+                  <Route path="/user-management" element={<Admin />} />
+                  <Route path="/strategy-management" element={<StrategyManagement />} />
+                  <Route path="/users/:userId" element={<UserProfile />} />
+                  <Route path="/control" element={<AdminDashboard />} />
 
-                  <Route path='/profile' element={<Profile />} />
-                  <Route path='/dashboard' element={<Dashboard />} />
-                  <Route path='/strategies' element={<Strategies />} />
-                  <Route path='/logs' element={<Logs />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/strategies" element={<Strategies />} />
+                  <Route path="/logs" element={<Logs />} />
 
-                  <Route path='*' element={<NotFound />} />
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
               </AuthContextProvider>
             </AdminContextProvider>

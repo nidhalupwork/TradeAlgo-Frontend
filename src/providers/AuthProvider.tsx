@@ -5,6 +5,7 @@ import apiClient from '@/services/Api';
 import { useSocket } from './SocketProvider';
 import { useAdmin } from './AdminProvider';
 import Api from '@/services/Api';
+import { toast } from '@/hooks/use-toast';
 
 interface AuthContextInterface {
   user: UserInterface;
@@ -67,7 +68,14 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
           setStrategies(data.strategies);
           setGlobalSetting(data.setting);
 
-          if (data.user.role === 'user') {
+          if (data.user.status === 'suspended') {
+            // toast({
+            //   variant: 'destructive',
+            //   title: 'Account Paused',
+            //   description: 'Please contact support to reactivate your account',
+            //   duration: 24 * 60 * 60 * 1000,
+            // });
+          } else if (data.user.status === 'pending' || data.user.status === 'active') {
             const accountIds = data.user.accounts.reduce((acc, cur) => {
               return [...acc, cur.accountId];
             }, []);

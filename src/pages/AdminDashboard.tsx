@@ -1,6 +1,5 @@
 import Navbar from '@/components/Navbar';
 import AdminDashboard from '@/components/admin/AdminDashboard';
-import TradingDashboard from '@/components/dashboard/TradingDashboard';
 import { Spinner } from '@/components/ui/Spinner';
 import { useAuth } from '@/providers/AuthProvider';
 
@@ -15,7 +14,7 @@ const Dashboard = () => {
             <Spinner className="w-12 h-12" />
           </div>
         )}
-        <TradingDashboard />
+        <AdminDashboard />
       </div>
     </div>
   );

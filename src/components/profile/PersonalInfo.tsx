@@ -100,8 +100,9 @@ export const PersonalInfo = () => {
   return (
     <Card className="shadow-card">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-xl">Personal Information</CardTitle>
-        <Button
+        {/* <CardTitle className="text-xl">Personal Information</CardTitle> */}
+        <CardTitle className="text-xl">Update Password</CardTitle>
+        {/* <Button
           variant={isEditing ? 'outline' : 'ghost'}
           size="sm"
           onClick={() => {
@@ -122,7 +123,7 @@ export const PersonalInfo = () => {
               Edit
             </>
           )}
-        </Button>
+        </Button> */}
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -155,7 +156,7 @@ export const PersonalInfo = () => {
         </div> */}
 
         {/* Email and phone number */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2 col-span-2">
             <Label htmlFor="email">Email Address</Label>
             <Input
@@ -169,7 +170,7 @@ export const PersonalInfo = () => {
               }}
             />
           </div>
-          {/* <div className='space-y-2'>
+          <div className='space-y-2'>
             <Label htmlFor='email'>Phone Number</Label>
             <Input
               id='phone'
@@ -181,8 +182,8 @@ export const PersonalInfo = () => {
                 setPersonalInfo({ ...personalInfo, phoneNumber: e.target.value });
               }}
             />
-          </div> */}
-        </div>
+          </div>
+        </div> */}
 
         {/* Phone number and timezone */}
         {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -233,7 +234,7 @@ export const PersonalInfo = () => {
           </div>
         )}
 
-        <CardTitle className="pt-2 border-t-2 text-xl mt-2">Update Password</CardTitle>
+        {/* <CardTitle className="pt-2 border-t-2 text-xl mt-2">Update Password</CardTitle> */}
         {/* Previous Password */}
         <div className="space-y-2 ">
           <Label htmlFor="lastPassword">Last Password</Label>

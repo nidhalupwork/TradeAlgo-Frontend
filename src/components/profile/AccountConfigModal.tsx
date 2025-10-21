@@ -16,11 +16,19 @@ interface AccountConfigModalProps {
   open: 'Delete' | 'Account' | 'Token' | '';
   modalType: 'Details' | 'Connect';
   onOpenChange: (open: 'Delete' | 'Account' | '') => void;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: AccountConfigModalProps) => {
+export const AccountConfigModal = ({
+  account,
+  open,
+  onOpenChange,
+  modalType,
+  isLoading,
+  setIsLoading,
+}: AccountConfigModalProps) => {
   const { setUser } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
   const [configuration, setConfiguration] = useState({
     name: '',
     login: '',
@@ -36,7 +44,7 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
       name: account?.name || '',
       login: account?.login.toString() || '',
       password: '',
-      brokerage: account?.brokerage || 'OctaFX-Demo',
+      brokerage: account?.brokerage || '',
       platform: account?.platform || '-',
       magic: account?.magic.toString() || '',
     });
@@ -60,13 +68,11 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
       console.log('Data in account config modal:', data);
       if (data?.success) {
         setUser(data.user);
-
         toast({
           title: 'Account Connected',
           description: `Account has been successfully configured.`,
           variant: 'profit',
         });
-
         onOpenChange('');
       }
     } catch (error) {
@@ -87,7 +93,13 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
   if (!account) return null;
 
   return (
-    <Dialog open={open === 'Account'} onOpenChange={() => onOpenChange('')}>
+    <Dialog
+      open={open === 'Account'}
+      onOpenChange={() => {
+        if (isLoading) return;
+        onOpenChange('');
+      }}
+    >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -186,7 +198,10 @@ export const AccountConfigModal = ({ account, open, onOpenChange, modalType }: A
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange('')}
+              onClick={() => {
+                if (isLoading) return;
+                onOpenChange('');
+              }}
               disabled={isLoading}
               className="flex-1"
             >

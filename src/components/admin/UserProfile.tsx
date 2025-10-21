@@ -114,6 +114,30 @@ export default function UserProfile() {
     }
   }
 
+  async function manageAccount(id: string, type: 'Approve' | 'Suspend' | 'Activate') {
+    try {
+      const data = await Api.post('/admin/manage-user', { id, type });
+      console.log('user management data:', data);
+      if (data?.success) {
+        setUsers((prevUsers) => prevUsers.map((user) => (user._id === data.user._id ? data.user : user)));
+        setUser(data.user);
+        toast({
+          title: 'Success',
+          description: 'Successfully ' + type + 'ed',
+          variant: 'profit',
+          duration: 2000,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: type + ' failed',
+        variant: 'destructive',
+        duration: 2000,
+      });
+    }
+  }
+
   return (
     <div className="main">
       <Navbar />
@@ -156,13 +180,19 @@ export default function UserProfile() {
                 </DropdownMenuItem>
               )}
               {user?.status === 'active' && (
-                <DropdownMenuItem className="text-warning hover:cursor-pointer">
+                <DropdownMenuItem
+                  className="text-warning hover:cursor-pointer"
+                  onClick={() => manageAccount(user._id, 'Suspend')}
+                >
                   <AlertTriangle className="mr-2 h-4 w-4" />
                   Suspend Account
                 </DropdownMenuItem>
               )}
               {user?.status === 'suspended' && (
-                <DropdownMenuItem className="text-success hover:cursor-pointer">
+                <DropdownMenuItem
+                  className="text-profit hover:cursor-pointer hover:!bg-profit"
+                  onClick={() => manageAccount(user._id, 'Activate')}
+                >
                   <UserCheck className="mr-2 h-4 w-4" />
                   Activate Account
                 </DropdownMenuItem>
@@ -375,7 +405,6 @@ export default function UserProfile() {
                     {strategies
                       ?.filter((s) => s.subscribers.includes(user?._id))
                       ?.map((strategy) => {
-                        const setting = user?.strategySetting?.find((ss) => ss.strategyId === strategy?._id);
                         return user.accounts.map((account) => {
                           const accSetting = account.strategySettings?.find((ss) => ss.strategyId === strategy?._id);
                           return (
@@ -395,14 +424,14 @@ export default function UserProfile() {
                           <TableCell>{strategy.trades}</TableCell> */}
                               <TableCell>{accSetting?.riskPerTrade}%</TableCell>
                               <TableCell>
-                                {user.globalSetting?.dailyLossCurrency == 'amount' && '$'}
-                                {user.globalSetting?.dailyLossLimit}
-                                {user.globalSetting?.dailyLossCurrency == 'percentage' && '%'}
+                                {account?.dailyLossCurrency == 'amount' && '$'}
+                                {account?.dailyLossLimit}
+                                {account?.dailyLossCurrency == 'percentage' && '%'}
                               </TableCell>
                               <TableCell>
-                                {user.globalSetting?.maxLossCurrency == 'amount' && '$'}
-                                {user.globalSetting?.maxLossLimit}
-                                {user.globalSetting?.maxLossCurrency == 'percentage' && '%'}
+                                {account?.maxLossCurrency == 'amount' && '$'}
+                                {account?.maxLossLimit}
+                                {account?.maxLossCurrency == 'percentage' && '%'}
                               </TableCell>
                               {/* <TableCell>
                                 <Button
