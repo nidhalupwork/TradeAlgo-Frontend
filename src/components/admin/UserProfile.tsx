@@ -59,7 +59,7 @@ export default function UserProfile() {
   const getTierBadge = (tier: string) => {
     switch (tier) {
       case 'premium':
-        return <Badge className="bg-primary/20 text-primary border-primary/30">Premium</Badge>;
+        return <Badge className="bg-profit/20 text-profit border-profit/30">Premium</Badge>;
       case 'pro':
         return <Badge className="bg-accent/20 text-accent border-accent/30">Pro</Badge>;
       case 'basic':
@@ -350,9 +350,9 @@ export default function UserProfile() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
-                      <TableHead>Broker</TableHead>
-                      <TableHead>Platform</TableHead>
                       <TableHead>Login</TableHead>
+                      <TableHead>Platform</TableHead>
+                      <TableHead>Broker</TableHead>
                       <TableHead>Status</TableHead>
                       {/* <TableHead className="w-[50px]"></TableHead> */}
                     </TableRow>
@@ -361,11 +361,11 @@ export default function UserProfile() {
                     {user?.accounts.map((account) => (
                       <TableRow key={account.accountId}>
                         <TableCell className="text-sm">{account.name}</TableCell>
-                        <TableCell className="font-medium">{account.brokerage}</TableCell>
+                        <TableCell className="font-mono text-sm">{account.login}</TableCell>
                         <TableCell>
                           <Badge variant="outline">{account.platform}</Badge>
                         </TableCell>
-                        <TableCell className="font-mono text-sm">{account.login}</TableCell>
+                        <TableCell className="font-medium">{account.brokerage}</TableCell>
                         <TableCell>{getBrokerStatusBadge(account.active)}</TableCell>
                         {/* <TableCell>
                           <Button variant="ghost" size="sm">
@@ -402,51 +402,51 @@ export default function UserProfile() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {strategies
-                      ?.filter((s) => s.subscribers.includes(user?._id))
-                      ?.map((strategy) => {
-                        return user.accounts.map((account) => {
-                          const accSetting = account.strategySettings?.find((ss) => ss.strategyId === strategy?._id);
-                          return (
-                            <TableRow key={strategy?._id + account.accountId}>
-                              <TableCell className="font-medium">{strategy.title}</TableCell>
-                              <TableCell>
-                                {account.name}{' '}
-                                <span className="text-muted-foreground text-xs">({account.platform})</span>
-                              </TableCell>
-                              {/* <TableCell>{getStrategyStatusBadge(strategy.status)}</TableCell> */}
-                              <TableCell>{accSetting?.subscribed ? 'Yes' : 'No'}</TableCell>
-                              {/* <TableCell
-                            className={`font-medium ${strategy.profit >= 0 ? 'text-success' : 'text-destructive'}`}
+                    {strategies?.map((strategy, index) => {
+                      return user.accounts.map((account) => {
+                        const accSetting = account.strategySettings?.find((ss) => ss.strategyId === strategy?._id);
+                        return (
+                          <TableRow
+                            key={strategy?._id + account.accountId}
+                            className={index % 2 === 0 ? 'bg-card-elevated' : ''}
                           >
-                            ${strategy.profit.toFixed(2)}
-                          </TableCell>
-                          <TableCell>{strategy.trades}</TableCell> */}
-                              <TableCell>{accSetting?.riskPerTrade}%</TableCell>
-                              <TableCell>
-                                {account?.dailyLossCurrency == 'amount' && '$'}
-                                {account?.dailyLossLimit}
-                                {account?.dailyLossCurrency == 'percentage' && '%'}
-                              </TableCell>
-                              <TableCell>
-                                {account?.maxLossCurrency == 'amount' && '$'}
-                                {account?.maxLossLimit}
-                                {account?.maxLossCurrency == 'percentage' && '%'}
-                              </TableCell>
-                              {/* <TableCell>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => onResetRiskClick(user?._id, strategy?._id)}
-                                >
-                                  <RotateCcw className="h-4 w-4" />
-                                  Reset Risk
-                                </Button>
-                              </TableCell> */}
-                            </TableRow>
-                          );
-                        });
-                      })}
+                            <TableCell className="font-medium">{strategy.title}</TableCell>
+                            <TableCell>
+                              {account.name} <span className="text-muted-foreground text-xs">({account.platform})</span>
+                            </TableCell>
+                            {/* <TableCell>{getStrategyStatusBadge(strategy.status)}</TableCell> */}
+                            <TableCell>{accSetting?.subscribed ? 'Yes' : 'No'}</TableCell>
+                            {/* <TableCell
+                              className={`font-medium ${strategy.profit >= 0 ? 'text-success' : 'text-destructive'}`}
+                            >
+                              ${strategy.profit.toFixed(2)}
+                            </TableCell>
+                            <TableCell>{strategy.trades}</TableCell> */}
+                            <TableCell>{accSetting?.riskPerTrade ?? 0}%</TableCell>
+                            <TableCell>
+                              {account?.dailyLossCurrency == 'amount' && '$'}
+                              {account?.dailyLossLimit}
+                              {account?.dailyLossCurrency == 'percentage' && '%'}
+                            </TableCell>
+                            <TableCell>
+                              {account?.maxLossCurrency == 'amount' && '$'}
+                              {account?.maxLossLimit}
+                              {account?.maxLossCurrency == 'percentage' && '%'}
+                            </TableCell>
+                            {/* <TableCell>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => onResetRiskClick(user?._id, strategy?._id)}
+                              >
+                                <RotateCcw className="h-4 w-4" />
+                                Reset Risk
+                              </Button>
+                            </TableCell> */}
+                          </TableRow>
+                        );
+                      });
+                    })}
                   </TableBody>
                 </Table>
               </div>

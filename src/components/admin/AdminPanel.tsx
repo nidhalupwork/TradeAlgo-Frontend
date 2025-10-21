@@ -279,10 +279,10 @@ const AdminPanel = () => {
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">User</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Role</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Status</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Plan</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Account Tier</th>
                   {/* <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Balance</th> */}
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Positions</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Brokers</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Accounts</th> 
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Registration</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Last Login</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Actions</th>

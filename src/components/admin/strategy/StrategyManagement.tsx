@@ -72,6 +72,7 @@ export default function StrategyManagement() {
   }, [strategies]);
 
   function openChange() {
+    if (isLoading) return;
     setOpen('');
     setStrategy(undefined);
   }
@@ -409,7 +410,13 @@ export default function StrategyManagement() {
         </div>
       </div>
 
-      <AddStrategyModal open={open} onOpenChange={openChange} selectedStrategy={strategy} />
+      <AddStrategyModal
+        open={open}
+        onOpenChange={openChange}
+        selectedStrategy={strategy}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
+      />
       <ConfirmDeletionModal
         open={open}
         onOpenChange={openChange}

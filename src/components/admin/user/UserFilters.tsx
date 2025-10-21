@@ -96,6 +96,54 @@ export const UserFilters = ({
           />
         </div>
 
+        <div className="relative flex-1">
+          <Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="number"
+            placeholder="Min accounts"
+            value={brokersMin}
+            onChange={(e) => onBrokersMinChange(e.target.value)}
+            className="pl-10"
+            min="0"
+          />
+        </div>
+
+        <div className="relative flex-1">
+          <Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="number"
+            placeholder="Max accounts"
+            value={brokersMax}
+            onChange={(e) => onBrokersMaxChange(e.target.value)}
+            className="pl-10"
+            min="0"
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-4">
+        <div className="relative flex-1">
+          <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="date"
+            placeholder="From date"
+            value={dateFrom}
+            onChange={(e) => onDateFromChange(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        <div className="relative flex-1">
+          <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="date"
+            placeholder="To date"
+            value={dateTo}
+            onChange={(e) => onDateToChange(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
         <Select value={roleFilter} onValueChange={onRoleFilterChange}>
           <SelectTrigger className="w-full md:w-[180px]">
             <SelectValue placeholder="Filter by role" />
@@ -130,54 +178,6 @@ export const UserFilters = ({
             <SelectItem value="basic">Basic</SelectItem>
           </SelectContent>
         </Select>
-      </div>
-
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-4">
-        <div className="relative flex-1">
-          <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="date"
-            placeholder="From date"
-            value={dateFrom}
-            onChange={(e) => onDateFromChange(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-
-        <div className="relative flex-1">
-          <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="date"
-            placeholder="To date"
-            value={dateTo}
-            onChange={(e) => onDateToChange(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-
-        <div className="relative flex-1">
-          <Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="number"
-            placeholder="Min brokers"
-            value={brokersMin}
-            onChange={(e) => onBrokersMinChange(e.target.value)}
-            className="pl-10"
-            min="0"
-          />
-        </div>
-
-        <div className="relative flex-1">
-          <Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="number"
-            placeholder="Max brokers"
-            value={brokersMax}
-            onChange={(e) => onBrokersMaxChange(e.target.value)}
-            className="pl-10"
-            min="0"
-          />
-        </div>
       </div>
     </div>
   );

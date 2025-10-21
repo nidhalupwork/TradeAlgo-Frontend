@@ -275,7 +275,10 @@ const StrategyMarketplace = () => {
       {/* For whole accounts */}
       <RiskSettingModal
         open={open}
-        onModalClose={() => setOpen('')}
+        onModalClose={() => {
+          if (isLoading) return;
+          setOpen('');
+        }}
         isLoading={isLoading}
         setIsLoading={setIsLoading}
       />

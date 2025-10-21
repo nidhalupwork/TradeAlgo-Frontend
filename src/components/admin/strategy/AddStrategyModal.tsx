@@ -16,12 +16,18 @@ interface AddStrategyModalProps {
   selectedStrategy: StrategyInterface;
   open: 'Edit' | 'Add' | 'Delete' | '';
   onOpenChange: () => void;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const AddStrategyModal = ({ open, onOpenChange, selectedStrategy }: AddStrategyModalProps) => {
-  const { setUser } = useAuth();
+export const AddStrategyModal = ({
+  open,
+  onOpenChange,
+  selectedStrategy,
+  isLoading,
+  setIsLoading,
+}: AddStrategyModalProps) => {
   const { setStrategies, strategies } = useAdmin();
-  const [isLoading, setIsLoading] = useState(false);
   const [strategy, setStrategy] = useState({
     id: '',
     title: '',
@@ -55,6 +61,7 @@ export const AddStrategyModal = ({ open, onOpenChange, selectedStrategy }: AddSt
       }
 
       if (type === 'Add') {
+        setIsLoading(true);
         const data = await Api.post('/strategy/add-strategy', strategy);
         console.log('strategy add:', data);
         if (data?.success) {
@@ -69,6 +76,7 @@ export const AddStrategyModal = ({ open, onOpenChange, selectedStrategy }: AddSt
           onOpenChange();
           return;
         }
+        setIsLoading(true);
         const data = await Api.post('/strategy/update-strategy', strategy);
         console.log('strategy add:', data);
         if (data?.success) {
@@ -79,7 +87,7 @@ export const AddStrategyModal = ({ open, onOpenChange, selectedStrategy }: AddSt
           );
         }
       }
-
+      setIsLoading(false);
       onOpenChange();
     } catch (error) {
       toast({

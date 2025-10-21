@@ -32,6 +32,11 @@ export const SocketProvider = ({ children }) => {
     closedPositions: [],
     accountInformation: [],
   });
+  const [userData, setUserData] = useState({
+    id: '',
+    email: '',
+    accountIds: [],
+  });
 
   useEffect(() => {
     let temp = localStorage.getItem('googleId');
@@ -54,6 +59,11 @@ export const SocketProvider = ({ children }) => {
     socketRef.current.on('disconnect', () => {
       setConnected(false);
       console.log('Disconnected from socket');
+
+      const isSignedIn = localStorage.getItem('isSignedIn');
+      if (isSignedIn && userData.id && userData.email && userData.accountIds.length > 0) {
+        initializeSocket(userData.id, userData.email, userData.accountIds);
+      }
     });
 
     socketRef.current.on('stats', (data) => {
@@ -76,6 +86,7 @@ export const SocketProvider = ({ children }) => {
       accountIds,
       googleId,
     });
+    setUserData({ id, email, accountIds });
   }
 
   function deinitializeSocket(id: string, accountIds: string[]) {

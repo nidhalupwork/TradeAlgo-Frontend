@@ -11,7 +11,7 @@ All colors MUST be HSL.
     /* Core Trading Colors */
     --background: 222 47% 5%;
     --foreground: 210 20% 98%;
-    
+
     /* Trading Specific */
     --profit: 158 64% 52%;
     --profit-glow: 158 64% 62%;
@@ -46,41 +46,41 @@ All colors MUST be HSL.
     --chart-18: 54, 91%, 65%;
     --chart-19: 36, 81%, 56%;
     --chart-20: 18, 83%, 53%;
-    
+
     /* Cards and Surfaces */
     --card: 222 47% 8%;
     --card-foreground: 210 20% 98%;
     --card-elevated: 222 47% 11%;
-    
+
     --popover: 222 47% 8%;
     --popover-foreground: 210 20% 98%;
-    
+
     /* Primary Brand */
     --primary: 217 91% 60%;
     --primary-foreground: 222 47% 5%;
     --primary-glow: 217 91% 70%;
-    
+
     /* Secondary */
     --secondary: 222 47% 15%;
     --secondary-foreground: 210 20% 98%;
-    
+
     /* Muted */
     --muted: 222 47% 15%;
     --muted-foreground: 215 20% 65%;
-    
+
     /* Accent */
     --accent: 43 96% 56%;
     --accent-foreground: 222 47% 5%;
-    
+
     /* Destructive */
     --destructive: 0 72% 51%;
     --destructive-foreground: 210 20% 98%;
-    
+
     /* Borders and Inputs */
     --border: 222 47% 15%;
     --input: 222 47% 12%;
     --ring: 217 91% 60%;
-    
+
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
     --gradient-profit: linear-gradient(135deg, hsl(var(--profit)), hsl(var(--profit-glow)));
@@ -88,7 +88,7 @@ All colors MUST be HSL.
     --gradient-gold: linear-gradient(135deg, hsl(var(--gold)), hsl(var(--warning)));
     --gradient-dark: linear-gradient(180deg, hsl(222 47% 8%), hsl(222 47% 5%));
     --gradient-danger: linear-gradient(135deg, hsl(0 84% 60%), hsl(0 84% 50%));
-    
+
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5);
@@ -97,14 +97,14 @@ All colors MUST be HSL.
     --shadow-glow-loss: 0 0 20px hsl(var(--loss) / 0.3);
     --shadow-glow-primary: 0 0 30px hsl(var(--primary) / 0.2);
     --shadow-danger: 0 0 20px hsl(0 84% 60% / 0.3);
-    
+
     /* Animations */
     --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    
+
     --radius: 0.5rem;
-    
+
     /* Sidebar */
     --sidebar-background: 222 47% 6%;
     --sidebar-foreground: 210 20% 95%;
@@ -115,7 +115,7 @@ All colors MUST be HSL.
     --sidebar-border: 222 47% 15%;
     --sidebar-ring: 217 91% 60%;
   }
-  
+
   .dark {
     /* Dark mode is default for trading platforms */
   }
@@ -129,4 +129,9 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+}
+
+input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(0.8); /* Inverts and adjusts brightness to color the icon */
+  cursor: pointer;
 }
