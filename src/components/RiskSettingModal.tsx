@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, TrendingUp } from 'lucide-react';
+import { CircleAlert, Loader2, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import { ConnectAccount } from '@/lib/types';
 import apiClient from '@/services/Api';
@@ -42,11 +42,11 @@ export const RiskSettingModal = ({
       setAccounts([...user.accounts]);
       setSelectedAccount({
         ...user.accounts[0],
-        strategySettings: user.accounts[0].strategySettings.map((ss) => ({ ...ss })),
+        strategySettings: user?.accounts[0]?.strategySettings?.map((ss) => ({ ...ss })),
       });
       setSelectedAccount1({
         ...user.accounts[0],
-        strategySettings: user.accounts[0].strategySettings.map((ss) => ({ ...ss })),
+        strategySettings: user?.accounts[0]?.strategySettings?.map((ss) => ({ ...ss })),
       });
     }
   }, [open]);
@@ -55,6 +55,7 @@ export const RiskSettingModal = ({
     const accountInfo = stats?.accountInformation?.find((a) => a?.accountId === selectedAccount?.accountId);
     setCurrency(accountInfo?.currency ?? 'USD');
   }, [selectedAccount]);
+
   useEffect(() => {
     const accountInfo = stats?.accountInformation?.find((a) => a?.accountId === selectedAccount1?.accountId);
     setCurrency1(accountInfo?.currency ?? 'USD');
@@ -103,6 +104,14 @@ export const RiskSettingModal = ({
 
   async function onSaveClick() {
     console.log(accounts, user.accounts);
+    if (accounts?.length === 0) {
+      toast({
+        title: 'No Account',
+        description: 'You have no account. Please connect account at first.',
+        variant: 'warn',
+      });
+      return;
+    }
     if (!hasAccountsChanged(accounts, user.accounts)) {
       toast({
         title: 'No changes detected',
@@ -175,27 +184,34 @@ export const RiskSettingModal = ({
           </div>
 
           <div className="space-y-1">
-            {accounts.map((account) => {
-              return (
-                <div
-                  key={account.accountId}
-                  className="flex gap-2 text-sm hover:cursor-pointer text-muted-foreground hover:text-muted-foreground/80 transition-all"
-                  onClick={() => setSelectedAccount(account)}
-                >
+            {accounts.length > 0 ? (
+              accounts?.map((account) => {
+                return (
                   <div
-                    className={`w-5 h-5 rounded-full ${
-                      selectedAccount.accountId === account.accountId ? 'bg-profit' : 'bg-muted'
-                    }`}
-                  />
-                  <p>
-                    {account.name} <span className="text-xs">({account.platform})</span>: Daily Loss Limit ={' '}
-                    {account.dailyLossCurrency === 'amount' && '$'}
-                    {account.dailyLossLimit}
-                    {account.dailyLossCurrency === 'percentage' && '%'}
-                  </p>
-                </div>
-              );
-            })}
+                    key={account.accountId}
+                    className="flex gap-2 text-sm hover:cursor-pointer text-muted-foreground hover:text-muted-foreground/80 transition-all"
+                    onClick={() => setSelectedAccount(account)}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full ${
+                        selectedAccount.accountId === account.accountId ? 'bg-profit' : 'bg-muted'
+                      }`}
+                    />
+                    <p>
+                      {account.name} <span className="text-xs">({account.platform})</span>: Daily Loss Limit ={' '}
+                      {account.dailyLossCurrency === 'amount' && '$'}
+                      {account.dailyLossLimit}
+                      {account.dailyLossCurrency === 'percentage' && '%'}
+                    </p>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="flex gap-2 items-center mt-4">
+                <CircleAlert color="gold" size={20} />
+                <p className="text-muted-foreground text-sm">You have no account</p>
+              </div>
+            )}
           </div>
 
           {/* Actions on Limit Breach */}
@@ -244,27 +260,34 @@ export const RiskSettingModal = ({
             <span></span>
           </div> */}
           <div className="space-y-1">
-            {accounts.map((account) => {
-              return (
-                <div
-                  key={account.accountId}
-                  className="flex gap-2 text-sm hover:cursor-pointer text-muted-foreground hover:text-muted-foreground/80 transition-all"
-                  onClick={() => setSelectedAccount1(account)}
-                >
+            {accounts.length > 0 ? (
+              accounts.map((account) => {
+                return (
                   <div
-                    className={`w-5 h-5 rounded-full ${
-                      selectedAccount1.accountId === account.accountId ? 'bg-profit' : 'bg-muted'
-                    }`}
-                  />
-                  <p>
-                    {account.name} <span className="text-xs">({account.platform})</span>: Max Loss Limit ={' '}
-                    {account.maxLossCurrency === 'amount' && '$'}
-                    {account.maxLossLimit}
-                    {account.maxLossCurrency === 'percentage' && '%'}
-                  </p>
-                </div>
-              );
-            })}
+                    key={account.accountId}
+                    className="flex gap-2 text-sm hover:cursor-pointer text-muted-foreground hover:text-muted-foreground/80 transition-all"
+                    onClick={() => setSelectedAccount1(account)}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full ${
+                        selectedAccount1.accountId === account.accountId ? 'bg-profit' : 'bg-muted'
+                      }`}
+                    />
+                    <p>
+                      {account.name} <span className="text-xs">({account.platform})</span>: Max Loss Limit ={' '}
+                      {account.maxLossCurrency === 'amount' && '$'}
+                      {account.maxLossLimit}
+                      {account.maxLossCurrency === 'percentage' && '%'}
+                    </p>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="flex gap-2 items-center mt-4">
+                <CircleAlert color="gold" size={20} />
+                <p className="text-muted-foreground text-sm">You have no account</p>
+              </div>
+            )}
           </div>
 
           {/* Actions on Limit Breach */}
