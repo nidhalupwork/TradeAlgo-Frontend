@@ -1,6 +1,17 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Activity, Settings, Users, SquareUser, Bell, LogOut, ChevronDown, Logs, UserCog } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Activity,
+  Settings,
+  Users,
+  SquareUser,
+  Bell,
+  LogOut,
+  ChevronDown,
+  Logs,
+  UserCog,
+} from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useEffect } from 'react';
 import logo from '@/assets/logo.png';
@@ -31,7 +42,7 @@ const Navbar = () => {
     // user and admin page
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, role: 'all' },
     { path: '/strategies', label: 'Strategies', icon: Activity, role: 'all' },
-    
+
     // admin only page
     { path: '/control', label: 'Admin Control', icon: UserCog, role: 'admin' },
     { path: '/user-management', label: 'Users', icon: Users, role: 'admin' },
@@ -46,7 +57,8 @@ const Navbar = () => {
           <div className="flex items-center space-x-8">
             <Link to="/" className="flex items-center space-x-2">
               <img src={logo} className="h-8 w-8 text-primary" alt="TradeAlgo logo" />
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-gray-700 via-gray-600 to-gray-200">
+              {/* <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-gray-700 via-gray-600 to-gray-200"> */}
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-br text-gray-200">
                 TradeAlgorithm
               </span>
             </Link>
@@ -108,7 +120,10 @@ const Navbar = () => {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => signOut()} className="text-red-600 focus:text-red-600 hover:cursor-pointer ">
+                  <DropdownMenuItem
+                    onClick={() => signOut()}
+                    className="text-red-600 focus:text-red-600 hover:cursor-pointer "
+                  >
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out
                   </DropdownMenuItem>
