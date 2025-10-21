@@ -174,7 +174,7 @@ export const TradingChart = ({
                 fontSize={12}
                 tickLine={true}
                 axisLine={true}
-                tickFormatter={(value) => (min > 1000 ? `$${(value / 1000).toFixed(0)}k` : `$${Math.floor(value)}`)}
+                tickFormatter={(value) => (value > 1000 ? `$${(value / 1000).toFixed(0)}k` : `$${value}`)}
                 domain={[min, max]}
               />
               <Tooltip content={<CustomTooltip accounts={selectedAccounts} account={selectedAccount} />} />
