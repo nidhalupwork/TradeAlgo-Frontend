@@ -199,7 +199,7 @@ export const TradingChart = ({ data, selectedAccount, accounts, currency, range,
                 domain={[min, max]}
               />
               <Tooltip content={<CustomTooltip account={selectedAccount} />} />
-              <ReferenceLine y={0} stroke="red" strokeDasharray="3 3" strokeWidth={2} targetY={0} />
+              <ReferenceLine y={0} stroke="red" strokeDasharray="3 3" strokeWidth={2} />
               {/* {data && ( */}
               {/* <defs>
                 <linearGradient id="splitColor" x1="-1" y1="0" x2="1" y2="0">
