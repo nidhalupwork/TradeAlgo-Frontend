@@ -10,12 +10,13 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background main">
       <Navbar />
       <div className="pt-16">
-        {!user.role && (
+        {!user.role ? (
           <div className="w-full h-[calc(100vh-64px)] flex items-center justify-center">
             <Spinner className="w-12 h-12" />
           </div>
+        ) : (
+          <TradingDashboard />
         )}
-        <TradingDashboard />
       </div>
     </div>
   );
