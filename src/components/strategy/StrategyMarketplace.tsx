@@ -12,6 +12,7 @@ import { StrategyInterface } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { RiskSettingModal } from './AccountRiskSettingModal';
 import { TradingTimeModal } from './TradingTimeModal';
+import { Spinner } from '../ui/Spinner';
 
 const StrategyMarketplace = () => {
   const { toast } = useToast();
@@ -32,6 +33,7 @@ const StrategyMarketplace = () => {
   }, []);
 
   async function fetchStrategies() {
+    setIsLoading(true);
     try {
       const data = await Api.get('/strategy');
       console.log('Data for fetching strategies:', data);
@@ -48,6 +50,7 @@ const StrategyMarketplace = () => {
     } catch (error) {
       console.error('Error while fetching strategies:', error);
     }
+    setIsLoading(false);
   }
 
   async function subscribeStrategy(strategyId: string, accountId: string, type: string) {
@@ -88,7 +91,11 @@ const StrategyMarketplace = () => {
     setStrategy(null);
   }
 
-  return (
+  return open === '' && isLoading === true ? (
+    <div className="w-full h-[calc(100vh-64px)] flex items-center justify-center">
+      <Spinner className="w-12 h-12" />
+    </div>
+  ) : (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -289,12 +296,12 @@ const StrategyMarketplace = () => {
       />
 
       {/* For each account */}
-      <TradingTimeModal
+      {/* <TradingTimeModal
         open={open}
         onConfigModalClose={onConfigModalClose}
         isLoading={isLoading}
         setIsLoading={setIsLoading}
-      />
+      /> */}
     </div>
   );
 };

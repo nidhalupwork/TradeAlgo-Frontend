@@ -1,8 +1,9 @@
-import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart, ReferenceLine } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '../ui/button';
 import { ConnectAccount } from '@/lib/types';
 import { useMemo } from 'react';
+import { roundUp } from '@/lib/utils';
 
 interface TradingChartProps {
   data: any;
@@ -108,7 +109,33 @@ export const TradingChart = ({ data, selectedAccount, accounts, currency, range,
     const min = Math.min(...data.map((d) => d[selectedAccount?.accountId]));
     const max = Math.max(...data.map((d) => d[selectedAccount?.accountId]));
     const padding = (max - min) * 0.1;
-    return { min: (min >= padding ? min : padding) - padding, max: max + padding };
+    // return { min: (min >= padding ? min : padding) - padding, max: max + padding };
+    return { min: roundUp(min - padding, 2), max: roundUp(max + padding, 2) };
+  }, [data, selectedAccount]);
+
+  const generateTicks = (data, key, tickCount = 5) => {
+    const values = data.map((d) => d[key]);
+    let min = Math.min(...values);
+    let max = Math.max(...values);
+    if (min > 0) min = 0;
+    if (max < 0) max = 0;
+
+    const step = (max - min) / (tickCount - 1);
+    const ticks = [];
+    for (let i = 0; i < tickCount; i++) {
+      ticks.push((min + step * i).toFixed(0));
+    }
+
+    // Add zero if not already in ticks and zero is within the possible min/max range
+    if (!ticks.includes(0) && min < 0 && max > 0) {
+      ticks.push(0);
+      ticks.sort((a, b) => a - b); // Keep ticks in order
+    }
+    return ticks;
+  };
+
+  const ticks = useMemo(() => {
+    return generateTicks(data, selectedAccount.accountId, 5);
   }, [data, selectedAccount]);
 
   // const [off, setOff] = useState(0);
@@ -168,9 +195,11 @@ export const TradingChart = ({ data, selectedAccount, accounts, currency, range,
                 tickLine={true}
                 axisLine={true}
                 tickFormatter={(value) => `${value}%`}
+                ticks={ticks}
                 domain={[min, max]}
               />
               <Tooltip content={<CustomTooltip account={selectedAccount} />} />
+              <ReferenceLine y={0} stroke="red" strokeDasharray="3 3" strokeWidth={2} targetY={0} />
               {/* {data && ( */}
               {/* <defs>
                 <linearGradient id="splitColor" x1="-1" y1="0" x2="1" y2="0">
