@@ -18,7 +18,7 @@ export const RiskConfigModal = ({
   isLoading,
   setIsLoading,
 }: {
-  open: 'Global' | 'Strategy' | '';
+  open: 'Global' | 'Strategy' | 'Time' | '';
   onConfigModalClose: () => void;
   strategy: any;
   isLoading: boolean;
@@ -270,7 +270,7 @@ export const RiskConfigModal = ({
                           {account.name}{' '}
                           <span className="text-xs">({accSetting?.subscribed ? 'Subscribed' : 'Unsubscribed'})</span>:
                         </p>
-                        <p>Risk Selected = {accSetting?.riskPerTrade}%</p>
+                        <p>Risk Selected = {accSetting?.riskPerTrade ?? 0}%</p>
                       </div>
                     );
                   })}

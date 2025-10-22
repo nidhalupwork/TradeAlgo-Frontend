@@ -1,5 +1,5 @@
 import Navbar from "@/components/Navbar";
-import StrategyMarketplace from "@/components/StrategyMarketplace";
+import StrategyMarketplace from "@/components/strategy/StrategyMarketplace";
 
 const Strategies = () => {
   return (

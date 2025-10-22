@@ -6,10 +6,10 @@ import { useMemo } from 'react';
 
 interface TradingChartProps {
   data: any;
-  selectedAccounts: { accountId: string; name: string }[];
   selectedAccount: { accountId: string; name: string };
   accounts: ConnectAccount[];
   range: '1m' | '3m' | '1y';
+  currency: string;
   setRange: React.Dispatch<React.SetStateAction<'3m' | '1y' | '1m'>>;
 }
 
@@ -36,7 +36,7 @@ const accountColors = [
   'hsl(var(--chart-20))',
 ];
 
-const CustomTooltip = ({ active, payload, label, accounts, account }: any) => {
+const CustomTooltip = ({ active, payload, label, account }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="rounded-lg border bg-card p-3 shadow-md">
@@ -44,7 +44,7 @@ const CustomTooltip = ({ active, payload, label, accounts, account }: any) => {
         {payload.map((entry: any, index: number) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
             {/* {accounts.find((a) => a.accountId === entry.dataKey)?.name}: ${entry.value.toLocaleString()} */}
-            {account?.name}: ${entry.value.toLocaleString()}
+            {account?.name}: {entry.value.toLocaleString()}%
           </p>
         ))}
       </div>
@@ -75,14 +75,7 @@ const CustomizedDot = ({ cx, cy, stroke, payload, value, index, data, accountId,
   );
 };
 
-export const TradingChart = ({
-  data,
-  selectedAccounts,
-  selectedAccount,
-  accounts,
-  range,
-  setRange,
-}: TradingChartProps) => {
+export const TradingChart = ({ data, selectedAccount, accounts, currency, range, setRange }: TradingChartProps) => {
   // Choose XAxis tick formatter and ticks interval based on range
   const { tickFormatter, interval } = useMemo(() => {
     if (range === '1m') {
@@ -174,10 +167,10 @@ export const TradingChart = ({
                 fontSize={12}
                 tickLine={true}
                 axisLine={true}
-                tickFormatter={(value) => (value > 1000 ? `$${(value / 1000).toFixed(0)}k` : `$${value}`)}
+                tickFormatter={(value) => `${value}%`}
                 domain={[min, max]}
               />
-              <Tooltip content={<CustomTooltip accounts={selectedAccounts} account={selectedAccount} />} />
+              <Tooltip content={<CustomTooltip account={selectedAccount} />} />
               {/* {data && ( */}
               {/* <defs>
                 <linearGradient id="splitColor" x1="-1" y1="0" x2="1" y2="0">

@@ -135,3 +135,10 @@ input[type='date']::-webkit-calendar-picker-indicator {
   filter: invert(1) brightness(0.8); /* Inverts and adjusts brightness to color the icon */
   cursor: pointer;
 }
+
+input[type='time']::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(0.8); /* Inverts and adjusts brightness to color the icon */
+  cursor: pointer;
+  right: 10px;
+  position: absolute;
+}

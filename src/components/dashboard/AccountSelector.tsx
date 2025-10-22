@@ -6,7 +6,6 @@ import { RadioGroupItem } from '../ui/radio-group';
 interface AccountSelectorProps {
   accounts: ConnectAccount[];
   selectedAccount: { accountId: string; name: string };
-  selectedAccounts: { accountId: string; name: string }[];
   onAccountToggle: (accountId: string, name: string) => void;
 }
 
@@ -35,7 +34,6 @@ const accountColors = [
 
 export const AccountSelector = ({
   accounts,
-  selectedAccounts,
   selectedAccount,
   onAccountToggle,
 }: AccountSelectorProps) => {

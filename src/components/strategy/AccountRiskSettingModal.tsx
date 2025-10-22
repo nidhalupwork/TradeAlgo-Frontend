@@ -19,7 +19,7 @@ export const RiskSettingModal = ({
   isLoading,
   setIsLoading,
 }: {
-  open: 'Global' | 'Strategy' | '';
+  open: 'Global' | 'Strategy' | 'Time' | '';
   onModalClose: () => void;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -72,6 +72,9 @@ export const RiskSettingModal = ({
       );
       setSelectedAccount(updatedAccount);
       setAccounts(updatedAccounts);
+      if (selectedAccount.login === selectedAccount1.login) {
+        setSelectedAccount1(updatedAccount);
+      }
     } else {
       const updatedAccount = {
         ...selectedAccount1,
@@ -82,6 +85,9 @@ export const RiskSettingModal = ({
       );
       setSelectedAccount1(updatedAccount);
       setAccounts(updatedAccounts);
+      if (selectedAccount.login === selectedAccount1.login) {
+        setSelectedAccount(updatedAccount);
+      }
     }
   }
 
@@ -199,9 +205,8 @@ export const RiskSettingModal = ({
                     />
                     <p>
                       {account.name} <span className="text-xs">({account.platform})</span>: Daily Loss Limit ={' '}
-                      {account.dailyLossCurrency === 'amount' && '$'}
                       {account.dailyLossLimit}
-                      {account.dailyLossCurrency === 'percentage' && '%'}
+                      {account.dailyLossCurrency === 'percentage' ? '%' : ` ${currency}`}
                     </p>
                   </div>
                 );
@@ -275,9 +280,8 @@ export const RiskSettingModal = ({
                     />
                     <p>
                       {account.name} <span className="text-xs">({account.platform})</span>: Max Loss Limit ={' '}
-                      {account.maxLossCurrency === 'amount' && '$'}
                       {account.maxLossLimit}
-                      {account.maxLossCurrency === 'percentage' && '%'}
+                      {account.maxLossCurrency === 'percentage' ? '%' : ` ${currency1}`}
                     </p>
                   </div>
                 );

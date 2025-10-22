@@ -3,22 +3,22 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
-import { TrendingUp, BarChart3, Clock, Users, Star, Info, Check, Settings, CircleAlert, Activity } from 'lucide-react';
+import { Settings, CircleAlert, Activity } from 'lucide-react';
 import Api from '@/services/Api';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { RiskConfigModal } from './RiskConfigModal';
-import { RiskSettingsInterface, StrategyInterface } from '@/lib/types';
+import { StrategyInterface } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { RiskSettingModal } from './RiskSettingModal';
-import Announcement from './Announcement';
+import { RiskSettingModal } from './AccountRiskSettingModal';
+import { TradingTimeModal } from './TradingTimeModal';
 
 const StrategyMarketplace = () => {
   const { toast } = useToast();
   const { user, setUser } = useAuth();
   const [strategies, setStrategies] = useState<StrategyInterface[]>([]);
   const [strategy, setStrategy] = useState<StrategyInterface | null>(null);
-  const [open, setOpen] = useState<'Global' | 'Strategy' | ''>('');
+  const [open, setOpen] = useState<'Global' | 'Strategy' | 'Time' | ''>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [stats, setStats] = useState({
     count: 0,
@@ -97,9 +97,14 @@ const StrategyMarketplace = () => {
           <p className="text-muted-foreground">Select, connect and configure your automated trading strategies.</p>
         </div>
 
-        <Button variant="gold" onClick={() => setOpen('Global')}>
-          Account Risk Settings
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="gold" onClick={() => setOpen('Global')}>
+            Account Risk Settings
+          </Button>
+          <Button variant="gold" onClick={() => setOpen('Time')}>
+            Trading Time Settings
+          </Button>
+        </div>
       </div>
       {/* {user.status === 'pending' && <Announcement />} */}
       {/* Stats Overview */}
@@ -279,6 +284,14 @@ const StrategyMarketplace = () => {
           if (isLoading) return;
           setOpen('');
         }}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
+      />
+
+      {/* For each account */}
+      <TradingTimeModal
+        open={open}
+        onConfigModalClose={onConfigModalClose}
         isLoading={isLoading}
         setIsLoading={setIsLoading}
       />

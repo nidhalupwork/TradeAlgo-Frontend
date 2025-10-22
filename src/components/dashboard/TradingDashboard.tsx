@@ -49,7 +49,6 @@ const TradingDashboard = () => {
     accountId: '',
     name: '',
   });
-  const [selectedAccounts, setSelectedAccounts] = useState([]);
   const [charts, setCharts] = useState([]);
   const [range, setRange] = useState<'1m' | '3m' | '1y'>('1m');
 
@@ -204,8 +203,8 @@ const TradingDashboard = () => {
             <div>
               <p className="text-sm text-muted-foreground">P&L</p>
               <p className={`text-2xl font-bold ${pnlObj.pnl >= 0 ? 'text-profit' : 'text-loss'}`}>
-                ${pnlObj.pnl >= 0 ? '+' : ''}
-                {pnlObj.pnl.toFixed(2)}
+                {pnlObj.pnl >= 0 ? '+' : ''}
+                {pnlObj.pnl.toFixed(2) + ' ' + currency}
               </p>
               <p className={`text-sm ${pnlObj.pnl >= 0 ? 'text-profit' : 'text-loss'}`}>
                 {pnlObj.pnl >= 0 ? '+' : ''}
@@ -238,8 +237,8 @@ const TradingDashboard = () => {
             <div>
               <p className="text-sm text-muted-foreground">Unrealized PNL</p>
               <p className={`text-2xl font-bold ${pnlObj.unrealizedPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
-                ${pnlObj.unrealizedPnl >= 0 ? '+' : ''}
-                {pnlObj.unrealizedPnl.toFixed(2)}
+                {pnlObj.unrealizedPnl >= 0 ? '+' : ''}
+                {pnlObj.unrealizedPnl.toFixed(2) + ' ' + currency}
               </p>
               <p className={`text-sm ${pnlObj.unrealizedPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
                 {pnlObj.unrealizedPnl >= 0 ? '+' : ''}
@@ -259,7 +258,6 @@ const TradingDashboard = () => {
         <div className="lg:col-span-1">
           <AccountSelector
             accounts={user.accounts}
-            selectedAccounts={selectedAccounts}
             selectedAccount={selectedAccount}
             onAccountToggle={handleAccountToggle}
           />
@@ -268,11 +266,11 @@ const TradingDashboard = () => {
         <div className="lg:col-span-3">
           <TradingChart
             data={transformData(charts, range)}
-            selectedAccounts={selectedAccounts}
             selectedAccount={selectedAccount}
             accounts={user.accounts}
             range={range}
             setRange={setRange}
+            currency={currency}
           />
         </div>
       </div>
