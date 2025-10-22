@@ -66,7 +66,7 @@ export const AccountSelector = ({
                     checked={selectedAccount?.accountId === account?.accountId}
                   /> */}
                   <div className="flex justify-between items-center w-full">
-                    <label htmlFor={account.accountId} className={`text-sm font-medium `}>
+                    <label htmlFor={account.accountId} className={`text-sm font-medium hover:cursor-pointer`}>
                       {account.name} - {account.login}
                     </label>
                     <div

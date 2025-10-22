@@ -14,6 +14,7 @@ interface StatsInterface {
 interface SocketContextInterface {
   socket: Socket;
   connected: boolean;
+  portfolio: any;
   initializeSocket: (id: string, email: string, accountIds: string[]) => void;
   deinitializeSocket: (id: string, accountIds: string[]) => void;
   signOutSocket: (id: string, email: string) => void;
@@ -25,6 +26,7 @@ const SocketContext = createContext<SocketContextInterface>(null);
 export const SocketProvider = ({ children }) => {
   const socketRef = useRef<Socket>(null);
   const [connected, setConnected] = useState(false);
+  const [portfolio, setPortfolio] = useState();
   const [googleId, setGoogleId] = useState(localStorage.getItem('googleId'));
   const [stats, setStats] = useState({
     balance: {},
@@ -69,6 +71,10 @@ export const SocketProvider = ({ children }) => {
     socketRef.current.on('stats', (data) => {
       // console.log('Received from socket connection!');
       processStatsData(data);
+    });
+
+    socketRef.current.on('portfolio', (data) => {
+      setPortfolio(data.portfolio);
     });
 
     return () => {
@@ -169,6 +175,7 @@ export const SocketProvider = ({ children }) => {
       value={{
         socket: socketRef.current,
         connected,
+        portfolio,
         initializeSocket,
         deinitializeSocket,
         signOutSocket,

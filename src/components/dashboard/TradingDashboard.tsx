@@ -27,7 +27,7 @@ import { roundUp } from '@/lib/utils';
 
 const TradingDashboard = () => {
   const { user } = useAuth();
-  const { stats } = useSocket();
+  const { stats, portfolio } = useSocket();
   const [filter, setFilter] = useState('All');
   const [activeTab, setActiveTab] = useState<'Open' | 'Close' | 'All'>('All');
   const [filterPrefix, setFilterPrefix] = useState(1);
@@ -108,11 +108,27 @@ const TradingDashboard = () => {
   }, [stats, filter, filterPrefix, activeTab, selectedAccount]);
 
   useEffect(() => {
+    setSelectedAccount({
+      accountId: user.accounts[0]?.accountId ?? '',
+      name: user.accounts[0]?.name ?? '',
+    });
     fetchPortfolio();
     return () => {
       console.log('Component unmounted');
     };
-  }, []);
+  }, [user]);
+
+  useEffect(() => {
+    setCharts((prevCharts) => {
+      return prevCharts.map((prevChart) => {
+        if (prevChart.login === portfolio.login) {
+          return portfolio;
+        } else {
+          return prevChart;
+        }
+      });
+    });
+  }, [portfolio]);
 
   function sortPositions(filt: string) {
     let pref = filterPrefix;
@@ -132,21 +148,12 @@ const TradingDashboard = () => {
       console.log('data for portfolio:', data);
       if (data?.success) {
         setCharts(data.data.sort((a, b) => a.accountId.localeCompare(b.accountId)));
-        setSelectedAccount({
-          accountId: user.accounts[0]?.accountId ?? '',
-          name: user.accounts[0]?.name ?? '',
-        });
       }
     } catch (error) {}
   }
 
   const handleAccountToggle = (accountId: string, name: string) => {
-    // setSelectedAccounts((prev) =>
-    //   prev.some((p) => p.accountId === accountId)
-    //     ? prev.filter((p) => p.accountId !== accountId)
-    //     : [...prev, { accountId, name }]
-    // );
-    setSelectedAccount({ accountId, name });
+    if (accountId !== selectedAccount.accountId) setSelectedAccount({ accountId, name });
   };
 
   const ths = [
@@ -333,7 +340,7 @@ const TradingDashboard = () => {
                         <td className="py-3 px-4">
                           <div className={position.profit >= 0 ? 'text-profit' : 'text-loss'}>
                             <p className="font-semibold">
-                              ${position.profit >= 0 ? '+' : ''}
+                              {position.profit >= 0 ? '+' : ''}
                               {position?.profit?.toFixed(2)}
                             </p>
                             {/* <p className="text-xs">

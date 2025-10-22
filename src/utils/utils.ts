@@ -4,19 +4,22 @@ export function transformData(items: DataItem[], range: '1m' | '3m' | '1y') {
   // Calculate the start date based on range
   const now = new Date();
   const startDate = new Date();
+  const endDate = new Date();
 
   switch (range) {
     case '1m':
-      startDate.setDate(now.getDate() - 30);
+      startDate.setUTCDate(now.getDate() - 30);
       break;
     case '3m':
-      startDate.setMonth(now.getMonth() - 3);
+      startDate.setUTCMonth(now.getMonth() - 3);
       break;
     case '1y':
-      startDate.setFullYear(now.getFullYear() - 1);
+      startDate.setUTCFullYear(now.getFullYear() - 1);
       break;
   }
   startDate.setUTCHours(0, 0, 0, 0);
+  endDate.setHours(23, 59, 59, 999);
+  // console.log('startDate:', startDate, 'now:', now, 'endDate:', endDate);
 
   // Filter and process each account's data
   const processedAccounts = items.map((item) => {
@@ -24,7 +27,6 @@ export function transformData(items: DataItem[], range: '1m' | '3m' | '1y') {
     const filteredHistory = item.history
       .filter((entry) => {
         const entryDate = new Date(entry.date);
-        // console.log('======', entry, '------', entryDate);
         return entryDate >= startDate && entryDate <= now;
       })
       .sort((a, b) => a.date - b.date);
@@ -46,16 +48,18 @@ export function transformData(items: DataItem[], range: '1m' | '3m' | '1y') {
       lastKnownQuantity: filteredHistory.length > 0 ? filteredHistory[filteredHistory.length - 1].quantity : 0,
     };
   });
+  // console.log('processedAccounts:', processedAccounts);
 
   // Generate continuous daily data
   const result = [];
   const currentDate = new Date(startDate);
 
-  while (currentDate <= now) {
+  while (currentDate <= endDate) {
     const dateKey = currentDate.toDateString();
     const record: any = {
       date: currentDate.toISOString().split('T')[0], // YYYY-MM-DD format
     };
+    // console.log('dateKey:', dateKey);
 
     // For each account, get the quantity for this date or use the appropriate fallback
     processedAccounts.forEach((account) => {
@@ -77,8 +81,9 @@ export function transformData(items: DataItem[], range: '1m' | '3m' | '1y') {
     });
 
     result.push(record);
-    currentDate.setDate(currentDate.getDate() + 1);
+    currentDate.setUTCDate(currentDate.getUTCDate() + 1);
   }
+  // console.log('result:', result);
 
   // Ensure we have exactly the right number of days for the range
   const expectedDays = Math.ceil((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
