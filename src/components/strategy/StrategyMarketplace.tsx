@@ -108,9 +108,9 @@ const StrategyMarketplace = () => {
           <Button variant="gold" onClick={() => setOpen('Global')}>
             Account Risk Settings
           </Button>
-          {/* <Button variant="gold" onClick={() => setOpen('Time')}>
+          <Button variant="gold" onClick={() => setOpen('Time')}>
             Trading Time Settings
-          </Button> */}
+          </Button>
         </div>
       </div>
       {/* {user.status === 'pending' && <Announcement />} */}
@@ -296,12 +296,12 @@ const StrategyMarketplace = () => {
       />
 
       {/* For each account */}
-      {/* <TradingTimeModal
+      <TradingTimeModal
         open={open}
         onConfigModalClose={onConfigModalClose}
         isLoading={isLoading}
         setIsLoading={setIsLoading}
-      /> */}
+      />
     </div>
   );
 };

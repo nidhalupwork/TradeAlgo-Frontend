@@ -19,6 +19,7 @@ export interface UserInterface {
   trades?: any[] | undefined;
   status: 'active' | 'pending' | 'suspended' | 'deleted' | '';
   twoFA: boolean;
+  agreedTerms: boolean;
   emailVerified: boolean;
   globalSetting: GlobalRiskSetting;
 }

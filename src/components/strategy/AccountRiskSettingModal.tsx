@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Card } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,6 +12,7 @@ import { ConnectAccount } from '@/lib/types';
 import apiClient from '@/services/Api';
 import { useToast } from '@/hooks/use-toast';
 import { useSocket } from '@/providers/SocketProvider';
+import { Checkbox } from '../ui/checkbox';
 
 export const RiskSettingModal = ({
   open,
@@ -32,6 +33,7 @@ export const RiskSettingModal = ({
   const [selectedAccount1, setSelectedAccount1] = useState<ConnectAccount | null>(null);
   const [currency, setCurrency] = useState<string>('USD');
   const [currency1, setCurrency1] = useState<string>('USD');
+  const [termsChecked, setTermsChecked] = useState(false);
 
   useEffect(() => {
     if (open === '') {
@@ -109,7 +111,9 @@ export const RiskSettingModal = ({
   }
 
   async function onSaveClick() {
-    console.log(accounts, user.accounts);
+    if (!termsChecked) {
+      return;
+    }
     if (accounts?.length === 0) {
       toast({
         title: 'No Account',
@@ -219,14 +223,14 @@ export const RiskSettingModal = ({
             )}
           </div>
 
-          {/* Actions on Limit Breach */}
+          {/* Actions on Daily Limit Breach */}
           <div className="space-y-3">
             <Label>Actions on Limit Breach</Label>
             <div className="mt-2">
               <div className="flex items-center justify-between bg-background/50 rounded-lg">
                 <div className="flex items-start gap-2">
                   {/* <AlertTriangle className='h-4 text-warning' /> */}
-                  <span className="text-sm pl-2">
+                  <span className="text-sm pl-2 text-muted-foreground">
                     All open positions will be automatically closed, and trading activity will be paused for the
                     remainder of the day. Trading will resume the following day.
                   </span>
@@ -260,10 +264,6 @@ export const RiskSettingModal = ({
             </div>
           </div>
 
-          {/* <div>
-            <p>Close All Trades</p>
-            <span></span>
-          </div> */}
           <div className="space-y-1">
             {accounts.length > 0 ? (
               accounts.map((account) => {
@@ -294,14 +294,14 @@ export const RiskSettingModal = ({
             )}
           </div>
 
-          {/* Actions on Limit Breach */}
+          {/* Actions on Max Limit Breach */}
           <div className="space-y-3">
             <Label>Actions on Limit Breach</Label>
             <div className="mt-2">
               <div className="flex items-center justify-between bg-background/50 rounded-lg">
                 <div className="flex items-start gap-2">
                   {/* <AlertTriangle className='h-4 text-warning' /> */}
-                  <span className="text-sm pl-2">
+                  <span className="text-sm pl-2 text-muted-foreground">
                     All open positions will be automatically closed, and trading will remain paused until strategies are
                     manually reactivated.
                   </span>
@@ -309,10 +309,30 @@ export const RiskSettingModal = ({
               </div>
             </div>
           </div>
+
+          <Card>
+            <div className="p-2 space-y-1">
+              <div className="flex gap-2 items-start">
+                <div className="w-6 h-6 mt-1">
+                  <CircleAlert className="text-warning" size={16} />
+                </div>
+                <p className="text-sm">
+                  Loss limits are checked every 5 minutes. In volatile markets, your actual loss may briefly exceed this
+                  value before positions are closed.
+                </p>
+              </div>
+              <div className="flex gap-2 items-start">
+                <Checkbox className="mt-1" checked={termsChecked} onClick={() => setTermsChecked(!termsChecked)} />
+                <span className="text-muted-foreground text-sm">
+                  I understand enforcement is every 5 minutes and losses may exceed my limit in volatile markets
+                </span>
+              </div>
+            </div>
+          </Card>
         </div>
 
         <DialogFooter>
-          <Button variant="gold" disabled={isLoading} onClick={() => onSaveClick()}>
+          <Button variant="gold" disabled={isLoading || !termsChecked} onClick={() => onSaveClick()}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save Settings
           </Button>
