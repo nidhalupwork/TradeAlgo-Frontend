@@ -4,14 +4,14 @@ import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
   return (
-    <section className='relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-dark'>
+    <section className='relative min-h-screen overflow-hidden bg-gradient-dark'>
       {/* Animated background elements */}
       <div className='absolute inset-0 overflow-hidden'>
         <div className='absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-pulse' />
         <div className='absolute -bottom-40 -left-40 w-80 h-80 bg-profit/10 rounded-full blur-3xl animate-pulse delay-1000' />
       </div>
 
-      <div className='mx-auto px-4 relative z-10'>
+      <div className='mx-auto px-4 relative z-10 mt-20'>
         <div className='max-w-4xl mx-auto text-center'>
           <div className='inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/20 mb-6'>
             <Zap className='h-4 w-4 text-gold' />
