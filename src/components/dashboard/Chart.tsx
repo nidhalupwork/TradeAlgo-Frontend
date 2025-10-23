@@ -120,6 +120,10 @@ export const TradingChart = ({ data, selectedAccount, accounts, currency, range,
     if (min > 0) min = 0;
     if (max < 0) max = 0;
 
+    if (min === max) {
+      return [min];
+    }
+
     const step = (max - min) / (tickCount - 1);
     const ticks = [];
     for (let i = 0; i < tickCount; i++) {
