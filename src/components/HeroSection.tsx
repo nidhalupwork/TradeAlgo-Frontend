@@ -13,23 +13,37 @@ const HeroSection = () => {
 
       <div className='mx-auto px-4 relative z-10 mt-20'>
         <div className='max-w-4xl mx-auto text-center'>
-          <div className='inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/20 mb-6'>
+          <div className='inline-flex items-center gap-2 px-2 py-1 md:px-4 md:py-2 rounded-full bg-gold/10 border border-gold/20 mb-6'>
             <Zap className='h-4 w-4 text-gold' />
             <span className='text-sm text-gold font-medium'>Advanced Trading Automation Platform</span>
           </div>
 
-          <h1 className='text-5xl md:text-7xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent'>
+          <h1 className='text-3xl sm:text-5xl md:text-7xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent'>
             Automate Proprietary Algorithms
             <br />
             <span className='bg-gradient-profit bg-clip-text'>Trade Systematically</span>
           </h1>
 
-          <p className='text-xl text-muted-foreground mb-8 max-w-2xl mx-auto'>
+          <p className='md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto'>
             Seamlessly connect proven TradingView strategies directly to your trading account. Advanced risk controls,
             automated position sizing, and real-time execution monitoring.
           </p>
 
-          <div className='flex flex-col sm:flex-row items-center justify-center gap-4 mb-12'>
+          <div className='flex sm:hidden flex-col items-center justify-center gap-4 mb-12'>
+            <Link to='/dashboard'>
+              <Button size='sm' variant='gold' className='group'>
+                Start Trading Now
+                <ArrowRight className='ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform' />
+              </Button>
+            </Link>
+            <Link to='/strategies'>
+              <Button size='sm' variant='outline'>
+                <BarChart3 className='mr-2 h-5 w-5' />
+                Explore Strategies
+              </Button>
+            </Link>
+          </div>
+          <div className='hidden sm:flex flex-col sm:flex-row items-center justify-center gap-4 mb-12'>
             <Link to='/dashboard'>
               <Button size='xl' variant='gold' className='group'>
                 Start Trading Now

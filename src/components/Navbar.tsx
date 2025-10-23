@@ -81,11 +81,11 @@ const Navbar = () => {
             <Link to="/" className="flex items-center space-x-2">
               <img src={logo} className="h-8 w-8 text-primary" alt="TradeAlgo logo" />
               {/* <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-gray-700 via-gray-600 to-gray-200"> */}
-              <span className="text-xl font-bold text-gray-200">TradeAlgorithm</span>
+              <span className="text-sm md:text-xl font-bold text-gray-200 ">TradeAlgorithm</span>
             </Link>
 
             {isSignedIn === 'true' && (
-              <div className="hidden md:flex items-center space-x-1">
+              <div className="flex items-center space-x-1">
                 {navItems
                   .filter((ni) => ni?.role?.includes(user?.role))
                   .map((item) => {
@@ -101,8 +101,8 @@ const Navbar = () => {
                             size="sm"
                             className={isActive ? 'shadow-glow-primary' : ''}
                           >
-                            <Icon className="h-4 w-4 mr-2" />
-                            {item.label}
+                            <Icon className="h-4 w-4 md:mr-2" />
+                            <span className='hidden md:flex'>{item.label}</span>
                           </Button>
                         </Link>
                       );
@@ -129,7 +129,7 @@ const Navbar = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
                     <SquareUser className="h-4 w-4 mr-2" />
-                    {user.fullName}
+                    <span className="hidden md:flex">{user.fullName}</span>
                     <ChevronDown className="h-4 w-4 ml-2" />
                   </Button>
                 </DropdownMenuTrigger>

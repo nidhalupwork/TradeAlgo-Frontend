@@ -157,7 +157,7 @@ export const RiskSettingModal = ({
 
   return (
     <Dialog open={open === 'Global'} onOpenChange={() => onModalClose()}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg overflow-y-auto max-h-screen">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">

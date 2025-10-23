@@ -100,20 +100,30 @@ const StrategyMarketplace = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Strategy Marketplace</h1>
-          <p className="text-muted-foreground">Select, connect and configure your automated trading strategies.</p>
+          <h1 className="text-base sm:text-xl md:text-3xl font-bold mb-2">Strategy Marketplace</h1>
+          <p className="text-muted-foreground md:text-base sm:text-sm text-xs">
+            Select, connect and configure your automated trading strategies.
+          </p>
         </div>
 
-        <div className="flex gap-2">
-          <Button variant="gold" onClick={() => setOpen('Global')}>
-            Account Risk Settings
-          </Button>
-          {/* <Button variant="gold" onClick={() => setOpen('Time')}>
+        {user.status === 'active' && (
+          <div className="flex gap-2">
+            <Button
+              variant="gold"
+              className="md:text-base sm:text-sm text-xs px-2 md:px-4 md:h-10 h-8"
+              onClick={() => setOpen('Global')}
+            >
+              Account <span className='hidden sm:flex'>Risk </span>Settings
+            </Button>
+            {/* <Button variant="gold" onClick={() => setOpen('Time')}>
             Trading Time Settings
           </Button> */}
-        </div>
+          </div>
+        )}
       </div>
+
       {/* {user.status === 'pending' && <Announcement />} */}
+
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
@@ -154,6 +164,7 @@ const StrategyMarketplace = () => {
           </div>
         </Card> */}
       </div>
+
       {/* Strategy Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {user.status === 'active' &&
