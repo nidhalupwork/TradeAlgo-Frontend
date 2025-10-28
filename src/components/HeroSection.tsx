@@ -18,10 +18,9 @@ const HeroSection = () => {
             <span className='text-sm text-gold font-medium'>Advanced Trading Automation Platform</span>
           </div>
 
-          <h1 className='text-3xl sm:text-5xl md:text-7xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent'>
+          <h1 className='text-3xl sm:text-5xl md:text-7xl font-bold mb-6 pb-3 bg-gradient-profit bg-clip-text text-transparent'>
             Automate Proprietary Algorithms
             <br />
-            <span className='bg-gradient-profit bg-clip-text'>Trade Systematically</span>
           </h1>
 
           <p className='md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto'>

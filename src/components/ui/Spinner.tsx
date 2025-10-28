@@ -14,7 +14,7 @@ if (styleSheet) {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }`;
-  styleSheet.insertRule(keyframes, styleSheet.cssRules.length);
+  // styleSheet.insertRule(keyframes, styleSheet.cssRules.length);
 }
 
 export const Spinner = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>((props, ref) => {

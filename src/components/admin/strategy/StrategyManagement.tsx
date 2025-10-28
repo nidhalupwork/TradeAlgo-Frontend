@@ -31,6 +31,7 @@ import { StrategyInterface } from '@/lib/types';
 import { ConfirmDeletionModal } from './ConfirmDeletionModal';
 import { Spinner } from '@/components/ui/Spinner';
 import { roundUp } from '@/lib/utils';
+import { PageDescription, PageHeader } from '@/components/components/PageHeader';
 
 export default function StrategyManagement() {
   const { strategies, setStrategies } = useAdmin();
@@ -142,10 +143,8 @@ export default function StrategyManagement() {
           {/* Page Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Strategy Management</h1>
-              <p className="text-muted-foreground">
-                Global risk controls, strategy management, and emergency overrides
-              </p>
+              <PageHeader>Strategy Management</PageHeader>
+              <PageDescription>Global risk controls, strategy management, and emergency overrides</PageDescription>
             </div>
             <div className="flex items-center gap-3">
               <Badge variant="outline" className="px-3 py-1">
@@ -311,6 +310,8 @@ export default function StrategyManagement() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Strategy</TableHead>
+                      <TableHead>Flags</TableHead>
+                      <TableHead>Symbol</TableHead>
                       <TableHead>Status</TableHead>
                       {/* <TableHead>Risk Level</TableHead> */}
                       <TableHead>Active Users</TableHead>
@@ -326,6 +327,17 @@ export default function StrategyManagement() {
                           <TableCell>
                             <div className="font-medium">{strategy.title}</div>
                           </TableCell>
+                          <TableCell className="flex gap-2 items-center">
+                            {strategy.images.map((image, index) => (
+                              <img
+                                key={index}
+                                src={image}
+                                alt={strategy.symbol}
+                                className="w-8 h-8 object-cover rounded-full"
+                              />
+                            ))}
+                          </TableCell>
+                          <TableCell>{strategy.symbol}</TableCell>
                           <TableCell>{getStatusBadge(strategy.status)}</TableCell>
                           {/* <TableCell>{getRiskBadge(strategy.star.toString())}</TableCell> */}
                           <TableCell>

@@ -18,7 +18,7 @@ interface AuthContextInterface {
 export const AuthContext = createContext<AuthContextInterface | undefined>(undefined);
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
-  const { initializeSocket, deinitializeSocket, signOutSocket } = useSocket();
+  const { initializeSocket, signOutSocket, setNotifications } = useSocket();
   const location = useLocation();
   const navigate = useNavigate();
   const { setUsers, setStrategies, setGlobalSetting } = useAdmin();
@@ -44,11 +44,14 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     status: '',
     twoFA: false,
     emailVerified: false,
+    agreedTerms: false,
     globalSetting: {
-      dailyLossCurrency: 'amount',
-      dailyLossLimit: 0,
-      maxLossCurrency: 'amount',
-      maxLossLimit: 0,
+      dayOfWeek: 0,
+      endTime: '00:00',
+      isTimeLimit: false,
+      startTime: '00:00',
+      weeklyClose: false,
+      weeklyCloseTime: '00:00',
     },
   });
 
@@ -67,6 +70,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
           setUsers(data.users);
           setStrategies(data.strategies);
           setGlobalSetting(data.setting);
+          setNotifications(data.announcements);
 
           if (data.user.status === 'suspended') {
             // toast({
@@ -76,10 +80,10 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
             //   duration: 24 * 60 * 60 * 1000,
             // });
           } else if (data.user.status === 'pending' || data.user.status === 'active') {
-            const accountIds = data.user.accounts.reduce((acc, cur) => {
-              return [...acc, cur.accountId];
+            const accounts = data?.user?.accounts?.reduce((acc, cur) => {
+              return [...acc, { accountId: cur.accountId, login: cur.login }];
             }, []);
-            initializeSocket(data.user._id, data.user.email, accountIds);
+            initializeSocket(data.user._id, data.user.email, accounts);
           }
 
           if (location.pathname === '/auth') {

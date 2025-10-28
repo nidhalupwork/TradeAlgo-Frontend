@@ -12,6 +12,7 @@ import apiClient from '@/services/Api';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Switch } from '../ui/switch';
+import Api from '@/services/Api';
 
 export const TradingTimeModal = ({
   open,
@@ -26,27 +27,55 @@ export const TradingTimeModal = ({
 }) => {
   const { user, setUser } = useAuth();
   const { toast } = useToast();
+  const [settings, setSettings] = useState({
+    dayOfWeek: 0,
+    weeklyClose: false,
+    weeklyCloseTime: '00:00',
 
-  useEffect(() => {}, [open]);
+    isTimeLimit: false,
+    startTime: '00:00',
+    endTime: '00:00',
+  });
 
-  function hasAccountsChanged(accounts1, accounts2) {
-    if (accounts1.length !== accounts2.length) return true;
+  useEffect(() => {
+    setSettings({
+      ...user.globalSetting,
+    });
+  }, [open]);
 
-    for (let i = 0; i < accounts1.length; i++) {
-      const a1 = accounts1[i];
-      const a2 = accounts2.find((acc) => acc.accountId === a1.accountId);
-      if (!a2) return true;
-
-      // Compare strategySettings length or other key properties if needed
-      if (JSON.stringify(a1.strategySettings) !== JSON.stringify(a2.strategySettings)) {
-        return true;
+  function areSettingsDifferent(obj1: any, obj2: any): boolean {
+    const keys = Object.keys(obj1);
+    for (const key of keys) {
+      if (obj1[key] !== obj2[key]) {
+        return true; // Difference found
       }
     }
-
-    return false;
+    return false; // No differences
   }
 
-  async function onSaveClick() {}
+  async function onSaveClick() {
+    if (!areSettingsDifferent(settings, user.globalSetting)) {
+      return;
+    }
+    setIsLoading(true);
+    try {
+      console.log('Settings:', settings);
+      const data = await Api.post('/users/update-trading-time', { ...settings });
+      console.log('data for updating trading time:', data);
+      if (data?.success) {
+        setUser(data.user);
+        onConfigModalClose();
+      }
+    } catch (error) {
+      console.error('Error while saving in trading time modal:', error);
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message ?? 'Unexpected Error',
+        variant: 'destructive',
+      });
+    }
+    setIsLoading(false);
+  }
 
   return (
     <Dialog open={open === 'Time'} onOpenChange={() => onConfigModalClose()}>
@@ -71,15 +100,18 @@ export const TradingTimeModal = ({
                 </p>
               </div>
               <div className="flex items-center justify-end">
-                <Switch checked={true} />
+                <Switch
+                  checked={settings.weeklyClose}
+                  onCheckedChange={(value) => setSettings({ ...settings, weeklyClose: value })}
+                />
               </div>
               <Card className="flex flex-col gap-4 px-3 py-4 bg-card/30">
                 <div className="space-y-2">
                   <h3 className="text-base">Day & Time to Close</h3>
                   <Select
-                  // value={configuration.platform}
-                  // onValueChange={(value) => setConfiguration({ ...configuration, platform: value })}
-                  // disabled={isLoading || modalType === 'Details'}
+                    value={settings.dayOfWeek.toString()}
+                    onValueChange={(value) => setSettings({ ...settings, dayOfWeek: Number(value) })}
+                    disabled={isLoading}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -97,7 +129,10 @@ export const TradingTimeModal = ({
                   <input
                     type="time"
                     className="relative flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
-                    onChange={(e) => console.log(e.target.value)}
+                    value={settings.weeklyCloseTime}
+                    onChange={(e) => {
+                      setSettings((prev) => ({ ...prev, weeklyCloseTime: e.target.value }));
+                    }}
                   />
                 </div>
                 <div className="space-y-2">
@@ -118,7 +153,10 @@ export const TradingTimeModal = ({
               </p>
             </div>
             <div className="flex items-center justify-end">
-              <Switch checked={true} />
+              <Switch
+                checked={settings.isTimeLimit}
+                onCheckedChange={(value) => setSettings({ ...settings, isTimeLimit: value })}
+              />
             </div>
             <Card className="flex flex-col gap-4 px-3 py-4 bg-card/30 flex-1">
               <div className="space-y-2">
@@ -126,6 +164,10 @@ export const TradingTimeModal = ({
                 <input
                   type="time"
                   className="relative flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
+                  value={settings.startTime}
+                  onChange={(e) => {
+                    setSettings((prev) => ({ ...prev, startTime: e.target.value }));
+                  }}
                 />
               </div>
               <div className="space-y-2 flex-1">
@@ -133,6 +175,10 @@ export const TradingTimeModal = ({
                 <input
                   type="time"
                   className="relative flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
+                  value={settings.endTime}
+                  onChange={(e) => {
+                    setSettings((prev) => ({ ...prev, endTime: e.target.value }));
+                  }}
                 />
               </div>
               <p className="text-xs text-muted-foreground">Based on UTC timezone</p>

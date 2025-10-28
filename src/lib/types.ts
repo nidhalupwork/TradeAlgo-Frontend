@@ -1,11 +1,15 @@
+export type UserRole = 'user' | 'admin' | 'owner' | 'support' | '';
+export type UserStatus = 'active' | 'pending' | 'suspended' | 'deleted' | '';
+export type UserPlan = 'premium' | 'basic' | '';
+
 export interface UserInterface {
   _id: string;
   email: string;
   username: string;
   fullName: string;
   phoneNumber: string;
-  role: 'user' | 'admin' | 'owner' | 'support' | '';
-  plan: 'premium' | 'basic' | '';
+  role: UserRole;
+  plan: UserPlan;
   mt5AccountId: string;
   riskSettings: RiskSettingsInterface;
   isPausedTradingForDay: boolean;
@@ -17,7 +21,7 @@ export interface UserInterface {
   strategySetting: RiskSettingsInterface[];
   metaApiToken: string;
   trades?: any[] | undefined;
-  status: 'active' | 'pending' | 'suspended' | 'deleted' | '';
+  status: UserStatus;
   twoFA: boolean;
   agreedTerms: boolean;
   emailVerified: boolean;
@@ -25,10 +29,13 @@ export interface UserInterface {
 }
 
 export interface GlobalRiskSetting {
-  dailyLossLimit: number;
-  dailyLossCurrency: 'amount' | 'percentage';
-  maxLossLimit: number;
-  maxLossCurrency: 'amount' | 'percentage';
+  dayOfWeek: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  weeklyClose: boolean;
+  weeklyCloseTime: string;
+
+  isTimeLimit: boolean;
+  startTime: string;
+  endTime: string;
 }
 
 export interface StrategySetting {
@@ -123,10 +130,12 @@ export interface StrategyInterface {
   _id: string;
   title: string;
   description: string;
+  symbol: string;
   winRate: number;
   avgProfit: number;
   avgLoss: number;
   star: number;
+  images: string[];
   tags: string[];
   subscribers: string[];
   status: 'Live' | 'Development' | 'Paused';
@@ -155,6 +164,7 @@ export interface DataItem {
   _id: any;
   userId: any;
   accountId: string;
+  login: string;
   history: HistoryItem[];
   lastUpdated: Date;
   createdAt: Date;
@@ -173,4 +183,44 @@ export interface StrategyInterface {
   subscribers: string[];
   status: 'Live' | 'Development' | 'Paused';
   enabled: boolean;
+}
+
+export interface Announcement {
+  _id: string;
+  title: string;
+  message: string;
+  expireTime: string;
+  readers: string[];
+  receivers: string[];
+  image_url: string | null;
+  createdAt: string;
+  createdBy: string;
+}
+
+export interface Lesson {
+  _id: string;
+  title: string;
+  description: string | null;
+  video: string;
+  order: number;
+  moduleId: string;
+  moduleTitle: string;
+  tutorialId: string;
+  tutorialTitle: string;
+}
+
+export interface Module {
+  _id: string;
+  title: string;
+  order: number;
+  lessons: Lesson[];
+  tutorialTitle: string;
+  tutorialId: string;
+}
+
+export interface Tutorial {
+  _id: string;
+  title: string;
+  description: string | null;
+  modules: Module[];
 }

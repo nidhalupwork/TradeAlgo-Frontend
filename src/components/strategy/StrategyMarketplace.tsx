@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { RiskSettingModal } from './AccountRiskSettingModal';
 import { TradingTimeModal } from './TradingTimeModal';
 import { Spinner } from '../ui/Spinner';
+import { PageDescription, PageHeader } from '../components/PageHeader';
 
 const StrategyMarketplace = () => {
   const { toast } = useToast();
@@ -100,24 +101,26 @@ const StrategyMarketplace = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-base sm:text-xl md:text-3xl font-bold mb-2">Strategy Marketplace</h1>
-          <p className="text-muted-foreground md:text-base sm:text-sm text-xs">
-            Select, connect and configure your automated trading strategies.
-          </p>
+          <PageHeader>Strategy Marketplace</PageHeader>
+          <PageDescription>Select, connect and configure your automated trading strategies.</PageDescription>
         </div>
 
         {user.status === 'active' && (
-          <div className="flex gap-2">
+          <div className="flex flex-col lg:flex-row gap-2">
             <Button
               variant="gold"
-              className="md:text-base sm:text-sm text-xs px-2 md:px-4 md:h-10 h-8"
+              className="md:text-sm text-xs px-2 md:px-4 py-0.5 h-6 sm:h-8 md:h-9"
               onClick={() => setOpen('Global')}
             >
-              Account <span className='hidden sm:flex'>Risk </span>Settings
+              Account <span className="hidden sm:flex">Risk </span>Settings
             </Button>
-            {/* <Button variant="gold" onClick={() => setOpen('Time')}>
-            Trading Time Settings
-          </Button> */}
+            <Button
+              variant="gold"
+              className="md:text-sm text-xs px-2 md:px-4 py-0.5 h-6 sm:h-8 md:h-9"
+              onClick={() => setOpen('Time')}
+            >
+              <span className="hidden sm:flex">Trading</span> Time Settings
+            </Button>
           </div>
         )}
       </div>
@@ -193,6 +196,14 @@ const StrategyMarketplace = () => {
                         >
                           {strategy?.status}
                         </Badge>
+                        {strategy.images.map((image, index) => (
+                          <img
+                            key={index}
+                            src={image}
+                            alt={strategy.symbol}
+                            className="w-8 h-8 object-cover rounded-full"
+                          />
+                        ))}
                       </div>
                       {user?.role === 'admin' && <Switch checked={strategy?.enabled} />}
                     </div>

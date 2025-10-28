@@ -18,6 +18,10 @@ import {
   Trash2,
   HandCoins,
   HandHelping,
+  Shield,
+  Headphones,
+  User,
+  ChevronRight,
 } from 'lucide-react';
 import { useAdmin } from '@/providers/AdminProvider';
 import {
@@ -35,11 +39,23 @@ import { roundUp } from '@/lib/utils';
 import { FRONTEND_ENDPOINT } from '@/config/config';
 import { DeleteModal } from './DeleteModal';
 import { useEffect, useState } from 'react';
-import { UserInterface } from '@/lib/types';
+import { UserInterface, UserRole } from '@/lib/types';
 import { UserFilters } from './user/UserFilters';
+import { capitalizeFirstLetter } from '@/utils/utils';
+import { RoleBadge, StatusBadge, TierBadge } from '../components/Badges';
+import { DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '@radix-ui/react-dropdown-menu';
+import { useAuth } from '@/providers/AuthProvider';
+import { PageDescription, PageHeader } from '../components/PageHeader';
+
+const roleOptions = [
+  { value: 'admin' as UserRole, label: 'Admin', icon: Shield },
+  { value: 'support' as UserRole, label: 'Support', icon: Headphones },
+  { value: 'user' as UserRole, label: 'User', icon: User },
+];
 
 const AdminPanel = () => {
   const { toast } = useToast();
+  const { user: me } = useAuth();
   const { users, setUsers } = useAdmin();
   const [selectedUser, setSelectedUser] = useState<UserInterface>(null);
   const [open, setOpen] = useState(false);
@@ -65,15 +81,6 @@ const AdminPanel = () => {
   const { active: activeUsers, pending: pendingUsers, suspended: suspendedUsers } = userStatusCounts;
 
   useEffect(() => {
-    console.log('name:', name);
-    console.log('email:', email);
-    console.log('roleFilter:', roleFilter);
-    console.log('statusFilter:', statusFilter);
-    console.log('planFilter:', planFilter);
-    console.log('dateFrom:', dateFrom);
-    console.log('dateTo:', dateTo);
-    console.log('brokersMin:', brokersMin);
-    console.log('brokersMax:', brokersMax);
     fetchUsers();
   }, [name, email, roleFilter, statusFilter, planFilter, dateFrom, dateTo, brokersMin, brokersMax]);
 
@@ -173,13 +180,36 @@ const AdminPanel = () => {
     }
   }
 
+  async function changeRole(userId: string, role: UserRole) {
+    try {
+      const data = await Api.post('/admin/change-role', { userId, role });
+      console.log('Data for change role:', data);
+      if (data?.success) {
+        setUsers((prevUsers) => prevUsers.map((user) => (user._id === data.user._id ? data.user : user)));
+        toast({
+          title: 'Success',
+          description: data.message,
+          variant: 'profit',
+          duration: 2000,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message ?? 'Unexpected error',
+        variant: 'destructive',
+        duration: 2000,
+      });
+    }
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Admin Control Center</h1>
-          <p className="text-muted-foreground">Manage users and monitor system-wide trading activity</p>
+          <PageHeader>Admin Control Center</PageHeader>
+          <PageDescription>Manage users and monitor system-wide trading activity</PageDescription>
         </div>
         <div className="flex gap-2"></div>
       </div>
@@ -308,41 +338,13 @@ const AdminPanel = () => {
                       </div>
                     </td>
                     <td className="py-3 px-4">
-                      <div className="flex gap-1 items-center text-muted-foreground">
-                        {user.role === 'user' ? <Users size={16} /> : <ShieldCheck size={16} />}
-                        <p className="text-sm">{user.role}</p>
-                      </div>
+                      <RoleBadge role={user?.role} />
                     </td>
                     <td className="py-3 px-4">
-                      {user.status === 'active' && (
-                        <Badge className="bg-profit/20 text-profit">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Active
-                        </Badge>
-                      )}
-                      {user.status === 'deleted' && (
-                        <Badge className="bg-destructive/20 text-destructive">
-                          <Trash2 className="h-3 w-3 mr-1" />
-                          Deleted
-                        </Badge>
-                      )}
-                      {user.status === 'suspended' && (
-                        <Badge className="bg-loss/20 text-loss">
-                          <Ban className="h-3 w-3 mr-1" />
-                          Suspended
-                        </Badge>
-                      )}
-                      {user.status === 'pending' && (
-                        <Badge className="bg-gold/20 text-gold">
-                          <Loader className="h-3 w-3 mr-1" />
-                          Pending
-                        </Badge>
-                      )}
+                      <StatusBadge variant={user?.status} />
                     </td>
                     <td className="py-3 px-4">
-                      <Badge className={user.plan === 'premium' ? 'bg-profit/20 text-profit' : 'bg-gold/20 text-gold'}>
-                        {user.plan}
-                      </Badge>
+                      <TierBadge variant={user?.plan} />
                     </td>
                     {/* <td className="py-3 px-4">
                       <p className="font-medium">${user.balance.toLocaleString()}</p>
@@ -397,6 +399,33 @@ const AdminPanel = () => {
                               <RotateCcw className="mr-2 h-4 w-4" />
                               Reset Risk
                             </DropdownMenuItem> */}
+                            {['owner', 'admin'].includes(me.role) && (
+                              <DropdownMenuSub>
+                                <DropdownMenuSubTrigger className="flex items-center text-sm cursor-pointer px-2 py-1.5 hover:">
+                                  <Shield className="mr-2 h-4 w-4" />
+                                  Change Role
+                                  <ChevronRight className="h-4 w-4 ml-4" />
+                                </DropdownMenuSubTrigger>
+                                <DropdownMenuSubContent className="bg-card border border-card-elevated rounded-sm p-1">
+                                  {roleOptions
+                                    .filter((role) => role.value !== me.role)
+                                    .map((role, index) => {
+                                      const Icon = role.icon;
+                                      return (
+                                        <DropdownMenuItem
+                                          key={index}
+                                          disabled={user.role === role.value}
+                                          onClick={() => changeRole(user._id, role.value)}
+                                          className="cursor-pointer"
+                                        >
+                                          <Icon className="mr-2 h-4 w-4" />
+                                          {role.label}
+                                        </DropdownMenuItem>
+                                      );
+                                    })}
+                                </DropdownMenuSubContent>
+                              </DropdownMenuSub>
+                            )}
                             {user.plan === 'basic' && (
                               <DropdownMenuItem
                                 className="text-profit hover:cursor-pointer hover:!bg-profit"

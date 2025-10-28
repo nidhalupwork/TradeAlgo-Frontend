@@ -42,7 +42,7 @@ export function transformData(items: DataItem[], range: '1m' | '3m' | '1y') {
     });
 
     return {
-      accountId: item.accountId,
+      login: item.login,
       historyMap,
       firstDataDate,
       lastKnownQuantity: filteredHistory.length > 0 ? filteredHistory[filteredHistory.length - 1].quantity : 0,
@@ -65,17 +65,17 @@ export function transformData(items: DataItem[], range: '1m' | '3m' | '1y') {
     processedAccounts.forEach((account) => {
       if (account.historyMap.has(dateKey)) {
         // Use the actual quantity for this date
-        record[account.accountId] = account.historyMap.get(dateKey);
+        record[account.login] = account.historyMap.get(dateKey);
         // Update last known quantity for future missing dates
         account.lastKnownQuantity = account.historyMap.get(dateKey);
       } else {
         // Check if current date is before the first data point
         if (account.firstDataDate && currentDate < account.firstDataDate) {
           // Use 0 for dates before the first data point
-          record[account.accountId] = 0;
+          record[account.login] = 0;
         } else {
           // Use the last known quantity for missing dates after first data point
-          record[account.accountId] = account.lastKnownQuantity;
+          record[account.login] = account.lastKnownQuantity;
         }
       }
     });
@@ -104,7 +104,7 @@ export function transformData(items: DataItem[], range: '1m' | '3m' | '1y') {
 
       // All accounts get 0 for these padded days
       processedAccounts.forEach((account) => {
-        paddedRecord[account.accountId] = 0;
+        paddedRecord[account.login] = 0;
       });
 
       paddedResult.push(paddedRecord);
@@ -115,4 +115,9 @@ export function transformData(items: DataItem[], range: '1m' | '3m' | '1y') {
   }
 
   return result;
+}
+
+export function capitalizeFirstLetter(str: string) {
+  if (!str) return ''; // handle empty string
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }

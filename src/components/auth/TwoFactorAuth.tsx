@@ -54,11 +54,11 @@ const TwoFactorAuth = () => {
           setUser(data.user);
           localStorage.setItem('isSignedIn', 'true');
 
-          const accountIds = data?.user?.accounts?.reduce((acc, cur) => {
-            return [...acc, cur.accountId];
+          const accounts = data?.user?.accounts?.reduce((acc, cur) => {
+            return [...acc, { accountId: cur.accountId, login: cur.login }];
           }, []);
 
-          initializeSocket(data.user._id, data.user.email, accountIds);
+          initializeSocket(data.user._id, data.user.email, accounts);
           if (data.user.role === 'user') {
             navigate('/dashboard');
           } else {

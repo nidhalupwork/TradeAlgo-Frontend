@@ -20,6 +20,7 @@ import Api from '@/services/Api';
 import { useToast } from '@/hooks/use-toast';
 import { ConfirmModal } from './ConfirmModal';
 import { useState } from 'react';
+import { PageDescription, PageHeader } from '../components/PageHeader';
 
 export default function AdminDashboard() {
   const { users, strategies, globalSetting, setGlobalSetting, setStrategies } = useAdmin();
@@ -90,8 +91,8 @@ export default function AdminDashboard() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Trading platform control center and system overview</p>
+          <PageHeader>Admin Dashboard</PageHeader>
+          <PageDescription>Trading platform control center and system overview</PageDescription>
         </div>
         <div className="flex items-center gap-3">
           <Badge variant="outline" className="px-3 py-1">

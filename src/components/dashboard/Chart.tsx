@@ -7,7 +7,7 @@ import { roundUp } from '@/lib/utils';
 
 interface TradingChartProps {
   data: any;
-  selectedAccount: { accountId: string; name: string };
+  selectedAccount: { login: string; name: string };
   accounts: ConnectAccount[];
   range: '1m' | '3m' | '1y';
   currency: string;
@@ -106,8 +106,8 @@ export const TradingChart = ({ data, selectedAccount, accounts, currency, range,
   }, [range]);
 
   const { min, max } = useMemo(() => {
-    const min = Math.min(...data.map((d) => d[selectedAccount?.accountId]));
-    const max = Math.max(...data.map((d) => d[selectedAccount?.accountId]));
+    const min = Math.min(...data.map((d) => d[selectedAccount?.login]));
+    const max = Math.max(...data.map((d) => d[selectedAccount?.login]));
     const padding = (max - min) * 0.1;
     // return { min: (min >= padding ? min : padding) - padding, max: max + padding };
     return { min: roundUp(min - padding, 2), max: roundUp(max + padding, 2) };
@@ -135,11 +135,11 @@ export const TradingChart = ({ data, selectedAccount, accounts, currency, range,
       ticks.push(0);
       ticks.sort((a, b) => a - b); // Keep ticks in order
     }
-    return ticks;
+    return [...new Set(ticks)];
   };
 
   const ticks = useMemo(() => {
-    return generateTicks(data, selectedAccount.accountId, 5);
+    return generateTicks(data, selectedAccount.login, 5);
   }, [data, selectedAccount]);
 
   // const [off, setOff] = useState(0);
@@ -216,7 +216,7 @@ export const TradingChart = ({ data, selectedAccount, accounts, currency, range,
                 <Area
                   type="monotone"
                   className="relative"
-                  dataKey={selectedAccount.accountId}
+                  dataKey={selectedAccount.login}
                   stroke={accountColors[2]}
                   strokeWidth={1}
                   activeDot={{ r: 6, stroke: accountColors[2], strokeWidth: 2, fill: 'hsl(var(--background))' }}

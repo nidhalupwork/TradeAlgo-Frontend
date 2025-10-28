@@ -14,7 +14,7 @@ const Auth = () => {
           backgroundImage: `url(${authHeroImage})`,
         }}
       >
-        <div className='absolute inset-0 w-screen'></div>
+        <div className='absolute inset-0 w-screen bg-black/65'></div>
       </div>
 
       {/* Gradient Overlay */}

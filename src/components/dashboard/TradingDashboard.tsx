@@ -46,14 +46,14 @@ const TradingDashboard = () => {
   const [balance, setBalance] = useState(0);
   const [currency, setCurrency] = useState('USD');
   const [selectedAccount, setSelectedAccount] = useState({
-    accountId: '',
+    login: '',
     name: '',
   });
   const [charts, setCharts] = useState([]);
   const [range, setRange] = useState<'1m' | '3m' | '1y'>('1m');
 
   useEffect(() => {
-    if (stats && selectedAccount.accountId !== '') {
+    if (stats && selectedAccount.login !== '') {
       let temps = [];
       if (activeTab === 'Open') {
         temps = [...stats?.openPositions];
@@ -71,26 +71,25 @@ const TradingDashboard = () => {
             }
             return (a[filter] as string)?.localeCompare(b[filter] as string) * filterPrefix;
           })
-          .filter((t) => t.accountId === selectedAccount.accountId)
+          .filter((t) => t.login === selectedAccount.login)
       );
       setPositionCount({
-        all: [...stats?.openPositions, ...stats?.closedPositions].filter(
-          (t) => t.accountId === selectedAccount.accountId
-        ).length,
-        open: stats?.openPositions.filter((t) => t.accountId === selectedAccount.accountId).length,
-        closed: stats?.closedPositions.filter((t) => t.accountId === selectedAccount.accountId).length,
+        all: [...stats?.openPositions, ...stats?.closedPositions].filter((t) => t.login === selectedAccount.login)
+          .length,
+        open: stats?.openPositions.filter((t) => t.login === selectedAccount.login).length,
+        closed: stats?.closedPositions.filter((t) => t.login === selectedAccount.login).length,
       });
-      const accountInfo = stats.accountInformation.find((a) => a.accountId === selectedAccount.accountId);
+      const accountInfo = stats.accountInformation.find((a) => a.login == selectedAccount.login);
       setBalance(accountInfo?.balance ?? 0);
       setCurrency(accountInfo?.currency ?? 'USD');
       const openSum = stats.openPositions
-        .filter((o) => o.accountId === selectedAccount.accountId)
+        .filter((o) => o.login === selectedAccount.login)
         .reduce((sum, cur) => {
           return sum + cur.profit;
         }, 0);
 
       const closedSum = stats.closedPositions
-        .filter((o) => o.accountId === selectedAccount.accountId)
+        .filter((o) => o.login === selectedAccount.login)
         .reduce((sum, cur) => {
           return sum + cur.profit;
         }, 0);
@@ -103,13 +102,13 @@ const TradingDashboard = () => {
       console.log('Positions updated');
     }
 
-    if (selectedAccount.accountId === '') {
+    if (selectedAccount.login === '') {
     }
   }, [stats, filter, filterPrefix, activeTab, selectedAccount]);
 
   useEffect(() => {
     setSelectedAccount({
-      accountId: user.accounts[0]?.accountId ?? '',
+      login: user.accounts[0]?.login ?? '',
       name: user.accounts[0]?.name ?? '',
     });
     fetchPortfolio();
@@ -147,13 +146,13 @@ const TradingDashboard = () => {
       const data = await Api.get('/users/portfolio');
       console.log('data for portfolio:', data);
       if (data?.success) {
-        setCharts(data.data.sort((a, b) => a.accountId.localeCompare(b.accountId)));
+        setCharts(data.data.sort((a, b) => a.login.localeCompare(b.login)));
       }
     } catch (error) {}
   }
 
-  const handleAccountToggle = (accountId: string, name: string) => {
-    if (accountId !== selectedAccount.accountId) setSelectedAccount({ accountId, name });
+  const handleAccountToggle = (login: string, name: string) => {
+    if (login !== selectedAccount.login) setSelectedAccount({ login, name });
   };
 
   const ths = [

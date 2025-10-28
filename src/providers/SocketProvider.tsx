@@ -1,8 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { useAuth } from './AuthProvider';
-import { roundUp } from '@/lib/utils';
 import { BACKEND_ENDPOINT } from '@/config/config';
+import { Announcement } from '@/lib/types';
 
 interface StatsInterface {
   balance: any;
@@ -19,6 +18,8 @@ interface SocketContextInterface {
   deinitializeSocket: (id: string, accountIds: string[]) => void;
   signOutSocket: (id: string, email: string) => void;
   stats: StatsInterface;
+  notifications: Announcement[];
+  setNotifications: React.Dispatch<React.SetStateAction<Announcement[]>>;
 }
 
 const SocketContext = createContext<SocketContextInterface>(null);
@@ -37,8 +38,9 @@ export const SocketProvider = ({ children }) => {
   const [userData, setUserData] = useState({
     id: '',
     email: '',
-    accountIds: [],
+    accounts: [],
   });
+  const [notifications, setNotifications] = useState<Announcement[]>([]);
 
   useEffect(() => {
     let temp = localStorage.getItem('googleId');
@@ -55,7 +57,10 @@ export const SocketProvider = ({ children }) => {
 
     socketRef.current.on('connect', () => {
       setConnected(true);
-      console.log('Connected to socket:', socketRef.current.id);
+      console.log('Connected to socket:', socketRef.current.id, userData);
+      if (userData.email) {
+        initializeSocket(userData.id, userData.email, userData.accounts);
+      }
     });
 
     socketRef.current.on('disconnect', () => {
@@ -63,14 +68,20 @@ export const SocketProvider = ({ children }) => {
       console.log('Disconnected from socket');
 
       const isSignedIn = localStorage.getItem('isSignedIn');
-      if (isSignedIn && userData.id && userData.email && userData.accountIds.length > 0) {
-        initializeSocket(userData.id, userData.email, userData.accountIds);
+      if (isSignedIn && userData.id && userData.email && userData.accounts.length > 0) {
+        initializeSocket(userData.id, userData.email, userData.accounts);
       }
     });
 
     socketRef.current.on('stats', (data) => {
-      // console.log('Received from socket connection!');
+      // console.log('Received from socket connection!', data);
       processStatsData(data);
+    });
+
+    socketRef.current.on('announcements', (data) => {
+      console.log('Received from socket for notifications:', data);
+      console.log('notifications:', notifications);
+      setNotifications((prevNotifications) => [data, ...prevNotifications]);
     });
 
     socketRef.current.on('portfolio', (data) => {
@@ -84,15 +95,15 @@ export const SocketProvider = ({ children }) => {
     };
   }, []);
 
-  function initializeSocket(id: string, email: string, accountIds: string[]) {
+  function initializeSocket(id: string, email: string, accounts: string[]) {
     console.log('initializeSocket is called');
     socketRef.current.emit('initialize', {
       userId: id,
       email,
-      accountIds,
+      accounts,
       googleId,
     });
-    setUserData({ id, email, accountIds });
+    setUserData({ id, email, accounts });
   }
 
   function deinitializeSocket(id: string, accountIds: string[]) {
@@ -125,6 +136,7 @@ export const SocketProvider = ({ children }) => {
       if (deals.filter((d) => d.positionId && d.positionId === deal.positionId).length === 2) {
         const temp = {
           accountId: '',
+          login: '',
           brokerTime: '',
           openPrice: 0,
           profit: 0,
@@ -145,6 +157,7 @@ export const SocketProvider = ({ children }) => {
         const pos = closedPositions.find((cp) => cp.positionId === deal.positionId);
         if (deal.entryType === 'DEAL_ENTRY_IN') {
           pos.accountId = deal.accountId;
+          pos.login = deal.login;
           pos.brokerTime = deal.brokerTime;
           pos.openPrice = deal.price;
           pos.type = deal.type;
@@ -180,6 +193,8 @@ export const SocketProvider = ({ children }) => {
         deinitializeSocket,
         signOutSocket,
         stats,
+        notifications,
+        setNotifications,
       }}
     >
       {children}

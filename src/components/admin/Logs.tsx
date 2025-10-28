@@ -18,6 +18,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Navbar from '../Navbar';
 import Api from '@/services/Api';
+import { PageDescription, PageHeader } from '../components/PageHeader';
 
 type SearchType = 'name' | 'email' | 'accountName';
 
@@ -55,7 +56,9 @@ const Logs = () => {
         activities.filter((log) => log?.userId?.fullName?.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     } else {
-      setFilteredLogs(activities.filter((log) => log?.userId?.email?.toLowerCase().includes(searchQuery.toLowerCase())));
+      setFilteredLogs(
+        activities.filter((log) => log?.userId?.email?.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
     }
   }
 
@@ -82,10 +85,8 @@ const Logs = () => {
       <div className="space-y-6 pt-[88px] px-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">System Logs</h1>
-          <p className="text-muted-foreground">
-            Monitor user activities and troubleshoot errors across the trading platform
-          </p>
+          <PageHeader>System Logs</PageHeader>
+          <PageDescription>Monitor user activities and troubleshoot errors across the trading platform</PageDescription>
         </div>
 
         {/* Stats Cards */}

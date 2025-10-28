@@ -8,7 +8,7 @@ interface UserFiltersProps {
   setName: React.Dispatch<React.SetStateAction<string>>;
   email: string;
   setEmail: React.Dispatch<React.SetStateAction<string>>;
-  roleFilter: 'user' | 'admin' | 'all';
+  roleFilter: 'user' | 'admin' | 'support' | 'all';
   onRoleFilterChange: (value: 'user' | 'admin' | 'all') => void;
   statusFilter: 'active' | 'pending' | 'suspended' | 'deleted' | 'all';
   onStatusFilterChange: (value: 'active' | 'pending' | 'suspended' | 'deleted' | 'all') => void;
@@ -157,6 +157,7 @@ export const UserFilters = ({
           <SelectContent>
             <SelectItem value="all">All Roles</SelectItem>
             <SelectItem value="admin">Admin</SelectItem>
+            <SelectItem value="support">Support</SelectItem>
             <SelectItem value="user">User</SelectItem>
           </SelectContent>
         </Select>

@@ -131,9 +131,16 @@ All colors MUST be HSL.
   }
 }
 
+/* html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+} */
+
 input[type='date']::-webkit-calendar-picker-indicator {
   filter: invert(1) brightness(0.8); /* Inverts and adjusts brightness to color the icon */
   cursor: pointer;
+  right: 10px;
+  position: absolute;
 }
 
 input[type='time']::-webkit-calendar-picker-indicator {
