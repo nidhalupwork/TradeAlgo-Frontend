@@ -17,6 +17,8 @@ import {
   User,
   BookOpenText,
   FileCog,
+  ImagePlus,
+  Eye,
 } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useEffect, useState } from 'react';
@@ -33,6 +35,7 @@ import { Badge } from './ui/badge';
 import { ScrollArea } from './ui/scroll-area';
 import { useSocket } from '@/providers/SocketProvider';
 import Api from '@/services/Api';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -41,6 +44,8 @@ const Navbar = () => {
   const { notifications, setNotifications } = useSocket();
   const isSignedIn = localStorage.getItem('isSignedIn');
   const [unreadCount, setUnreadCount] = useState(0);
+  const [selectedNotification, setSelectedNotification] = useState<any>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const isLoading = false;
 
   const roleWeights = {
@@ -77,6 +82,7 @@ const Navbar = () => {
     { path: '/strategy-management', minRole: 3 },
     { path: '/announcement', minRole: 3 },
     { path: '/tutorial-management', minRole: 3 },
+    { path: '/image-upload', minRole: 3 },
 
     { path: '/user-management', minRole: 2 },
     { path: '/logs', minRole: 2 },
@@ -91,6 +97,7 @@ const Navbar = () => {
         { path: '/strategy-management', label: 'Strategy', icon: Activity, role: ['owner', 'admin'], minRole: 3 },
         { path: '/announcement', label: 'Announce', icon: BellPlus, role: ['owner', 'admin'], minRole: 3 },
         { path: '/tutorial-management', label: 'Tutorials', icon: FileCog, role: ['owner', 'admin'], minRole: 3 },
+        { path: '/image-upload', label: 'Images', icon: ImagePlus, role: ['owner', 'admin'], minRole: 3 },
 
         { path: '/user-management', label: 'Users', icon: Users, role: ['owner', 'admin', 'support'], minRole: 2 },
         { path: '/logs', label: 'Logs', icon: Logs, role: ['owner', 'admin', 'support'], minRole: 2 },
@@ -137,20 +144,25 @@ const Navbar = () => {
     }
   }
 
+  function openNotificationDetail(notification: any) {
+    setSelectedNotification(notification);
+    setIsDetailModalOpen(true);
+  }
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
-      <div className="max-w-[1400px] mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-8">
+    <nav className='fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border'>
+      <div className='max-w-[1400px] mx-auto px-4'>
+        <div className='flex items-center justify-between h-16'>
+          <div className='flex items-center space-x-8'>
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
-              <img src={logo} className="h-8 w-8 text-primary" alt="TradeAlgo logo" />
-              <span className="text-sm md:text-xl font-bold text-gray-200 ">TradeAlgorithm</span>
+            <Link to='/' className='flex items-center space-x-2'>
+              <img src={logo} className='h-8 w-8 text-primary' alt='TradeAlgo logo' />
+              <span className='text-sm md:text-xl font-bold text-gray-200 '>TradeAlgorithm</span>
             </Link>
 
             {/* Admin & User Navigations */}
-            {isSignedIn === 'true' && (
-              <div className="flex items-center space-x-1">
+            {isSignedIn === 'true' && ['owner', 'admin', 'support'].includes(user.role) && (
+              <div className='flex items-center space-x-1'>
                 {nestedNavs
                   .filter((nn) => nn.items.filter((item) => item.role.includes(user.role)).length > 0)
                   .map((nav, index) => {
@@ -158,21 +170,21 @@ const Navbar = () => {
                     return (
                       <DropdownMenu key={index}>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="sm" className="!border-0 !outline-none">
-                            <Icon className="h-4 w-4 mr-2 hidden md:flex" />
+                          <Button variant='outline' size='sm' className='!border-0 !outline-none'>
+                            <Icon className='h-4 w-4 mr-2 hidden md:flex' />
                             <span>{nav.label}</span>
-                            <ChevronDown className="h-4 w-4 ml-2" />
+                            <ChevronDown className='h-4 w-4 ml-2' />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuContent align='end' className='w-48'>
                           {nav.items
                             .filter((item) => item.role.includes(user.role))
                             .map((item, idx) => {
                               const ItemIcon = item.icon;
                               return (
                                 <DropdownMenuItem key={idx} asChild>
-                                  <Link to={item.path} className="flex items-center hover:cursor-pointer">
-                                    <ItemIcon className="h-4 w-4 mr-2" />
+                                  <Link to={item.path} className='flex items-center hover:cursor-pointer'>
+                                    <ItemIcon className='h-4 w-4 mr-2' />
                                     {item.label}
                                   </Link>
                                 </DropdownMenuItem>
@@ -184,64 +196,111 @@ const Navbar = () => {
                   })}
               </div>
             )}
+
+            {isSignedIn === 'true' && user.role === 'user' && (
+              <div className='flex items-center space-x-1'>
+                {nestedNavs[1].items.map((item, index) => {
+                  const Icon = item.icon;
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <Link key={item.path} to={item.path}>
+                      <Button
+                        variant={isActive ? 'default' : 'ghost'}
+                        size='sm'
+                        className={isActive ? 'shadow-glow-primary' : ''}
+                      >
+                        <Icon className='h-4 w-4 mr-2' />
+                        {item.label}
+                      </Button>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          <div className="flex items-center space-x-0 sm:space-x-2 md:space-x-4">
+          <div className='flex items-center space-x-0 sm:space-x-2 md:space-x-4'>
             {/* Notification Bell */}
             {isSignedIn === 'true' && (
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative">
-                    <Bell className="h-5 w-5" />
+                  <Button variant='ghost' size='icon' className='relative'>
+                    <Bell className='h-5 w-5' />
                     {unreadCount > 0 && (
                       <Badge
-                        variant="destructive"
-                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                        variant='destructive'
+                        className='absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs'
                       >
                         {unreadCount}
                       </Badge>
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-80 p-0" align="end">
-                  <div className="flex items-center justify-between p-4 border-b">
-                    <h3 className="font-semibold">Notifications</h3>
-                    {unreadCount > 0 && <Badge variant="secondary">{unreadCount} new</Badge>}
+                <PopoverContent className='w-80 p-0' align='end'>
+                  <div className='flex items-center justify-between p-4 border-b'>
+                    <h3 className='font-semibold'>Notifications</h3>
+                    {unreadCount > 0 && <Badge variant='secondary'>{unreadCount} new</Badge>}
                   </div>
-                  <ScrollArea className="h-[400px]">
+                  <ScrollArea className='h-[400px]'>
                     {isLoading ? (
-                      <div className="p-4 text-center text-muted-foreground">Loading...</div>
+                      <div className='p-4 text-center text-muted-foreground'>Loading...</div>
                     ) : notifications.length === 0 ? (
-                      <div className="p-4 text-center text-muted-foreground">No notifications</div>
+                      <div className='p-4 text-center text-muted-foreground'>No notifications</div>
                     ) : (
-                      <div className="divide-y">
+                      <div className='divide-y'>
                         {notifications?.map((notification) => (
                           <div
                             key={notification._id}
-                            className={`p-4 hover:bg-muted/50 transition-colors cursor-pointer ${
+                            className={`p-4 hover:bg-muted/50 transition-colors ${
                               !notification.readers ? 'bg-primary/5' : ''
                             }`}
                           >
-                            <div className="flex items-start gap-2">
-                              <div className="flex-1 space-y-1">
-                                <p className="text-sm font-medium">{notification.title}</p>
-                                <p className="text-sm text-muted-foreground pl-2">{notification.message}</p>
-                                <p className="text-xs text-muted-foreground">
+                            <div className='flex items-start gap-3'>
+                              {/* Image Thumbnail */}
+                              {notification.imageUrl && (
+                                <img
+                                  src={notification.imageUrl}
+                                  alt={notification.title}
+                                  className='w-16 h-16 object-cover rounded-md flex-shrink-0'
+                                />
+                              )}
+
+                              {/* Content */}
+                              <div className='flex-1 space-y-1 min-w-0'>
+                                <p className='text-sm font-medium'>{notification.title}</p>
+                                <p className='text-sm text-muted-foreground line-clamp-2'>{notification.message}</p>
+                                <p className='text-xs text-muted-foreground'>
                                   {formatDistanceToNow(new Date(notification.createdAt), {
                                     addSuffix: true,
                                   })}
                                 </p>
                               </div>
-                              {/* {!notification.read && (
-                                <Check
-                                  className="w-4 h-4 hover:text-muted-foreground transition-colors"
-                                  onClick={() => markAsRead(notification.id)}
-                                />
-                              )} */}
-                              <Check
-                                className="w-4 h-4 hover:text-muted-foreground transition-colors"
-                                onClick={() => markAsRead(notification._id)}
-                              />
+
+                              {/* Actions */}
+                              <div className='flex flex-col gap-2 flex-shrink-0'>
+                                <Button
+                                  size='icon'
+                                  variant='ghost'
+                                  className='h-8 w-8'
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openNotificationDetail(notification);
+                                  }}
+                                >
+                                  <Eye className='w-4 h-4' />
+                                </Button>
+                                <Button
+                                  size='icon'
+                                  variant='ghost'
+                                  className='h-8 w-8'
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    markAsRead(notification._id);
+                                  }}
+                                >
+                                  <Check className='w-4 h-4' />
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -256,25 +315,25 @@ const Navbar = () => {
             {isSignedIn && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <SquareUser className="h-4 w-4 mr-2" />
-                    <span className="hidden md:flex">{user.fullName}</span>
-                    <ChevronDown className="h-4 w-4 md:ml-2" />
+                  <Button variant='outline' size='sm'>
+                    <SquareUser className='h-4 w-4 mr-2' />
+                    <span className='hidden md:flex'>{user.fullName}</span>
+                    <ChevronDown className='h-4 w-4 md:ml-2' />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent align='end' className='w-48'>
                   <DropdownMenuItem asChild>
-                    <Link to="/profile" className="flex items-center hover:cursor-pointer">
-                      <SquareUser className="h-4 w-4 mr-2" />
+                    <Link to='/profile' className='flex items-center hover:cursor-pointer'>
+                      <SquareUser className='h-4 w-4 mr-2' />
                       Profile
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => signOut()}
-                    className="text-red-600 focus:text-red-600 hover:cursor-pointer "
+                    className='text-red-600 focus:text-red-600 hover:cursor-pointer '
                   >
-                    <LogOut className="h-4 w-4 mr-2" />
+                    <LogOut className='h-4 w-4 mr-2' />
                     Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -283,9 +342,9 @@ const Navbar = () => {
 
             {/* Sign In Button */}
             {!isSignedIn && (
-              <Link to="/auth">
-                <Button variant="default" size="sm" className="shadow-glow-primary">
-                  <Users className="h-4 w-4 mr-2" />
+              <Link to='/auth'>
+                <Button variant='default' size='sm' className='shadow-glow-primary'>
+                  <Users className='h-4 w-4 mr-2' />
                   Sign In
                 </Button>
               </Link>
@@ -293,6 +352,60 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+
+      {/* Notification Detail Modal */}
+      <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
+        <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto'>
+          <DialogHeader>
+            <DialogTitle>{selectedNotification?.title}</DialogTitle>
+            <DialogDescription>
+              {selectedNotification?.createdAt &&
+                formatDistanceToNow(new Date(selectedNotification.createdAt), {
+                  addSuffix: true,
+                })}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className='space-y-4'>
+            {/* Full Image */}
+            {selectedNotification?.imageUrl && (
+              <img
+                src={selectedNotification.imageUrl}
+                alt={selectedNotification.title}
+                className='w-full h-64 object-cover rounded-lg'
+              />
+            )}
+
+            {/* Full Message */}
+            <div className='space-y-2'>
+              <h4 className='text-sm font-medium'>Message</h4>
+              <p className='text-sm text-muted-foreground whitespace-pre-wrap'>{selectedNotification?.message}</p>
+            </div>
+
+            {/* Expiry Information */}
+            {selectedNotification?.expireTime && (
+              <div className='flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t'>
+                <span>Expires: {new Date(selectedNotification.expireTime).toLocaleDateString()}</span>
+              </div>
+            )}
+          </div>
+
+          <div className='flex justify-end gap-2 pt-4'>
+            <Button variant='outline' onClick={() => setIsDetailModalOpen(false)}>
+              Close
+            </Button>
+            <Button
+              onClick={() => {
+                markAsRead(selectedNotification._id);
+                setIsDetailModalOpen(false);
+              }}
+            >
+              <Check className='w-4 h-4 mr-2' />
+              Mark as Read
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </nav>
   );
 };

@@ -6,31 +6,30 @@ import { useToast } from '@/hooks/use-toast';
 import { ImageIcon, Loader2, TrendingUp, Upload } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { StrategyInterface } from '@/lib/types';
+import { MarketplaceOpen, StrategyInterface } from '@/lib/types';
 import apiClient from '@/services/Api';
 import { useAuth } from '@/providers/AuthProvider';
 import Api from '@/services/Api';
 import { useAdmin } from '@/providers/AdminProvider';
 import { useDropzone } from 'react-dropzone';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { currencyFlags } from '../../../lib/flags';
+import { currencyFlags } from '@/lib/flags';
+import { uploadToIPFS } from '@/utils/utils';
+import { AxiosProgressEvent } from 'axios';
 
 interface AddStrategyModalProps {
   selectedStrategy: StrategyInterface;
-  open: 'Edit' | 'Add' | 'Delete' | '';
+  open: MarketplaceOpen;
   onOpenChange: () => void;
-  isLoading: boolean;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setStrategies: React.Dispatch<React.SetStateAction<StrategyInterface[]>>;
 }
 
-export const AddStrategyModal = ({
+export const AddCustomStrategyModal = ({
   open,
   onOpenChange,
   selectedStrategy,
-  isLoading,
-  setIsLoading,
+  setStrategies,
 }: AddStrategyModalProps) => {
-  const { setStrategies, strategies } = useAdmin();
   const [strategy, setStrategy] = useState({
     id: '',
     title: '',
@@ -41,9 +40,8 @@ export const AddStrategyModal = ({
   });
   const { toast } = useToast();
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
-  const [imageSource, setImageSource] = useState<'default' | 'uploaded'>('default');
-  const [uploadedCurrencyImages, setUploadedCurrencyImages] = useState<any[]>([]);
-  const [isLoadingImages, setIsLoadingImages] = useState(false);
+  const [imageSource, setImageSource] = useState<'default' | 'upload'>('default');
+  const [isLoading, setIsLoading] = useState(false);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: { 'image/*': [] },
@@ -83,49 +81,42 @@ export const AddStrategyModal = ({
     }
   }, [selectedStrategy]);
 
-  // Fetch uploaded currency images
-  useEffect(() => {
-    if (open === 'Add' || open === 'Edit') {
-      fetchUploadedImages();
-    }
-  }, [open]);
-
-  const fetchUploadedImages = async () => {
-    setIsLoadingImages(true);
+  async function handleSubmit(type: MarketplaceOpen) {
+    setIsLoading(true);
+    console.log('strategy images:', strategy.images);
+    let images: string[] = [];
     try {
-      const data = await Api.get('/images');
-      if (data?.success) {
-        // Filter only currency type images
-        const currencyImages = data.images.filter((img: any) => img.type === 'currency');
-        setUploadedCurrencyImages(currencyImages);
-      }
-    } catch (error) {
-      console.error('Error fetching uploaded images:', error);
-    } finally {
-      setIsLoadingImages(false);
-    }
-  };
+      const promises = uploadedImages.map((img) => {
+        return uploadToIPFS(img, ({}: AxiosProgressEvent) => {}).catch((err) => {
+          console.log(err);
+          throw new Error('Image upload failed to IPFS. Please retry.');
+        });
+      });
+      const imgs = await Promise.all(promises);
+      images = strategy.images.map((image: string, index) => {
+        if (image.includes('blob')) {
+          return imgs.splice(0, 1)[0];
+        } else {
+          return image;
+        }
+      });
+    } catch (error) {}
 
-  async function handleSubmit(type: 'Add' | 'Edit' | 'Delete' | '') {
     try {
       if (type === 'Add') {
-        setIsLoading(true);
-        const data = await Api.post('/strategy/add-strategy', strategy);
+        const data = await Api.post('/strategy/add-custom-strategy', {
+          ...strategy,
+          images: images,
+        });
         console.log('strategy add:', data);
         if (data?.success) {
-          setStrategies([...strategies, data.strategy]);
+          setStrategies((prev) => [...prev, data.strategy]);
         }
       } else if (type === 'Edit') {
-        // if (
-        //   strategy.title == selectedStrategy.title &&
-        //   strategy.description == selectedStrategy.description &&
-        //   strategy.status == selectedStrategy.status
-        // ) {
-        //   onOpenChange();
-        //   return;
-        // }
-        setIsLoading(true);
-        const data = await Api.post('/strategy/update-strategy', strategy);
+        const data = await Api.post('/strategy/update-custom-strategy', {
+          ...strategy,
+          images: images,
+        });
         console.log('strategy add:', data);
         if (data?.success) {
           setStrategies((prev) =>
@@ -146,7 +137,14 @@ export const AddStrategyModal = ({
   }
 
   return (
-    <Dialog open={open === 'Add' || open === 'Edit'} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open === 'Add' || open === 'Edit'}
+      onOpenChange={() => {
+        if (isLoading) return;
+        onOpenChange();
+        setUploadedImages([]);
+      }}
+    >
       <DialogContent
         className="sm:max-w-2xl max-h-[90vh] overflow-y-auto touch-auto"
         aria-describedby="Strategy Management"
@@ -205,7 +203,6 @@ export const AddStrategyModal = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Live">Live</SelectItem>
-                <SelectItem value="Development">Development</SelectItem>
                 <SelectItem value="Paused">Paused</SelectItem>
               </SelectContent>
             </Select>
@@ -216,16 +213,16 @@ export const AddStrategyModal = ({
             <Tabs
               value={imageSource}
               onValueChange={(val) => {
-                setImageSource(val as 'default' | 'uploaded');
+                setImageSource(val as 'default' | 'upload');
+                // setSelectedImages([]);
+                // setUploadedImages([]);
               }}
               className="w-full"
             >
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="default">Default Images</TabsTrigger>
-                <TabsTrigger value="uploaded">Uploaded Images</TabsTrigger>
+                <TabsTrigger value="upload">Upload Images</TabsTrigger>
               </TabsList>
-
-              {/* Default Images Tab */}
               <TabsContent value="default" className="space-y-4">
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">
@@ -269,68 +266,7 @@ export const AddStrategyModal = ({
                   })}
                 </div>
               </TabsContent>
-
-              {/* Uploaded Images Tab */}
-              <TabsContent value="uploaded" className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">
-                    Select up to 2 uploaded currency images ({strategy.images.length}/2 selected)
-                  </p>
-                  {strategy.images.length > 0 && (
-                    <Button variant="ghost" size="sm" onClick={() => setStrategy({ ...strategy, images: [] })}>
-                      Clear Selection
-                    </Button>
-                  )}
-                </div>
-                {isLoadingImages ? (
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                  </div>
-                ) : uploadedCurrencyImages.length === 0 ? (
-                  <div className="text-center py-12 border rounded-lg">
-                    <ImageIcon className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">No currency images uploaded yet</p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Go to Image Management to upload currency images
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 max-h-[400px] overflow-y-auto touch-auto border rounded-lg p-3">
-                    {uploadedCurrencyImages.map((img) => {
-                      const isSelected = strategy.images.includes(img.ipfsUrl);
-                      const selectionIndex = strategy.images.indexOf(img.ipfsUrl);
-                      return (
-                        <div
-                          key={img._id}
-                          onClick={() => {
-                            if (isSelected) {
-                              setStrategy({ ...strategy, images: strategy.images.filter((i) => i !== img.ipfsUrl) });
-                            } else if (strategy.images.length < 2) {
-                              setStrategy({ ...strategy, images: [...strategy.images, img.ipfsUrl] });
-                            } else {
-                              toast({ description: 'Maximum 2 images allowed' });
-                            }
-                          }}
-                          className={`cursor-pointer rounded-lg border-2 p-2 transition-all hover:border-primary relative flex flex-col items-center ${
-                            isSelected ? 'border-primary bg-primary/5' : 'border-border'
-                          } ${strategy.images.length >= 2 && !isSelected ? 'opacity-50' : ''}`}
-                        >
-                          {isSelected && (
-                            <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg">
-                              {selectionIndex + 1}
-                            </div>
-                          )}
-                          <img src={img.ipfsUrl} alt={img.alt} className="h-16 w-16 object-cover rounded" />
-                          <p className="text-[10px] text-center mt-1 text-muted-foreground truncate w-full">
-                            {img.currency}
-                          </p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </TabsContent>
-              {/* <TabsContent value="upload" className="space-y-4">
+              <TabsContent value="upload" className="space-y-4">
                 <div
                   {...getRootProps()}
                   className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
@@ -373,34 +309,36 @@ export const AddStrategyModal = ({
                       </Button>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                      {strategy.images.map((img, idx) => (
-                        <div key={idx} className="relative group">
-                          <img
-                            src={img}
-                            alt={`Upload ${idx + 1}`}
-                            className="h-32 w-full object-cover rounded-lg border-2 border-primary"
-                          />
-                          <div className="absolute -top-2 -left-2 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg">
-                            {idx + 1}
+                      {strategy.images
+                        .filter((img) => img.includes('blob:http'))
+                        .map((img, idx) => (
+                          <div key={idx} className="relative group">
+                            <img
+                              src={img}
+                              alt={`Upload ${idx + 1}`}
+                              className="h-32 w-full object-cover rounded-lg border-2 border-primary"
+                            />
+                            <div className="absolute -top-2 -left-2 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg">
+                              {idx + 1}
+                            </div>
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="absolute -top-2 -right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => {
+                                URL.revokeObjectURL(img);
+                                setStrategy({ ...strategy, images: strategy.images.filter((_, i) => i !== idx) });
+                                setUploadedImages(uploadedImages.filter((_, i) => i !== idx));
+                              }}
+                            >
+                              ×
+                            </Button>
                           </div>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="absolute -top-2 -right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => {
-                              URL.revokeObjectURL(img);
-                              setStrategy({ ...strategy, images: strategy.images.filter((_, i) => i !== idx) });
-                              setUploadedImages(uploadedImages.filter((_, i) => i !== idx));
-                            }}
-                          >
-                            ×
-                          </Button>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   </div>
                 )}
-              </TabsContent> */}
+              </TabsContent>
             </Tabs>
           </div>
 

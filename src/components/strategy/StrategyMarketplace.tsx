@@ -1,26 +1,27 @@
+import Api from '@/services/Api';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Settings, CircleAlert, Activity } from 'lucide-react';
-import Api from '@/services/Api';
+import { Activity } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { RiskConfigModal } from './RiskConfigModal';
-import { StrategyInterface } from '@/lib/types';
+import { MarketplaceOpen, StrategyInterface } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { RiskSettingModal } from './AccountRiskSettingModal';
 import { TradingTimeModal } from './TradingTimeModal';
 import { Spinner } from '../ui/Spinner';
 import { PageDescription, PageHeader } from '../components/PageHeader';
+import { AddStrategyCard } from './AddStrategyCard';
+import { StrategyCard } from './StrategyCard';
+import { AddCustomStrategyModal } from './AddCustomStrategyModal';
+import { DeleteModal } from './DeleteModal';
+import { toast } from 'sonner';
 
 const StrategyMarketplace = () => {
-  const { toast } = useToast();
   const { user, setUser } = useAuth();
   const [strategies, setStrategies] = useState<StrategyInterface[]>([]);
   const [strategy, setStrategy] = useState<StrategyInterface | null>(null);
-  const [open, setOpen] = useState<'Global' | 'Strategy' | 'Time' | ''>('');
+  const [open, setOpen] = useState<MarketplaceOpen>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [stats, setStats] = useState({
     count: 0,
@@ -71,12 +72,25 @@ const StrategyMarketplace = () => {
       }
     } catch (error) {
       console.error('Error while subscribing strategy:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: error?.response?.data?.error?.strategy ?? error?.response?.data?.message ?? 'Somethign went wrong',
-      });
+      toast.error(error?.response?.data?.error?.strategy ?? error?.response?.data?.message ?? 'Somethign went wrong');
     }
+  }
+
+  async function confirmDelete() {
+    setIsLoading(true);
+    try {
+      const data = await Api.delete(`/strategy/${strategy._id}`);
+      console.log('data:', data);
+      if (data?.success) {
+        setStrategies(strategies.filter((s) => s._id !== strategy._id));
+        toast.success('Successfully deleted');
+        setStrategy(null);
+        setOpen('');
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || 'Unexpected Error');
+    }
+    setIsLoading(false);
   }
 
   function onConfigModalOpen(strat: any) {
@@ -84,7 +98,7 @@ const StrategyMarketplace = () => {
     setStrategy(strat);
   }
 
-  function onConfigModalClose() {
+  function onModalClose() {
     if (isLoading) {
       return;
     }
@@ -112,14 +126,16 @@ const StrategyMarketplace = () => {
               className="md:text-sm text-xs px-2 md:px-4 py-0.5 h-6 sm:h-8 md:h-9"
               onClick={() => setOpen('Global')}
             >
-              Account <span className="hidden sm:flex">Risk </span>Settings
+              <span className="hidden sm:flex">Account Risk Settings</span>
+              <span className="sm:hidden">Account Settings</span>
             </Button>
             <Button
               variant="gold"
               className="md:text-sm text-xs px-2 md:px-4 py-0.5 h-6 sm:h-8 md:h-9"
               onClick={() => setOpen('Time')}
             >
-              <span className="hidden sm:flex">Trading</span> Time Settings
+              <span className="hidden sm:flex">Trading Time Settings</span>
+              <span className="sm:hidden">Time Settings</span>
             </Button>
           </div>
         )}
@@ -168,162 +184,70 @@ const StrategyMarketplace = () => {
         </Card> */}
       </div>
 
-      {/* Strategy Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {user.status === 'active' &&
-          strategies.map((strategy) => (
-            <Card
-              key={strategy?.title}
-              className={`bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all ${
-                strategy?.enabled ? 'ring-2 ring-profit/20' : ''
-              }`}
-            >
-              <div className="p-6">
-                {/* Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className=" w-full">
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-semibold">{strategy?.title}</h3>
-                        <Badge
-                          className={
-                            strategy?.status === 'Live'
-                              ? 'bg-profit/20 text-profit'
-                              : strategy?.status === 'Paused'
-                              ? 'bg-gold/20 text-gold'
-                              : 'bg-primary/20 text-primary'
-                          }
-                        >
-                          {strategy?.status}
-                        </Badge>
-                        {strategy.images.map((image, index) => (
-                          <img
-                            key={index}
-                            src={image}
-                            alt={strategy.symbol}
-                            className="w-8 h-8 object-cover rounded-full"
-                          />
-                        ))}
-                      </div>
-                      {user?.role === 'admin' && <Switch checked={strategy?.enabled} />}
-                    </div>
-                    <p className="text-sm text-muted-foreground">{strategy?.description}</p>
-                  </div>
-                </div>
+      <section>
+        <h2 className="text-xl font-semibold text-foreground mb-2">Platform Strategies</h2>
 
-                {/* Stats Grid */}
-                {/* <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="bg-background/50 rounded p-2">
-                  <p className="text-xs text-muted-foreground">Win Rate</p>
-                  <p className="text-lg font-semibold text-profit">{strategy.winRate}%</p>
-                </div>
-                <div className="bg-background/50 rounded p-2">
-                  <p className="text-xs text-muted-foreground">Monthly Return</p>
-                  <p className="text-lg font-semibold text-primary">+{strategy.monthlyReturn}%</p>
-                </div>
-                <div className="bg-background/50 rounded p-2">
-                  <p className="text-xs text-muted-foreground">Avg Profit</p>
-                  <p className="text-lg font-semibold">+{strategy.avgProfit}%</p>
-                </div>
-                <div className="bg-background/50 rounded p-2">
-                  <p className="text-xs text-muted-foreground">Avg Loss</p>
-                  <p className="text-lg font-semibold">-{strategy.avgLoss}%</p>
-                </div>
-              </div> */}
+        {/* Strategy Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {user.status === 'active' &&
+            strategies
+              .filter((s) => s.type === 'default')
+              .map((stra) => (
+                <StrategyCard
+                  key={stra._id}
+                  strategy={stra}
+                  onConfigModalOpen={onConfigModalOpen}
+                  subscribeStrategy={subscribeStrategy}
+                  setOpen={setOpen}
+                />
+              ))}
+        </div>
+      </section>
 
-                {/* Markets and Timeframe */}
-                {/* <div className="flex flex-wrap gap-2 mb-4">
-                {strategy.tags.map((market) => (
-                  <Badge key={market} variant="outline" className="text-xs">
-                    {market}
-                  </Badge>
-                ))}
-                <Badge variant="outline" className="text-xs">
-                  <Clock className="h-3 w-3 mr-1" />
-                  {strategy.timeframe}
-                </Badge>
-              </div> */}
-
-                {/* Footer */}
-                <div className="pt-2 border-t border-border">
-                  <p className="text-sm text-muted-foreground">Select the account to subscribe this strategy.</p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 text-muted-foreground text-sm">
-                      {user?.accounts.map((acc) => {
-                        return (
-                          <div key={acc.accountId} className="flex gap-2 items-center mt-1">
-                            <Checkbox
-                              checked={acc.strategySettings.find((ss) => ss.strategyId === strategy._id)?.subscribed}
-                              onClick={() => {
-                                subscribeStrategy(strategy._id, acc.accountId, '');
-                              }}
-                            />
-                            {acc.name}
-                          </div>
-                        );
-                      })}
-                      {user?.accounts?.length > 1 && (
-                        <div className="flex gap-2 items-center mt-1">
-                          <Checkbox
-                            checked={user.accounts.every(
-                              (account) =>
-                                account?.strategySettings?.find((ss) => ss.strategyId === strategy._id)?.subscribed
-                            )}
-                            onClick={() => {
-                              subscribeStrategy(strategy._id, '', 'All');
-                            }}
-                          />{' '}
-                          All
-                        </div>
-                      )}
-                      {user?.accounts?.length === 0 && (
-                        <div className="flex gap-2 items-center mt-1">
-                          <CircleAlert color="gold" size={20} />
-                          <p className="text-muted-foreground text-sm">You have no account</p>
-                        </div>
-                      )}
-                    </div>
-                    {user?.status === 'active' && user?.accounts?.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => onConfigModalOpen(strategy)}>
-                          <Settings />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))}
-      </div>
+      <section>
+        <h2 className="text-xl font-semibold text-foreground mb-2">My Strategies</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {strategies
+            .filter((s) => s.type === 'custom')
+            .map((stra) => (
+              <StrategyCard
+                key={stra._id}
+                strategy={stra}
+                onConfigModalOpen={onConfigModalOpen}
+                subscribeStrategy={subscribeStrategy}
+                setOpen={setOpen}
+                setStrategy={setStrategy}
+              />
+            ))}
+          <AddStrategyCard onClick={() => setOpen('Add')} disabled={user.plan === 'basic'} />
+        </div>
+      </section>
 
       {/* For each account */}
       <RiskConfigModal
         open={open}
-        onConfigModalClose={onConfigModalClose}
+        onModalClose={onModalClose}
         strategy={strategy}
         isLoading={isLoading}
         setIsLoading={setIsLoading}
       />
 
       {/* For whole accounts */}
-      <RiskSettingModal
-        open={open}
-        onModalClose={() => {
-          if (isLoading) return;
-          setOpen('');
-        }}
-        isLoading={isLoading}
-        setIsLoading={setIsLoading}
-      />
+      <RiskSettingModal open={open} onModalClose={onModalClose} isLoading={isLoading} setIsLoading={setIsLoading} />
 
       {/* For each account */}
-      <TradingTimeModal
+      <TradingTimeModal open={open} onModalClose={onModalClose} isLoading={isLoading} setIsLoading={setIsLoading} />
+
+      {/* Add Strategy Modal */}
+      <AddCustomStrategyModal
         open={open}
-        onConfigModalClose={onConfigModalClose}
-        isLoading={isLoading}
-        setIsLoading={setIsLoading}
+        onOpenChange={onModalClose}
+        selectedStrategy={strategy}
+        setStrategies={setStrategies}
       />
+
+      {/* Delete Modal */}
+      <DeleteModal open={open} onOpenChange={onModalClose} isLoading={isLoading} confirmDelete={confirmDelete} />
     </div>
   );
 };

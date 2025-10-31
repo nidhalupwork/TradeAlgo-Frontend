@@ -24,6 +24,7 @@ import Announce from './pages/Announce';
 import Tutorials from './pages/Tutorials';
 import TutorialsManagement from './pages/TutorialsManagement';
 import TutorialDetail from './pages/TutorialDetail';
+import ImageUpload from './pages/ImageUpload';
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => {
                   <Route path="/tutorials" element={<Tutorials />} />
                   <Route path="/tutorial-management" element={<TutorialsManagement />} />
                   <Route path="/tutorials/:tutorialId" element={<TutorialDetail />} />
+                  <Route path="/image-upload" element={<ImageUpload />} />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>

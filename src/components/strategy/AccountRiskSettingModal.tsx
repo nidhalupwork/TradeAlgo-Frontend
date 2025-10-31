@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CircleAlert, Loader2, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
-import { ConnectAccount } from '@/lib/types';
+import { ConnectAccount, MarketplaceOpen } from '@/lib/types';
 import apiClient from '@/services/Api';
 import { useToast } from '@/hooks/use-toast';
 import { useSocket } from '@/providers/SocketProvider';
@@ -20,7 +20,7 @@ export const RiskSettingModal = ({
   isLoading,
   setIsLoading,
 }: {
-  open: 'Global' | 'Strategy' | 'Time' | '';
+  open: MarketplaceOpen;
   onModalClose: () => void;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -157,7 +157,7 @@ export const RiskSettingModal = ({
 
   return (
     <Dialog open={open === 'Global'} onOpenChange={() => onModalClose()}>
-      <DialogContent className="sm:max-w-lg overflow-y-auto max-h-screen">
+      <DialogContent className="sm:max-w-lg overflow-y-auto touch-auto max-h-screen">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">

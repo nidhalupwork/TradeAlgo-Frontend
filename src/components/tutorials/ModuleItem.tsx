@@ -2,8 +2,6 @@ import { Lesson, Module } from '@/lib/types';
 import { ArrowRight, ChevronDown, ChevronUp, Lock, X } from 'lucide-react';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Card } from '../ui/card';
-import videoUrl from '@/assets/video/lucy.mp4';
 import { Button } from '../ui/button';
 
 export const ModuleItem = ({ module, index }: { module: Module; index: number }) => {
@@ -50,7 +48,7 @@ export const ModuleItem = ({ module, index }: { module: Module; index: number })
                 </div>
                 <div className="flex flex-col flex-1 gap-2">
                   <p className="font-semibold text-lg">{lesson.title}</p>
-                  <p className="text-sm">{lesson.description}</p>
+                  <p className="text-sm whitespace-pre-wrap">{lesson.description}</p>
                 </div>
                 <div className="w-36 h-24 bg-white mt-1"></div>
               </div>
@@ -59,23 +57,19 @@ export const ModuleItem = ({ module, index }: { module: Module; index: number })
         </div>
       )}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogContent className="max-w-5xl">
+        <DialogContent className="max-w-5xl max-h-screen overflow-y-auto touch-auto">
           <DialogHeader>
             <DialogTitle className="text-center">{selectedLesson?.title}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col p-6 md:p-8 gap-6">
             <div className="flex justify-center">
-              <p className="max-w-xl text-center text-sm">{selectedLesson?.description}</p>
+              <p className="max-w-xl text-center text-sm whitespace-pre-wrap">{selectedLesson?.description}</p>
             </div>
             {/* <video className="w-full" controls>
               <source src={videoUrl} type="video/mp4" />
               Your browser does not support the video tag.
             </video> */}
-            <iframe
-              className="w-full h-full aspect-video"
-              src="https://www.youtube.com/embed/gEJ2nUna8c4"
-              allowFullScreen
-            />
+            <iframe className="w-full h-full aspect-video" src={selectedLesson?.video} allowFullScreen />
             <div className="flex flex-col items-center md:items-end">
               <Button variant="default" className="w-full md:w-auto rounded-full">
                 Next lesson

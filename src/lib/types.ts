@@ -1,6 +1,7 @@
-export type UserRole = 'user' | 'admin' | 'owner' | 'support' | '';
-export type UserStatus = 'active' | 'pending' | 'suspended' | 'deleted' | '';
-export type UserPlan = 'premium' | 'basic' | '';
+export type UserRole = "user" | "admin" | "owner" | "support" | "";
+export type UserStatus = "active" | "pending" | "suspended" | "deleted" | "";
+export type UserPlan = "premium" | "basic" | "";
+export type MarketplaceOpen = "Global" | "Strategy" | "Time" | "Add" | "Edit" | "Delete" | "";
 
 export interface UserInterface {
   _id: string;
@@ -52,7 +53,7 @@ export interface StrategySetting {
 
 export interface ConnectAccount {
   name: string;
-  platform: 'mt4' | 'mt5' | '-';
+  platform: "mt4" | "mt5" | "-";
   magic: string;
   login: string;
   brokerage: string;
@@ -60,9 +61,9 @@ export interface ConnectAccount {
   active: boolean;
   strategySettings: StrategySetting[];
   subscribedStrategies: string[];
-  dailyLossCurrency: 'percentage' | 'amount';
+  dailyLossCurrency: "percentage" | "amount";
   dailyLossLimit: number;
-  maxLossCurrency: 'percentage' | 'amount';
+  maxLossCurrency: "percentage" | "amount";
   maxLossLimit: number;
 }
 
@@ -70,7 +71,7 @@ export interface PositionSize {
   riskType: string;
   riskPerTrade: number;
   accountBalance: number;
-  stopLossType: 'atr' | 'percentage' | 'fixed';
+  stopLossType: "atr" | "percentage" | "fixed";
   atrMultiplier?: number;
   stopLossPercentage?: number;
   riskAmount: number;
@@ -131,15 +132,11 @@ export interface StrategyInterface {
   title: string;
   description: string;
   symbol: string;
-  winRate: number;
-  avgProfit: number;
-  avgLoss: number;
-  star: number;
   images: string[];
-  tags: string[];
   subscribers: string[];
-  status: 'Live' | 'Development' | 'Paused';
+  status: "Live" | "Development" | "Paused";
   enabled: boolean;
+  type: "default" | "custom";
 }
 
 export interface GlobalSettingInterface {
@@ -149,7 +146,7 @@ export interface GlobalSettingInterface {
 }
 
 export interface ITier {
-  name: 'basic' | 'premium';
+  name: "basic" | "premium";
   price: number;
   maxAccountsCount: number;
   level: number;
@@ -171,20 +168,6 @@ export interface DataItem {
   updatedAt: Date;
 }
 
-export interface StrategyInterface {
-  _id: string;
-  title: string;
-  description: string;
-  winRate: number;
-  avgProfit: number;
-  avgLoss: number;
-  star: number;
-  tags: string[];
-  subscribers: string[];
-  status: 'Live' | 'Development' | 'Paused';
-  enabled: boolean;
-}
-
 export interface Announcement {
   _id: string;
   title: string;
@@ -192,7 +175,7 @@ export interface Announcement {
   expireTime: string;
   readers: string[];
   receivers: string[];
-  image_url: string | null;
+  imageUrl: string | null;
   createdAt: string;
   createdBy: string;
 }

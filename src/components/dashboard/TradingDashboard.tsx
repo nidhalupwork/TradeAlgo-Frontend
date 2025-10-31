@@ -120,7 +120,7 @@ const TradingDashboard = () => {
   useEffect(() => {
     setCharts((prevCharts) => {
       return prevCharts.map((prevChart) => {
-        if (prevChart.login === portfolio.login) {
+        if (prevChart?.login === portfolio?.login) {
           return portfolio;
         } else {
           return prevChart;

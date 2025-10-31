@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { TrendingUp, Loader2 } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
-import { ConnectAccount } from '@/lib/types';
+import { ConnectAccount, MarketplaceOpen } from '@/lib/types';
 import apiClient from '@/services/Api';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -16,12 +16,12 @@ import Api from '@/services/Api';
 
 export const TradingTimeModal = ({
   open,
-  onConfigModalClose,
+  onModalClose,
   isLoading,
   setIsLoading,
 }: {
-  open: 'Global' | 'Strategy' | 'Time' | '';
-  onConfigModalClose: () => void;
+  open: MarketplaceOpen;
+  onModalClose: () => void;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
@@ -64,7 +64,7 @@ export const TradingTimeModal = ({
       console.log('data for updating trading time:', data);
       if (data?.success) {
         setUser(data.user);
-        onConfigModalClose();
+        onModalClose();
       }
     } catch (error) {
       console.error('Error while saving in trading time modal:', error);
@@ -78,8 +78,8 @@ export const TradingTimeModal = ({
   }
 
   return (
-    <Dialog open={open === 'Time'} onOpenChange={() => onConfigModalClose()}>
-      <DialogContent className="sm:max-w-4xl">
+    <Dialog open={open === 'Time'} onOpenChange={() => onModalClose()}>
+      <DialogContent className="sm:max-w-4xl max-h-screen overflow-y-auto touch-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
@@ -89,67 +89,65 @@ export const TradingTimeModal = ({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           {/* Close All Trades */}
-          <Card className="bg-card/50 backdrop-blur-sm border-border/50 flex-1">
-            <div className="p-4 space-y-3">
+          <Card className="bg-card/50 backdrop-blur-sm border-border/50 flex-1 p-4 flex flex-col gap-1 sm:gap-3">
+            <div className="space-y-2">
+              <h2 className="text-lg font-semibold">Close All Trades</h2>
+              <p className="text-sm text-muted-foreground">
+                Schedule weekly closures to manage positions and reduce weekend risk.
+              </p>
+            </div>
+            <div className="flex items-center justify-end">
+              <Switch
+                checked={settings.weeklyClose}
+                onCheckedChange={(value) => setSettings({ ...settings, weeklyClose: value })}
+              />
+            </div>
+            <Card className="flex flex-col gap-2 sm:gap-4 px-3 py-4 bg-card/30">
               <div className="space-y-2">
-                <h2 className="text-lg font-semibold">Close All Trades</h2>
-                <p className="text-sm text-muted-foreground">
-                  Schedule weekly closures to manage positions and reduce weekend risk
-                </p>
-              </div>
-              <div className="flex items-center justify-end">
-                <Switch
-                  checked={settings.weeklyClose}
-                  onCheckedChange={(value) => setSettings({ ...settings, weeklyClose: value })}
+                <h3 className="text-base">Day & Time to Close</h3>
+                <Select
+                  value={settings.dayOfWeek.toString()}
+                  onValueChange={(value) => setSettings({ ...settings, dayOfWeek: Number(value) })}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0">Sunday</SelectItem>
+                    <SelectItem value="1">Monday</SelectItem>
+                    <SelectItem value="2">Tuesday</SelectItem>
+                    <SelectItem value="3">Wednesday</SelectItem>
+                    <SelectItem value="4">Thursday</SelectItem>
+                    <SelectItem value="5">Friday</SelectItem>
+                    <SelectItem value="6">Saturday</SelectItem>
+                  </SelectContent>
+                </Select>
+                <input
+                  type="time"
+                  className="relative flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
+                  value={settings.weeklyCloseTime}
+                  onChange={(e) => {
+                    setSettings((prev) => ({ ...prev, weeklyCloseTime: e.target.value }));
+                  }}
                 />
               </div>
-              <Card className="flex flex-col gap-4 px-3 py-4 bg-card/30">
-                <div className="space-y-2">
-                  <h3 className="text-base">Day & Time to Close</h3>
-                  <Select
-                    value={settings.dayOfWeek.toString()}
-                    onValueChange={(value) => setSettings({ ...settings, dayOfWeek: Number(value) })}
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">Sunday</SelectItem>
-                      <SelectItem value="1">Monday</SelectItem>
-                      <SelectItem value="2">Tuesday</SelectItem>
-                      <SelectItem value="3">Wednesday</SelectItem>
-                      <SelectItem value="4">Thursday</SelectItem>
-                      <SelectItem value="5">Friday</SelectItem>
-                      <SelectItem value="6">Saturday</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <input
-                    type="time"
-                    className="relative flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
-                    value={settings.weeklyCloseTime}
-                    onChange={(e) => {
-                      setSettings((prev) => ({ ...prev, weeklyCloseTime: e.target.value }));
-                    }}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-base">Delivery</h3>
-                  <span className="text-sm text-muted-foreground">Will send email to your email address</span>
-                </div>
-                <p className="text-xs text-muted-foreground">Based on UTC timezone</p>
-              </Card>
-            </div>
+              <div className="space-y-2">
+                <h3 className="text-base">Delivery</h3>
+                <span className="text-sm text-muted-foreground">Will send email to your email address</span>
+              </div>
+              <p className="text-xs text-muted-foreground">Based on UTC timezone</p>
+            </Card>
           </Card>
 
           {/* Trading Time Limit */}
-          <Card className="bg-card/50 backdrop-blur-sm border-border/50 flex-1 p-4 flex flex-col gap-3">
+          <Card className="bg-card/50 backdrop-blur-sm border-border/50 flex-1 p-4 flex flex-col gap-1 sm:gap-3">
             <div className="space-y-2">
               <h2 className="text-lg font-semibold">Trading Time Limit</h2>
               <p className="text-sm text-muted-foreground">
-                Allow new trades only within defiend time window to control market exposure
+                Allow new trades only within defined time window to control market exposure.
               </p>
             </div>
             <div className="flex items-center justify-end">
@@ -158,7 +156,7 @@ export const TradingTimeModal = ({
                 onCheckedChange={(value) => setSettings({ ...settings, isTimeLimit: value })}
               />
             </div>
-            <Card className="flex flex-col gap-4 px-3 py-4 bg-card/30 flex-1">
+            <Card className="flex flex-col gap-2 sm:gap-4 px-3 py-4 bg-card/30 flex-1">
               <div className="space-y-2">
                 <h3 className="text-base">Start Time</h3>
                 <input

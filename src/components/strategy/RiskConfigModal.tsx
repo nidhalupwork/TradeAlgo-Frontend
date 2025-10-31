@@ -7,19 +7,19 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { TrendingUp, Loader2 } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
-import { ConnectAccount } from '@/lib/types';
+import { ConnectAccount, MarketplaceOpen } from '@/lib/types';
 import apiClient from '@/services/Api';
 import { useToast } from '@/hooks/use-toast';
 
 export const RiskConfigModal = ({
   open,
-  onConfigModalClose,
+  onModalClose,
   strategy,
   isLoading,
   setIsLoading,
 }: {
-  open: 'Global' | 'Strategy' | 'Time' | '';
-  onConfigModalClose: () => void;
+  open: MarketplaceOpen;
+  onModalClose: () => void;
   strategy: any;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -149,7 +149,7 @@ export const RiskConfigModal = ({
       console.log('Data:', data);
       if (data?.success) {
         setUser(data.user);
-        onConfigModalClose();
+        onModalClose();
         toast({
           title: 'Success',
           description: 'Successfully updated account risk settings',
@@ -168,7 +168,7 @@ export const RiskConfigModal = ({
   }
 
   return (
-    <Dialog open={open === 'Strategy'} onOpenChange={() => onConfigModalClose()}>
+    <Dialog open={open === 'Strategy'} onOpenChange={() => onModalClose()}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

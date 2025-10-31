@@ -1,4 +1,30 @@
 import { DataItem } from '@/lib/types';
+import { PINATA_KEY } from '@/config/config';
+import axios, { AxiosProgressEvent } from 'axios';
+
+export const uploadToIPFS = (data: File, progress: (event: AxiosProgressEvent) => void) =>
+  new Promise<string>(async (resolve, reject) => {
+    const formData = new FormData();
+    formData.append('file', data);
+    formData.append('pinataMetadata', JSON.stringify({ name: 'SQD' }));
+    formData.append('pinataOptions', JSON.stringify({ cidVersion: 0 }));
+
+    try {
+      const res = await axios.post('https://api.pinata.cloud/pinning/pinFileToIPFS', formData, {
+        maxBodyLength: Infinity,
+        headers: {
+          'Content-Type': `multipart/form-data`, // Updated to use getBoundary()
+          Authorization: `Bearer ${PINATA_KEY}`,
+        },
+        onUploadProgress: progress,
+      });
+
+      resolve(`https://ipfs.io/ipfs/${res.data.IpfsHash}`);
+    } catch (error) {
+      console.error('IPFS upload error:', error);
+      reject('IPFS projectInfo upload failed');
+    }
+  });
 
 export function transformData(items: DataItem[], range: '1m' | '3m' | '1y') {
   // Calculate the start date based on range
@@ -8,18 +34,23 @@ export function transformData(items: DataItem[], range: '1m' | '3m' | '1y') {
 
   switch (range) {
     case '1m':
-      startDate.setUTCDate(now.getDate() - 30);
+      startDate.setTime(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       break;
     case '3m':
+      // Set date to 1 first to prevent overflow then subtract months
+      startDate.setUTCDate(1);
       startDate.setUTCMonth(now.getMonth() - 3);
       break;
     case '1y':
+      // Similarly handle year change
+      startDate.setUTCDate(1);
       startDate.setUTCFullYear(now.getFullYear() - 1);
       break;
   }
   startDate.setUTCHours(0, 0, 0, 0);
+
   endDate.setHours(23, 59, 59, 999);
-  // console.log('startDate:', startDate, 'now:', now, 'endDate:', endDate);
+  // console.log("startDate:", startDate, "now:", now, "endDate:", endDate);
 
   // Filter and process each account's data
   const processedAccounts = items.map((item) => {
