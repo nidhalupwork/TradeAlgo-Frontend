@@ -107,88 +107,66 @@ const StrategyMarketplace = () => {
   }
 
   return open === '' && isLoading === true ? (
-    <div className="w-full h-[calc(100vh-64px)] flex items-center justify-center">
-      <Spinner className="w-12 h-12" />
+    <div className='w-full h-[calc(100vh-64px)] flex items-center justify-center'>
+      <Spinner className='w-12 h-12' />
     </div>
   ) : (
-    <div className="p-6 space-y-6">
+    <div className='p-6 space-y-6'>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className='flex items-center justify-between'>
         <div>
           <PageHeader>Strategy Marketplace</PageHeader>
           <PageDescription>Select, connect and configure your automated trading strategies.</PageDescription>
         </div>
 
         {user.status === 'active' && (
-          <div className="flex flex-col lg:flex-row gap-2">
+          <div className='flex flex-col lg:flex-row gap-2'>
             <Button
-              variant="gold"
-              className="md:text-sm text-xs px-2 md:px-4 py-0.5 h-6 sm:h-8 md:h-9"
+              variant='gold'
+              className='md:text-sm text-xs px-2 md:px-4 py-0.5 h-6 sm:h-8 md:h-9'
               onClick={() => setOpen('Global')}
             >
-              <span className="hidden sm:flex">Account Risk Settings</span>
-              <span className="sm:hidden">Account Settings</span>
+              <span className='hidden sm:flex'>Account Risk Settings</span>
+              <span className='sm:hidden'>Account Settings</span>
             </Button>
             <Button
-              variant="gold"
-              className="md:text-sm text-xs px-2 md:px-4 py-0.5 h-6 sm:h-8 md:h-9"
+              variant='gold'
+              className='md:text-sm text-xs px-2 md:px-4 py-0.5 h-6 sm:h-8 md:h-9'
               onClick={() => setOpen('Time')}
             >
-              <span className="hidden sm:flex">Trading Time Settings</span>
-              <span className="sm:hidden">Time Settings</span>
+              <span className='hidden sm:flex'>Trading Time Settings</span>
+              <span className='sm:hidden'>Time Settings</span>
             </Button>
           </div>
         )}
       </div>
 
-      {/* {user.status === 'pending' && <Announcement />} */}
-
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
-          <div className="flex items-center gap-3">
-            <Activity className="h-8 w-8 text-primary" />
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+        <Card className='p-4 bg-card/50 backdrop-blur-sm border-border/50'>
+          <div className='flex items-center gap-3'>
+            <Activity className='h-8 w-8 text-primary' />
             {user.status === 'active' && (
               <div>
-                <p className="text-2xl font-bold">{stats.count.toLocaleString()}</p>
-                <p className="text-sm text-muted-foreground">Available Strategies</p>
+                <p className='text-2xl font-bold'>{stats.count.toLocaleString()}</p>
+                <p className='text-sm text-muted-foreground'>Available Strategies</p>
               </div>
             )}
             {user.status !== 'active' && (
               <div>
-                <p className="text-2xl font-bold">Not Available</p>
-                <p className="text-sm text-muted-foreground">Required account approval</p>
+                <p className='text-2xl font-bold'>Not Available</p>
+                <p className='text-sm text-muted-foreground'>Required account approval</p>
               </div>
             )}
           </div>
         </Card>
-
-        {/* <Card className='p-4 bg-card/50 backdrop-blur-sm border-border/50'>
-          <div className='flex items-center gap-3'>
-            <Users className='h-8 w-8 text-profit' />
-            <div>
-              <p className='text-2xl font-bold'>{stats.activeUsersCount.toLocaleString()}</p>
-              <p className='text-sm text-muted-foreground'>Available Markets</p>
-            </div>
-          </div>
-        </Card> */}
-
-        {/* <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
-          <div className="flex items-center gap-3">
-            <TrendingUp className="h-8 w-8 text-gold" />
-            <div>
-              <p className="text-2xl font-bold">{stats.avgMonthlyReturn.toLocaleString()}%</p>
-              <p className="text-sm text-muted-foreground">Active Algorithms</p>
-            </div>
-          </div>
-        </Card> */}
       </div>
 
       <section>
-        <h2 className="text-xl font-semibold text-foreground mb-2">Platform Strategies</h2>
+        <h2 className='text-xl font-semibold text-foreground mb-2'>Platform Strategies</h2>
 
         {/* Strategy Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className='grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6'>
           {user.status === 'active' &&
             strategies
               .filter((s) => s.type === 'default')
@@ -205,8 +183,8 @@ const StrategyMarketplace = () => {
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold text-foreground mb-2">My Strategies</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <h2 className='text-xl font-semibold text-foreground mb-2'>My Strategies</h2>
+        <div className='grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6'>
           {strategies
             .filter((s) => s.type === 'custom')
             .map((stra) => (
@@ -219,7 +197,13 @@ const StrategyMarketplace = () => {
                 setStrategy={setStrategy}
               />
             ))}
-          <AddStrategyCard onClick={() => setOpen('Add')} disabled={user.plan === 'basic'} />
+          <AddStrategyCard
+            onClick={() => {
+              setStrategy(null);
+              setOpen('Add');
+            }}
+            disabled={user.plan === 'basic'}
+          />
         </div>
       </section>
 
