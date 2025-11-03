@@ -49,15 +49,12 @@ export const SocketProvider = ({ children }) => {
       localStorage.setItem('googleId', temp);
     }
     setGoogleId(temp);
-    console.log('googleId:', temp);
 
     // Connect once when provider mounts
     socketRef.current = io(BACKEND_ENDPOINT);
-    console.log('Socket is connected');
 
     socketRef.current.on('connect', () => {
       setConnected(true);
-      console.log('Connected to socket:', socketRef.current.id, userData);
       if (userData.email) {
         initializeSocket(userData.id, userData.email, userData.accounts);
       }
@@ -96,7 +93,6 @@ export const SocketProvider = ({ children }) => {
   }, []);
 
   function initializeSocket(id: string, email: string, accounts: string[]) {
-    console.log('initializeSocket is called');
     socketRef.current.emit('initialize', {
       userId: id,
       email,
@@ -107,7 +103,6 @@ export const SocketProvider = ({ children }) => {
   }
 
   function deinitializeSocket(id: string, accountIds: string[]) {
-    console.log('deinitializeSocket is called');
     socketRef.current.emit('deinitialize', { userId: id, accountIds });
   }
 

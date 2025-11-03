@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { Module, Tutorial } from '@/lib/types';
 import Api from '@/services/Api';
+import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 
 export const ModulesManager = ({
   modules,
@@ -24,6 +25,9 @@ export const ModulesManager = ({
   const [editingModule, setEditingModule] = useState<Module | null>(null);
   const [formData, setFormData] = useState({ tutorialId: '', title: '', order: 0 });
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [moduleToDelete, setModuleToDelete] = useState<{ moduleId: string; tutorialId: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,10 +86,41 @@ export const ModulesManager = ({
     setDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (!confirm('Are you sure? This will delete all lessons in this module.')) return;
-    // Logic will be implemented later
-    toast.success('Module deleted successfully');
+  const handleDeleteClick = (moduleId: string, tutorialId: string) => {
+    setModuleToDelete({ moduleId, tutorialId });
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!moduleToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      const data = await Api.delete(`/tutorial/module/${moduleToDelete.tutorialId}/${moduleToDelete.moduleId}`, { tutorialId: moduleToDelete.tutorialId });
+      console.log('Data to delete module:', data);
+      
+      if (data?.success) {
+        setTutorials((prev) =>
+          prev.map((t) => {
+            if (t._id === moduleToDelete.tutorialId) {
+              return {
+                ...t,
+                modules: t.modules.filter((m) => m._id !== moduleToDelete.moduleId),
+              };
+            }
+            return t;
+          })
+        );
+        toast.success('Module deleted successfully');
+        setDeleteModalOpen(false);
+        setModuleToDelete(null);
+      }
+    } catch (error) {
+      console.error('Error while deleting module:', error);
+      toast.error(error?.response?.data?.message ?? 'Failed to delete module');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleDialogClose = () => {
@@ -146,7 +181,7 @@ export const ModulesManager = ({
                       <Button variant="outline" className="h-8 w-8" onClick={() => handleEdit(module)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="destructive" className="h-8 w-8" onClick={() => handleDelete(module._id)}>
+                      <Button variant="destructive" className="h-8 w-8" onClick={() => handleDeleteClick(module._id, module.tutorialId)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -214,6 +249,15 @@ export const ModulesManager = ({
           </form>
         </DialogContent>
       </Dialog>
+
+      <DeleteConfirmationModal
+        open={deleteModalOpen}
+        onOpenChange={setDeleteModalOpen}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Module"
+        description="Are you sure you want to delete this module? This will also delete all lessons in this module. This action cannot be undone."
+        isLoading={isDeleting}
+      />
     </Card>
   );
 };

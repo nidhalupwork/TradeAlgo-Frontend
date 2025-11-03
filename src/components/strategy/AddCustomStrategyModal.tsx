@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { currencyFlags } from '@/lib/flags';
 import { uploadToIPFS } from '@/utils/utils';
 import { AxiosProgressEvent } from 'axios';
+import { toast } from 'sonner';
 
 interface AddStrategyModalProps {
   selectedStrategy: StrategyInterface;
@@ -38,7 +39,6 @@ export const AddCustomStrategyModal = ({
     status: 'Live',
     images: [],
   });
-  const { toast } = useToast();
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [imageSource, setImageSource] = useState<'default' | 'uploaded' | 'upload'>('default');
   const [isLoading, setIsLoading] = useState(false);
@@ -81,24 +81,12 @@ export const AddCustomStrategyModal = ({
         images: [],
       });
     }
-  }, [selectedStrategy]);
 
-  // Fetch uploaded currency images when modal opens
-  useEffect(() => {
-    setStrategy({
-      id: '',
-      title: '',
-      description: '',
-      symbol: '',
-      status: 'Live',
-      images: [],
-    });
-    if (open === 'Add' || open === 'Edit') {
-      fetchUploadedImages();
-    }
-  }, [open]);
+    fetchUploadedImages();
+  }, [selectedStrategy, open]);
 
   const fetchUploadedImages = async () => {
+    if (open !== 'Add' && open !== 'Edit' && uploadedCurrencyImages.length > 0) return;
     setIsLoadingImages(true);
     try {
       const data = await Api.get('/images/type/currency');
@@ -159,14 +147,11 @@ export const AddCustomStrategyModal = ({
           );
         }
       }
-      setIsLoading(false);
       onOpenChange();
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: error?.response?.data?.message || 'Unexpected Error',
-      });
+      toast.error(error?.response?.data?.message || 'Unexpected Error');
     }
+    setIsLoading(false);
   }
 
   return (
@@ -281,7 +266,7 @@ export const AddCustomStrategyModal = ({
                           } else if (strategy.images.length < 2) {
                             setStrategy({ ...strategy, images: [...strategy.images, img.url] });
                           } else {
-                            toast({ description: 'Maximum 2 images allowed' });
+                            toast.warning('Maximum 2 images allowed');
                           }
                         }}
                         className={`cursor-pointer rounded-lg border-2 p-2 transition-all hover:border-primary relative flex flex-col items-center ${
@@ -339,7 +324,7 @@ export const AddCustomStrategyModal = ({
                             } else if (strategy.images.length < 2) {
                               setStrategy({ ...strategy, images: [...strategy.images, img.ipfsUrl] });
                             } else {
-                              toast({ description: 'Maximum 2 images allowed' });
+                              toast.warning('Maximum 2 images allowed');
                             }
                           }}
                           className={`cursor-pointer rounded-lg border-2 p-2 transition-all hover:border-primary relative flex flex-col items-center ${

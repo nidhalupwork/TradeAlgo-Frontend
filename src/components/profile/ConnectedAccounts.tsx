@@ -1,18 +1,29 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Edit3, Eye, EyeOff, Logs, Plus, Save, Settings, Trash2, TrendingUp, X, Zap } from 'lucide-react';
+import {
+  ChartLine,
+  Download,
+  Edit3,
+  Eye,
+  EyeOff,
+  Logs,
+  Plus,
+  Save,
+  Trash2,
+  TrendingUp,
+  X,
+} from 'lucide-react';
 import { AccountConfigModal } from './AccountConfigModal';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { ConnectAccount } from '@/lib/types';
 import Api from '@/services/Api';
 import { Label } from '../ui/label';
-import { Textarea } from '../ui/textarea';
 import { Input } from '../ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { DeleteModal } from './DeleteModal';
+import { Link } from 'react-router-dom';
 
 export const ConnectedAccounts = () => {
   const { toast } = useToast();
@@ -109,173 +120,210 @@ export const ConnectedAccounts = () => {
   }
 
   return (
-    <Card className="shadow-card">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle className="text-xl flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Connected Accounts
-          </CardTitle>
-          <p className="text-sm text-muted-foreground mt-1">Manage your trading platform connections</p>
-        </div>
-        <Button
-          size="sm"
-          className="gap-2"
-          onClick={() =>
-            handleConfigure(
-              {
-                accountId: '',
-                active: false,
-                brokerage: '',
-                login: '',
-                magic: '',
-                name: '',
-                platform: '-',
-                subscribedStrategies: [],
-                strategySettings: [],
-                dailyLossCurrency: 'percentage',
-                dailyLossLimit: 0,
-                maxLossCurrency: 'percentage',
-                maxLossLimit: 0,
-              },
-              'Connect'
-            )
-          }
-          disabled={user.status !== 'active'}
-        >
-          <Plus className="h-4 w-4" />
-          Add Account
-        </Button>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        {user.plan === 'basic' && user.accounts.length === 3 && (
-          <div className="border border-gold rounded-lg p-2 bg-gold/40">
-            <p className="text-gold text-sm">
-              You have reached the maximum accounts that you can connect to our platform. To connect more please contact
-              to support team.
-            </p>
-          </div>
-        )}
-        {accounts?.map((account, idx) => (
-          <div key={idx} className="flex items-center justify-between p-2 rounded-lg border bg-gradient-subtle">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-primary-foreground" />
+    <div className='space-y-6'>
+      {/* Elite Program Promotional Card */}
+      <Card className='shadow-card bg-gradient-to-br from-primary/5 via-background to-primary/10 border-primary/20'>
+        <CardContent className='p-6'>
+          <div className='flex flex-col items-start justify-between gap-6'>
+            <div className='flex gap-4'>
+              <div className='w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center'>
+                <ChartLine className='h-6 w-6 text-primary-foreground' />
               </div>
+              <div>
+                <h3 className='text-xl font-bold'>Elite Trading Tools</h3>
+                <p className='text-sm text-muted-foreground'>TradingView Suite</p>
+              </div>
+            </div>
 
-              <div className="space-y-1">
-                <h4 className="font-semibold">{account.name}</h4>
-                <span className="text-sm text-muted-foreground">{account.platform.toUpperCase()}</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">{account.brokerage}</span>
-                  {/* <Badge
+            <div className='flex flex-col xs:flex-row items-center gap-4 lg:gap-2'>
+              <div className='space-y-3'>
+                <p className='text-sm text-muted-foreground leading-relaxed'>
+                  Claim your institutional-grade trading tools here including advanced indicators, backtesting software
+                  and market-optimized strategies.
+                </p>
+              </div>
+              <Link to='https://whop.com/tradealgorithm/elite-program/' target='_blank' className='w-full xs:flex-1'>
+                <Button className='w-full gap-2 shadow-lg hover:shadow-xl transition-all'>
+                  <Download className='h-5 w-5' />
+                  Get Access Here
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Connected Accounts Card */}
+      <Card className='shadow-card'>
+        <CardHeader className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3'>
+          <div>
+            <CardTitle className='text-xl flex items-center gap-2'>
+              <TrendingUp className='h-5 w-5' />
+              Connected Accounts
+            </CardTitle>
+            <p className='text-sm text-muted-foreground mt-1'>Manage your trading platform connections</p>
+          </div>
+          <div className='flex gap-2 w-full sm:w-auto'>
+            <Button
+              size='sm'
+              className='gap-1 flex-1 sm:flex-initial'
+              onClick={() =>
+                handleConfigure(
+                  {
+                    accountId: '',
+                    active: false,
+                    brokerage: '',
+                    login: '',
+                    magic: '',
+                    name: '',
+                    platform: '-',
+                    subscribedStrategies: [],
+                    strategySettings: [],
+                    dailyLossCurrency: 'percentage',
+                    dailyLossLimit: 0,
+                    maxLossCurrency: 'percentage',
+                    maxLossLimit: 0,
+                  },
+                  'Connect'
+                )
+              }
+              disabled={user.status !== 'active'}
+            >
+              <Plus className='h-4 w-4' />
+              Add Account
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent className='space-y-4'>
+          {user.plan === 'basic' && user.accounts.length === 3 && (
+            <div className='border border-gold rounded-lg p-2 bg-gold/40'>
+              <p className='text-gold text-sm'>
+                You have reached the maximum accounts that you can connect to our platform. To connect more please
+                contact to support team.
+              </p>
+            </div>
+          )}
+          {accounts?.map((account, idx) => (
+            <div key={idx} className='flex items-center justify-between p-2 rounded-lg border bg-gradient-subtle'>
+              <div className='flex items-center gap-4'>
+                <div className='w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center'>
+                  <TrendingUp className='h-6 w-6 text-primary-foreground' />
+                </div>
+
+                <div className='space-y-1'>
+                  <h4 className='font-semibold'>{account.name}</h4>
+                  <span className='text-sm text-muted-foreground'>{account.platform.toUpperCase()}</span>
+                  <div className='flex items-center gap-2'>
+                    <span className='text-sm text-muted-foreground'>{account.brokerage}</span>
+                    {/* <Badge
                     variant={account.status === 'connected' ? 'default' : 'destructive'}
                     className={account.status === 'connected' ? 'bg-success/10 text-success border-success/20' : ''}
                   >
                     {account.status}
                   </Badge> */}
+                  </div>
+                  {/* <p className="text-sm font-medium">Balance: {account.balance}</p> */}
                 </div>
-                {/* <p className="text-sm font-medium">Balance: {account.balance}</p> */}
               </div>
-            </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <Switch checked={account.active} onClick={() => handleActiveClick(account.accountId)} />
-                <span className="text-sm text-muted-foreground">{account.active ? 'Active' : 'Inactive'}</span>
+              <div className='flex items-center gap-3'>
+                <div className='flex items-center gap-2'>
+                  <Switch checked={account.active} onClick={() => handleActiveClick(account.accountId)} />
+                  <span className='text-sm text-muted-foreground'>{account.active ? 'Active' : 'Inactive'}</span>
+                </div>
+                <Logs
+                  size={20}
+                  className='hover:cursor-pointer text-primary hover:text-primary/80 transition-all'
+                  onClick={() => handleConfigure(account, 'Details')}
+                />
+                <Trash2
+                  size={20}
+                  className='hover:cursor-pointer text-red-600 hover:text-red-700 transition-all'
+                  onClick={() => {
+                    setSelectedAccount(account);
+                    setModalOpen('Delete');
+                  }}
+                />
               </div>
-              <Logs
-                size={20}
-                className="hover:cursor-pointer text-primary hover:text-primary/80 transition-all"
-                onClick={() => handleConfigure(account, 'Details')}
-              />
-              <Trash2
-                size={20}
-                className="hover:cursor-pointer text-red-600 hover:text-red-700 transition-all"
-                onClick={() => {
-                  setSelectedAccount(account);
-                  setModalOpen('Delete');
-                }}
-              />
             </div>
-          </div>
-        ))}
-        {user.status === 'active' && (
-          <div className="space-y-2 border-t-2 pt-2">
-            <div className="flex justify-between items-center">
-              <Label>Meta API token</Label>
+          ))}
+          {user.status === 'active' && (
+            <div className='space-y-2 border-t-2 pt-2'>
+              <div className='flex justify-between items-center'>
+                <Label>Meta API token</Label>
+                <Button
+                  variant={isEditing ? 'outline' : 'ghost'}
+                  size='sm'
+                  onClick={() => setIsEditing(!isEditing)}
+                  className='gap-2'
+                >
+                  {isEditing ? (
+                    <>
+                      <X className='h-4 w-4' />
+                      Cancel
+                    </>
+                  ) : (
+                    <>
+                      <Edit3 className='h-4 w-4' />
+                      Edit
+                    </>
+                  )}
+                </Button>
+              </div>
+              <div className='relative'>
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  value={metaToken}
+                  disabled={!isEditing}
+                  className='pr-8'
+                  onChange={(e) => setMetaToken(e.target.value)}
+                />
+                <button
+                  type='button'
+                  onClick={() => setShowPassword(!showPassword)}
+                  className='absolute  right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors'
+                >
+                  {showPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {isEditing && (
+            <div className='flex gap-3'>
               <Button
-                variant={isEditing ? 'outline' : 'ghost'}
-                size="sm"
-                onClick={() => setIsEditing(!isEditing)}
-                className="gap-2"
+                className='gap-2'
+                onClick={() => setModalOpen('Token')}
+                disabled={metaToken === user.metaApiToken || metaToken === ''}
               >
-                {isEditing ? (
-                  <>
-                    <X className="h-4 w-4" />
-                    Cancel
-                  </>
-                ) : (
-                  <>
-                    <Edit3 className="h-4 w-4" />
-                    Edit
-                  </>
-                )}
+                <Save className='h-4 w-4' />
+                Save
+              </Button>
+              <Button
+                variant='outline'
+                onClick={() => {
+                  setIsEditing(false);
+                  setMetaToken(user.metaApiToken);
+                }}
+              >
+                Cancel
               </Button>
             </div>
-            <div className="relative">
-              <Input
-                type={showPassword ? 'text' : 'password'}
-                value={metaToken}
-                disabled={!isEditing}
-                className="pr-8"
-                onChange={(e) => setMetaToken(e.target.value)}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute  right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
-        )}
+          )}
+        </CardContent>
 
-        {isEditing && (
-          <div className="flex gap-3">
-            <Button
-              className="gap-2"
-              onClick={() => setModalOpen('Token')}
-              disabled={metaToken === user.metaApiToken || metaToken === ''}
-            >
-              <Save className="h-4 w-4" />
-              Save
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsEditing(false);
-                setMetaToken(user.metaApiToken);
-              }}
-            >
-              Cancel
-            </Button>
-          </div>
-        )}
-      </CardContent>
+        <AccountConfigModal
+          account={selectedAccount}
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          modalType={modalType}
+          isLoading={isLoading}
+          setIsLoading={setIsLoading}
+        />
 
-      <AccountConfigModal
-        account={selectedAccount}
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        modalType={modalType}
-        isLoading={isLoading}
-        setIsLoading={setIsLoading}
-      />
-
-      <DeleteModal open={modalOpen} onOpenChange={setModalOpen} isLoading={isLoading} confirmDelete={confirmDelete} />
-    </Card>
+        <DeleteModal open={modalOpen} onOpenChange={setModalOpen} isLoading={isLoading} confirmDelete={confirmDelete} />
+      </Card>
+    </div>
   );
 };

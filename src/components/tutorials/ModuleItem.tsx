@@ -1,14 +1,54 @@
 import { Lesson, Module } from '@/lib/types';
 import { ArrowRight, ChevronDown, ChevronUp, Lock, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, forwardRef, useImperativeHandle } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '../ui/button';
 
-export const ModuleItem = ({ module, index }: { module: Module; index: number }) => {
-  const [opened, setOpened] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedLesson, setSelectedLesson] = useState<Lesson>();
-  return (
+interface ModuleItemProps {
+  module: Module;
+  index: number;
+  onRequestNextModule?: () => void;
+  moduleRef?: React.Ref<{ openModule: () => void }>;
+}
+
+export const ModuleItem = forwardRef<{ openModule: () => void }, ModuleItemProps>(
+  ({ module, index, onRequestNextModule }, ref) => {
+    const [opened, setOpened] = useState(false);
+    const [openDialog, setOpenDialog] = useState(false);
+    const [selectedLesson, setSelectedLesson] = useState<Lesson>();
+    const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
+
+    // Expose methods to parent component
+    useImperativeHandle(ref, () => ({
+      openModule: () => {
+        setOpened(true);
+      },
+    }));
+
+    const handleLessonClick = (lesson: Lesson, lessonIndex: number) => {
+      setSelectedLesson(lesson);
+      setCurrentLessonIndex(lessonIndex);
+      setOpenDialog(true);
+    };
+
+    const handleNextLesson = () => {
+      const nextIndex = currentLessonIndex + 1;
+
+      // Check if there's a next lesson in the current module
+      if (nextIndex < module.lessons.length) {
+        // Move to next lesson
+        setSelectedLesson(module.lessons[nextIndex]);
+        setCurrentLessonIndex(nextIndex);
+      } else {
+        // Last lesson of the module
+        setOpenDialog(false);
+        if (onRequestNextModule) {
+          onRequestNextModule();
+        }
+      }
+    };
+
+    return (
     <div>
       <div
         className="w-full flex justify-between items-center px-6 py-4 bg-muted-foreground/30 hover:bg-muted-foreground/50 rounded-2xl border border-muted-foreground/40 group transition-all cursor-pointer"
@@ -35,10 +75,7 @@ export const ModuleItem = ({ module, index }: { module: Module; index: number })
               <div
                 key={idx}
                 className="flex gap-4 relative hover:cursor-pointer"
-                onClick={() => {
-                  setSelectedLesson(lesson);
-                  setOpenDialog(true);
-                }}
+                onClick={() => handleLessonClick(lesson, idx)}
               >
                 {module.lessons.length !== idx + 1 && (
                   <div className="absolute top-[6px] bottom-[-48px] left-[-20px] w-[3px] bg-black/10 dark:bg-white/10" />
@@ -71,8 +108,12 @@ export const ModuleItem = ({ module, index }: { module: Module; index: number })
             </video> */}
             <iframe className="w-full h-full aspect-video" src={selectedLesson?.video} allowFullScreen />
             <div className="flex flex-col items-center md:items-end">
-              <Button variant="default" className="w-full md:w-auto rounded-full">
-                Next lesson
+              <Button 
+                variant="default" 
+                className="w-full md:w-auto rounded-full"
+                onClick={handleNextLesson}
+              >
+                {currentLessonIndex < module.lessons.length - 1 ? 'Next lesson' : 'Next module'}
                 <ArrowRight />
               </Button>
             </div>
@@ -81,4 +122,4 @@ export const ModuleItem = ({ module, index }: { module: Module; index: number })
       </Dialog>
     </div>
   );
-};
+});

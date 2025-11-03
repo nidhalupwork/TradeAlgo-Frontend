@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -8,46 +8,45 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { Announcement } from "@/lib/types";
-import { Megaphone, Calendar, Image as ImageIcon, X, Loader2, Upload } from "lucide-react";
-import { useDropzone } from "react-dropzone";
-import { format } from "date-fns";
-import { MultiSelect } from "@/components/components/MultiSelect";
-import { Checkbox } from "@/components/ui/checkbox";
-import Api from "@/services/Api";
-import { PageHeader } from "@/components/components/PageHeader";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { uploadToIPFS } from "@/utils/utils";
-import { AxiosProgressEvent } from "axios";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
+import { Announcement } from '@/lib/types';
+import { Megaphone, Calendar, Image as ImageIcon, X, Loader2, Upload } from 'lucide-react';
+import { useDropzone } from 'react-dropzone';
+import { format } from 'date-fns';
+import { MultiSelect } from '@/components/components/MultiSelect';
+import { Checkbox } from '@/components/ui/checkbox';
+import Api from '@/services/Api';
+import { PageHeader } from '@/components/components/PageHeader';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { uploadToIPFS } from '@/utils/utils';
+import { AxiosProgressEvent } from 'axios';
 
 const AnnouncementManagement = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [newAnnouncement, setNewAnnouncement] = useState({
-    title: "",
-    message: "",
-    expireTime: "",
+    title: '',
+    message: '',
+    expireTime: '',
     to: [],
-    imageUrl: "",
+    imageUrl: '',
   });
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-  const [imageSource, setImageSource] = useState<"uploaded" | "new">("uploaded");
+  const [imageSource, setImageSource] = useState<'uploaded' | 'new'>('uploaded');
   const [uploadedAnnouncementImages, setUploadedAnnouncementImages] = useState<any[]>([]);
   const [isLoadingImages, setIsLoadingImages] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const { toast } = useToast();
   const roles = [
-    { value: "admin", label: "Admin" },
-    { value: "support", label: "Support" },
-    { value: "user", label: "User" },
+    { value: 'admin', label: 'Admin' },
+    { value: 'support', label: 'Support' },
+    { value: 'user', label: 'User' },
   ];
 
   // Fetch announcements
@@ -62,25 +61,17 @@ const AnnouncementManagement = () => {
     }
   }, [isDialogOpen]);
 
-  // Real-time subscription
-  useEffect(() => {}, [toast]);
-
   const fetchAnnouncements = async () => {
     setIsLoading(true);
     try {
-      const data = await Api.get("/announcement");
-      console.log("data for fethcing announcements:", data);
+      const data = await Api.get('/announcement');
+      console.log('data for fethcing announcements:', data);
       if (data?.success) {
         setAnnouncements(data.announcements);
       }
     } catch (error) {
-      console.error("Error while fetching all announcements:", error);
-      toast({
-        title: "Error",
-        description: error?.response?.data?.message ?? "Unexpected error",
-        variant: "destructive",
-        duration: 2000,
-      });
+      console.error('Error while fetching all announcements:', error);
+      toast.error(error?.response?.data?.message ?? 'Unexpected error');
     }
     setIsLoading(false);
   };
@@ -88,14 +79,14 @@ const AnnouncementManagement = () => {
   const fetchUploadedImages = async () => {
     setIsLoadingImages(true);
     try {
-      const data = await Api.get("/images");
+      const data = await Api.get('/images');
       if (data?.success) {
         // Filter only announcement type images
-        const announcementImages = data.images.filter((img: any) => img.type === "announcement");
+        const announcementImages = data.images.filter((img: any) => img.type === 'announcement');
         setUploadedAnnouncementImages(announcementImages);
       }
     } catch (error) {
-      console.error("Error fetching announcement images:", error);
+      console.error('Error fetching announcement images:', error);
     } finally {
       setIsLoadingImages(false);
     }
@@ -103,7 +94,7 @@ const AnnouncementManagement = () => {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
-      "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"],
+      'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'],
     },
     maxFiles: 1,
     onDrop: (acceptedFiles) => {
@@ -123,12 +114,7 @@ const AnnouncementManagement = () => {
       !newAnnouncement.expireTime ||
       newAnnouncement.to.length === 0
     ) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-        duration: 2000,
-      });
+      toast.error('Please fill in all required fields');
       return;
     }
 
@@ -138,7 +124,7 @@ const AnnouncementManagement = () => {
       let imageUrl = newAnnouncement.imageUrl;
 
       // Upload new image to IPFS if provided
-      if (imageSource === "new" && uploadedImage) {
+      if (imageSource === 'new' && uploadedImage) {
         imageUrl = await uploadToIPFS(uploadedImage, (event: AxiosProgressEvent) => {
           if (event.total) {
             const progress = Math.round((event.loaded * 100) / event.total);
@@ -146,55 +132,45 @@ const AnnouncementManagement = () => {
           }
         }).catch((err) => {
           console.log(err);
-          throw new Error("Image upload failed to IPFS. Please retry.");
+          throw new Error('Image upload failed to IPFS. Please retry.');
         });
       }
 
-      const data = await Api.post("/announcement/create-announce", {
+      const data = await Api.post('/announcement/create-announce', {
         ...newAnnouncement,
         imageUrl,
       });
       if (data?.success) {
-        toast({
-          title: "Success",
-          description: "Announcement created successfully!",
-        });
+        toast.success('Announcement created successfully!');
         setAnnouncements([data?.announcement, ...announcements]);
         // Reset form
-        setNewAnnouncement({ title: "", message: "", expireTime: "", to: [], imageUrl: "" });
+        setNewAnnouncement({ title: '', message: '', expireTime: '', to: [], imageUrl: '' });
         setUploadedImage(null);
-        setImagePreview("");
-        setImageSource("uploaded");
+        setImagePreview('');
+        setImageSource('uploaded');
         setUploadProgress(0);
         setIsDialogOpen(false);
       }
     } catch (error) {
-      console.error("Error creating announcement:", error);
-      toast({
-        title: "Error",
-        description: error?.response?.data?.message ?? "Failed to create announcement",
-        variant: "destructive",
-        duration: 2000,
-      });
+      console.error('Error creating announcement:', error);
+      toast.error(error?.response?.data?.message ?? 'Failed to create announcement');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDeleteAnnouncement = async (id: string) => {
-    // const { error } = await supabase.from('announcements').delete().eq('id', id);
-    // if (error) {
-    //   toast({
-    //     title: 'Error',
-    //     description: 'Failed to delete announcement',
-    //     variant: 'destructive',
-    //   });
-    // } else {
-    //   toast({
-    //     title: 'Success',
-    //     description: 'Announcement deleted successfully',
-    //   });
-    // }
+    try {
+      const data = await Api.delete(`/announcement/${id}`);
+      if (data?.success) {
+        toast.success('Announcement deleted successfully');
+        // Remove the deleted announcement from state
+        setAnnouncements(announcements.filter((announcement) => announcement._id !== id));
+      }
+    } catch (error) {
+      console.error('Error deleting announcement:', error);
+      toast.error(error?.response?.data?.message ?? 'Failed to delete announcement');
+    }
   };
 
   const isExpired = (expireTime: string) => {
@@ -232,7 +208,7 @@ const AnnouncementManagement = () => {
       ) : (
         <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
           {announcements.map((announcement) => (
-            <Card key={announcement._id} className={isExpired(announcement.expireTime) ? "opacity-60" : ""}>
+            <Card key={announcement._id} className={isExpired(announcement.expireTime) ? 'opacity-60' : ''}>
               <CardHeader>
                 <div className='flex justify-between items-start'>
                   <CardTitle className='text-xl'>{announcement.title}</CardTitle>
@@ -249,10 +225,10 @@ const AnnouncementManagement = () => {
                   <Calendar className='h-4 w-4' />
                   {isExpired(announcement.expireTime) ? (
                     <span className='text-destructive'>
-                      Expired on {format(new Date(announcement.expireTime), "PPP")}
+                      Expired on {format(new Date(announcement.expireTime), 'PPP')}
                     </span>
                   ) : (
-                    <span>Expires {format(new Date(announcement.expireTime), "PPP")}</span>
+                    <span>Expires {format(new Date(announcement.expireTime), 'PPP')}</span>
                   )}
                 </CardDescription>
               </CardHeader>
@@ -331,7 +307,7 @@ const AnnouncementManagement = () => {
             {/* Image Section */}
             <div className='space-y-2'>
               <Label>Image (Optional)</Label>
-              <Tabs value={imageSource} onValueChange={(val) => setImageSource(val as "uploaded" | "new")}>
+              <Tabs value={imageSource} onValueChange={(val) => setImageSource(val as 'uploaded' | 'new')}>
                 <TabsList className='grid w-full grid-cols-2'>
                   <TabsTrigger value='uploaded'>Select Uploaded</TabsTrigger>
                   <TabsTrigger value='new'>Upload New</TabsTrigger>
@@ -360,13 +336,13 @@ const AnnouncementManagement = () => {
                             key={img._id}
                             onClick={() => {
                               if (isSelected) {
-                                setNewAnnouncement({ ...newAnnouncement, imageUrl: "" });
+                                setNewAnnouncement({ ...newAnnouncement, imageUrl: '' });
                               } else {
                                 setNewAnnouncement({ ...newAnnouncement, imageUrl: img.ipfsUrl });
                               }
                             }}
                             className={`cursor-pointer rounded-lg border-2 p-2 transition-all hover:border-primary relative ${
-                              isSelected ? "border-primary bg-primary/5" : "border-border"
+                              isSelected ? 'border-primary bg-primary/5' : 'border-border'
                             }`}
                           >
                             {isSelected && (
@@ -383,13 +359,13 @@ const AnnouncementManagement = () => {
                       })}
                     </div>
                   )}
-                  {newAnnouncement.imageUrl && imageSource === "uploaded" && (
+                  {newAnnouncement.imageUrl && imageSource === 'uploaded' && (
                     <div className='flex items-center justify-between p-2 bg-muted/50 rounded'>
                       <span className='text-sm'>Image selected</span>
                       <Button
                         variant='ghost'
                         size='sm'
-                        onClick={() => setNewAnnouncement({ ...newAnnouncement, imageUrl: "" })}
+                        onClick={() => setNewAnnouncement({ ...newAnnouncement, imageUrl: '' })}
                       >
                         Clear
                       </Button>
@@ -402,7 +378,7 @@ const AnnouncementManagement = () => {
                   <div
                     {...getRootProps()}
                     className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                      isDragActive ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                      isDragActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
                     }`}
                   >
                     <input {...getInputProps()} />
@@ -428,7 +404,7 @@ const AnnouncementManagement = () => {
                         className='absolute top-2 right-2'
                         onClick={() => {
                           setUploadedImage(null);
-                          setImagePreview("");
+                          setImagePreview('');
                           URL.revokeObjectURL(imagePreview);
                         }}
                       >
@@ -437,7 +413,7 @@ const AnnouncementManagement = () => {
                     </div>
                   )}
 
-                  {isLoading && uploadProgress > 0 && imageSource === "new" && (
+                  {isLoading && uploadProgress > 0 && imageSource === 'new' && (
                     <div className='space-y-2'>
                       <div className='flex items-center justify-between text-sm'>
                         <span>Uploading to IPFS...</span>
@@ -461,7 +437,7 @@ const AnnouncementManagement = () => {
               Cancel
             </Button>
             <Button onClick={handleCreateAnnouncement} disabled={isLoading}>
-              {isLoading ? "Creating..." : "Create Announcement"}
+              {isLoading ? 'Creating...' : 'Create Announcement'}
             </Button>
           </DialogFooter>
         </DialogContent>

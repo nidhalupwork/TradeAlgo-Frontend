@@ -206,6 +206,7 @@ export interface Tutorial {
   _id: string;
   title: string;
   description: string | null;
+  image?: string;
   modules: Module[];
 }
 

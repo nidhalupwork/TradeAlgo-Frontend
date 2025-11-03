@@ -162,6 +162,7 @@ const StrategyMarketplace = () => {
         </Card>
       </div>
 
+      {/* Plastform Strategies */}
       <section>
         <h2 className='text-xl font-semibold text-foreground mb-2'>Platform Strategies</h2>
 
@@ -182,6 +183,7 @@ const StrategyMarketplace = () => {
         </div>
       </section>
 
+      {/* Custom Strategies */}
       <section>
         <h2 className='text-xl font-semibold text-foreground mb-2'>My Strategies</h2>
         <div className='grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6'>
@@ -202,7 +204,7 @@ const StrategyMarketplace = () => {
               setStrategy(null);
               setOpen('Add');
             }}
-            disabled={user.plan === 'basic'}
+            disabled={user.plan === 'basic' || user.status !== 'active'}
           />
         </div>
       </section>

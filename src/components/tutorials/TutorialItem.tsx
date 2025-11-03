@@ -13,10 +13,10 @@ const TutorialItem = ({ tutorial }: { tutorial: Tutorial }) => {
           <div
             className="bg-cover bg-center bg-no-repeat w-full h-full sm:rounded-2xl rounded-tr-2xl rounded-tl-2xl"
             style={{
-              backgroundImage: `url(${tutorialImage})`,
+              backgroundImage: `url(${tutorial.image || tutorialImage})`,
             }}
           >
-            <div className="bg-black/30 w-full h-full sm:rounded-2xl" />
+            {/* <div className="bg-black/30 w-full h-full sm:rounded-2xl" /> */}
           </div>
         </div>
         <div className="flex flex-col flex-1 p-6 justify-between">

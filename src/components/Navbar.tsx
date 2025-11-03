@@ -151,16 +151,15 @@ const Navbar = () => {
 
   return (
     <nav className='fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border'>
-      <div className='max-w-[1400px] mx-auto px-4'>
+      <div className='max-w-[1400px] mx-auto px-4 sm:px-6'>
         <div className='flex items-center justify-between h-16'>
-          <div className='flex items-center space-x-8'>
+          <div className='flex items-center gap-2'>
             {/* Logo */}
             <Link to='/' className='flex items-center space-x-2'>
               <img src={logo} className='h-8 w-8 text-primary' alt='TradeAlgo logo' />
-              <span className='text-sm md:text-xl font-bold text-gray-200 '>TradeAlgorithm</span>
+              <span className='text-sm md:text-xl font-bold text-gray-200 hidden xs:flex'>TradeAlgorithm</span>
             </Link>
-
-            {/* Admin & User Navigations */}
+            {/* Admin Navigations */}
             {isSignedIn === 'true' && ['owner', 'admin', 'support'].includes(user.role) && (
               <div className='flex items-center space-x-1'>
                 {nestedNavs
@@ -197,25 +196,61 @@ const Navbar = () => {
               </div>
             )}
 
+            {/* User Navigations */}
             {isSignedIn === 'true' && user.role === 'user' && (
-              <div className='flex items-center space-x-1'>
-                {nestedNavs[1].items.map((item, index) => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.path;
-                  return (
-                    <Link key={item.path} to={item.path}>
-                      <Button
-                        variant={isActive ? 'default' : 'ghost'}
-                        size='sm'
-                        className={isActive ? 'shadow-glow-primary' : ''}
-                      >
-                        <Icon className='h-4 w-4 mr-2' />
-                        {item.label}
+              <>
+                {/* Mobile: Dropdown Navigation */}
+                <div className='flex md:hidden items-center space-x-1'>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant='outline' size='sm' className='!border-0 !outline-none'>
+                        <User className='h-4 w-4 mr-2' />
+                        <span>Menu</span>
+                        <ChevronDown className='h-4 w-4 ml-2' />
                       </Button>
-                    </Link>
-                  );
-                })}
-              </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align='end' className='w-48'>
+                      {nestedNavs[1].items.map((item, idx) => {
+                        const ItemIcon = item.icon;
+                        const isActive = location.pathname === item.path;
+                        return (
+                          <DropdownMenuItem key={idx} asChild>
+                            <Link 
+                              to={item.path} 
+                              className={`flex items-center hover:cursor-pointer ${
+                                isActive ? 'bg-primary text-primary-foreground' : ''
+                              }`}
+                            >
+                              <ItemIcon className='h-4 w-4 mr-2' />
+                              {item.label}
+                            </Link>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                {/* Desktop: Flat Navigation */}
+                <div className='hidden md:flex items-center space-x-1'>
+                  {nestedNavs[1].items.map((item, index) => {
+                    const Icon = item.icon;
+                    const isActive = location.pathname === item.path;
+                    return (
+                      <Link key={item.path} to={item.path}>
+                        <Button
+                          variant={isActive ? 'default' : 'ghost'}
+                          size='sm'
+                          className={isActive ? 'shadow-glow-primary !px-2' : '!px-2'}
+                        >
+                          <Icon className='h-4 w-4' />
+                          {item.label}
+                        </Button>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </>
             )}
           </div>
 
@@ -317,8 +352,9 @@ const Navbar = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant='outline' size='sm'>
                     <SquareUser className='h-4 w-4 mr-2' />
-                    <span className='hidden md:flex'>{user.fullName}</span>
-                    <ChevronDown className='h-4 w-4 md:ml-2' />
+                    <span className='hidden lg:flex'>{user.fullName}</span>
+                    <span className='hidden md:flex lg:hidden'>{user.fullName.split(" ")[0]}</span>
+                    {/* <ChevronDown className='h-4 w-4 md:ml-2' /> */}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align='end' className='w-48'>

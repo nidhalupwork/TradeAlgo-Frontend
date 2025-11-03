@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { Lesson, Module, Tutorial } from '@/lib/types';
 import Api from '@/services/Api';
+import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 
 export const LessonsManager = ({
   tutorials,
@@ -34,6 +35,9 @@ export const LessonsManager = ({
     order: 0,
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [lessonToDelete, setLessonToDelete] = useState<{ lessonId: string; tutorialId: string; moduleId: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,10 +97,52 @@ export const LessonsManager = ({
     setDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (!confirm('Are you sure you want to delete this lesson?')) return;
-    // Logic will be implemented later
-    toast.success('Lesson deleted successfully');
+  const handleDeleteClick = (lessonId: string, tutorialId: string, moduleId: string) => {
+    setLessonToDelete({ lessonId, tutorialId, moduleId });
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!lessonToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      const data = await Api.delete(`/tutorial/lesson/${lessonToDelete.tutorialId}/${lessonToDelete.moduleId}/${lessonToDelete.lessonId}`, { 
+        tutorialId: lessonToDelete.tutorialId, 
+        moduleId: lessonToDelete.moduleId 
+      });
+      console.log('Data to delete lesson:', data);
+      
+      if (data?.success) {
+        setTutorials((prev) =>
+          prev.map((t) => {
+            if (t._id === lessonToDelete.tutorialId) {
+              return {
+                ...t,
+                modules: t.modules.map((m) => {
+                  if (m._id === lessonToDelete.moduleId) {
+                    return {
+                      ...m,
+                      lessons: m.lessons.filter((l) => l._id !== lessonToDelete.lessonId),
+                    };
+                  }
+                  return m;
+                }),
+              };
+            }
+            return t;
+          })
+        );
+        toast.success('Lesson deleted successfully');
+        setDeleteModalOpen(false);
+        setLessonToDelete(null);
+      }
+    } catch (error) {
+      console.error('Error while deleting lesson:', error);
+      toast.error(error?.response?.data?.message ?? 'Failed to delete lesson');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleDialogClose = () => {
@@ -157,7 +203,7 @@ export const LessonsManager = ({
                       <Button variant="outline" size="sm" onClick={() => handleEdit(lesson)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="destructive" size="sm" onClick={() => handleDelete(lesson.moduleId)}>
+                      <Button variant="destructive" size="sm" onClick={() => handleDeleteClick(lesson._id, lesson.tutorialId, lesson.moduleId)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -272,6 +318,15 @@ export const LessonsManager = ({
           </form>
         </DialogContent>
       </Dialog>
+
+      <DeleteConfirmationModal
+        open={deleteModalOpen}
+        onOpenChange={setDeleteModalOpen}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Lesson"
+        description="Are you sure you want to delete this lesson? This action cannot be undone."
+        isLoading={isDeleting}
+      />
     </Card>
   );
 };

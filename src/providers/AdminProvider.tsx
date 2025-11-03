@@ -13,9 +13,13 @@ interface AdminContextInterface {
 export const AdminContext = createContext<AdminContextInterface | undefined>(undefined);
 
 export const AdminContextProvider = ({ children }: { children: ReactNode }) => {
-  const [users, setUsers] = useState<UserInterface[]>([]);
+  const [users, setUsers] = useState<UserInterface[] | undefined>(undefined);
   const [strategies, setStrategies] = useState(null);
   const [globalSetting, setGlobalSetting] = useState<GlobalSettingInterface>();
+
+  useEffect(() => {
+    console.log('admin users:', users);
+  }, [users]);
 
   return (
     <AdminContext.Provider value={{ users, setUsers, strategies, setStrategies, globalSetting, setGlobalSetting }}>
