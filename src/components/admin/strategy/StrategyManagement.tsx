@@ -1,21 +1,21 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Activity, Users, Pause, Play, Plus, Edit, Trash2, Code } from 'lucide-react';
+import { Activity, Plus } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useAdmin } from '@/providers/AdminProvider';
 import Api from '@/services/Api';
 import { useToast } from '@/hooks/use-toast';
 import { AddStrategyModal } from './AddStrategyModal';
 import { useEffect, useState } from 'react';
-import { StrategyInterface } from '@/lib/types';
+import { AdminStrategyStatsInterface, StrategyInterface } from '@/lib/types';
 import { ConfirmDeletionModal } from './ConfirmDeletionModal';
 import { Spinner } from '@/components/ui/Spinner';
-import { roundUp } from '@/lib/utils';
 import { PageDescription, PageHeader } from '@/components/components/PageHeader';
+import { StrategyRow } from './StrategyRow';
+import { AdminStrategyStats } from './AdminStrategyStats';
 
 export default function StrategyManagement() {
   const { strategies, setStrategies } = useAdmin();
@@ -24,7 +24,7 @@ export default function StrategyManagement() {
   const [strategy, setStrategy] = useState<StrategyInterface>();
   const [isLoading, setIsLoading] = useState(false);
   const [tabs, setTabs] = useState<'default' | 'custom'>('default');
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<AdminStrategyStatsInterface>({
     activeUsers: 0,
     totalStrategies: 0,
     enabeldStrategies: 0,
@@ -62,19 +62,6 @@ export default function StrategyManagement() {
     setOpen('');
     setStrategy(undefined);
   }
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'Live':
-        return <Badge className="bg-profit/20 text-profit">{status}</Badge>;
-      case 'Paused':
-        return <Badge className="bg-gold/20 text-gold">{status}</Badge>;
-      case 'Development':
-        return <Badge className="bg-primary/20 text-primary">{status}</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
-  };
 
   async function enablingStrategy(strategyId: string, value: boolean) {
     try {
@@ -121,82 +108,30 @@ export default function StrategyManagement() {
   }
 
   return (
-    <div className="main">
+    <div className='main'>
       <Navbar />
-      <div className="pt-16">
-        <div className="p-6 space-y-6">
+      <div className='pt-16'>
+        <div className='p-6 space-y-6'>
           {/* Page Header */}
-          <div className="flex items-center justify-between">
+          <div className='flex items-center justify-between'>
             <div>
               <PageHeader>Strategy Management</PageHeader>
               <PageDescription>Global risk controls, strategy management, and emergency overrides</PageDescription>
             </div>
-            <div className="flex items-center gap-3">
-              <Badge variant="outline" className="px-3 py-1">
-                <Activity className="h-3 w-3 mr-1" />
+            <div className='flex items-center gap-3'>
+              <Badge variant='outline' className='px-3 py-1'>
+                <Activity className='h-3 w-3 mr-1' />
                 Real-time Monitoring
               </Badge>
             </div>
           </div>
 
-          {/* Risk Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Strategies</CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalStrategies}</div>
-                <p className="text-xs text-muted-foreground">
-                  <span className="text-profit">
-                    Enabled: {stats.enabeldStrategies} {stats.enabeldStrategies > 1 ? 'strategies' : 'strategy'}
-                  </span>
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Subscribers</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.activeUsers}</div>
-                <p className="text-xs text-muted-foreground">Across all users</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Paused Strategies</CardTitle>
-                <Pause className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-warning">{stats.pausedStrategies}</div>
-                <p className="text-xs text-warning">
-                  {roundUp((stats.pausedStrategies / stats.totalStrategies) * 100, 2)}%
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">In Development</CardTitle>
-                <Code className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-primary">{stats.devStrategies}</div>
-                <p className="text-xs text-primary">
-                  {roundUp((stats.devStrategies / stats.totalStrategies) * 100, 2)}%
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Strategy Metrics */}
+          <AdminStrategyStats stats={stats} />
 
           {/* Strategy Controls */}
           <Card>
-            <CardHeader className="flex flex-row justify-between">
+            <CardHeader className='flex flex-row justify-between'>
               <div>
                 <CardTitle>Strategy Risk Management</CardTitle>
                 <CardDescription>Control and monitor individual trading strategies across the platform</CardDescription>
@@ -214,189 +149,54 @@ export default function StrategyManagement() {
               )}
             </CardHeader>
             <CardContent>
-              <Tabs className="w-full" value={tabs} onValueChange={(value) => setTabs(value as 'default' | 'custom')}>
-                <TabsList className="grid w-full grid-cols-2 mb-4">
-                  <TabsTrigger value="default">Default Strategies</TabsTrigger>
-                  <TabsTrigger value="custom">User Strategies</TabsTrigger>
+              <Tabs className='w-full' value={tabs} onValueChange={(value) => setTabs(value as 'default' | 'custom')}>
+                <TabsList className='grid w-full grid-cols-2 mb-4'>
+                  <TabsTrigger value='default'>Default Strategies</TabsTrigger>
+                  <TabsTrigger value='custom'>User Strategies</TabsTrigger>
                 </TabsList>
 
-                {/* Default Strategies */}
-                <TabsContent value="default" className="space-y-4">
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Strategy</TableHead>
-                          <TableHead>Flags</TableHead>
-                          <TableHead>Symbol</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Active Users</TableHead>
-                          <TableHead>Enabled</TableHead>
-                          <TableHead className="w-[100px]">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {strategies
-                          ?.filter((s) => s?.type === 'default')
-                          ?.map((strategy) => (
-                            <TableRow key={strategy._id}>
-                              <TableCell>
-                                <div className="font-medium">{strategy.title}</div>
-                              </TableCell>
-                              <TableCell className="flex gap-2 items-center">
-                                {strategy.images.map((image, index) => (
-                                  <img
-                                    key={index}
-                                    src={image}
-                                    alt={strategy.symbol}
-                                    className="w-8 h-8 object-cover rounded-full"
-                                  />
-                                ))}
-                              </TableCell>
-                              <TableCell>{strategy.symbol}</TableCell>
-                              <TableCell>{getStatusBadge(strategy.status)}</TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-1">
-                                  <Users className="h-3 w-3 text-muted-foreground" />
-                                  {strategy.subscribers.length}
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-2">
-                                  <Switch
-                                    checked={strategy.enabled}
-                                    onCheckedChange={(value) => enablingStrategy(strategy._id, value)}
-                                  />
-                                  <span className="text-xs text-muted-foreground">
-                                    {strategy.enabled ? 'Enabled' : 'Disabled'}
-                                  </span>
-                                </div>
-                              </TableCell>
-
-                              {/* Actions */}
-                              <TableCell>
-                                <div className="flex items-center gap-2">
-                                  <Edit
-                                    size={20}
-                                    className="hover:cursor-pointer hover:text-blue-400 transition-all"
-                                    onClick={() => {
-                                      setOpen('Edit');
-                                      setStrategy(strategy);
-                                    }}
-                                  />
-                                  <Trash2
-                                    size={20}
-                                    className="hover:cursor-pointer text-red-600 hover:text-red-700 transition-all"
-                                    onClick={() => {
-                                      setOpen('Delete');
-                                      setStrategy(strategy);
-                                    }}
-                                  />
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                      </TableBody>
-                    </Table>
-                    {strategies === null && (
-                      <div className="flex justify-center py-3">
-                        <Spinner className="w-6 h-6" />
-                      </div>
-                    )}
-                    {strategies?.length === 0 && (
-                      <div className="flex justify-center py-3 text-muted-foreground">No strategies</div>
-                    )}
-                  </div>
-                </TabsContent>
-
-                {/* Custom Strategies */}
-                <TabsContent value="custom" className="space-y-4">
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Strategy</TableHead>
-                          <TableHead>Flags</TableHead>
-                          <TableHead>Symbol</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Active Users</TableHead>
-                          <TableHead>Enabled</TableHead>
-                          <TableHead className="w-[100px]">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {strategies
-                          ?.filter((s) => s?.type === 'custom')
-                          ?.map((strategy) => (
-                            <TableRow key={strategy._id}>
-                              <TableCell>
-                                <div className="font-medium">{strategy.title}</div>
-                              </TableCell>
-                              <TableCell className="flex gap-2 items-center">
-                                {strategy.images.map((image, index) => (
-                                  <img
-                                    key={index}
-                                    src={image}
-                                    alt={strategy.symbol}
-                                    className="w-8 h-8 object-cover rounded-full"
-                                  />
-                                ))}
-                              </TableCell>
-                              <TableCell>{strategy.symbol}</TableCell>
-                              <TableCell>{getStatusBadge(strategy.status)}</TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-1">
-                                  <Users className="h-3 w-3 text-muted-foreground" />
-                                  {strategy.subscribers.length}
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-2">
-                                  <Switch
-                                    checked={strategy.enabled}
-                                    onCheckedChange={(value) => enablingStrategy(strategy._id, value)}
-                                  />
-                                  <span className="text-xs text-muted-foreground">
-                                    {strategy.enabled ? 'Enabled' : 'Disabled'}
-                                  </span>
-                                </div>
-                              </TableCell>
-
-                              {/* Actions */}
-                              <TableCell>
-                                <div className="flex items-center gap-2">
-                                  <Edit
-                                    size={20}
-                                    className="hover:cursor-pointer hover:text-blue-400 transition-all"
-                                    onClick={() => {
-                                      setOpen('Edit');
-                                      setStrategy(strategy);
-                                    }}
-                                  />
-                                  <Trash2
-                                    size={20}
-                                    className="hover:cursor-pointer text-red-600 hover:text-red-700 transition-all"
-                                    onClick={() => {
-                                      setOpen('Delete');
-                                      setStrategy(strategy);
-                                    }}
-                                  />
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                      </TableBody>
-                    </Table>
-                    {strategies === null && (
-                      <div className="flex justify-center py-3">
-                        <Spinner className="w-6 h-6" />
-                      </div>
-                    )}
-                    {strategies?.length === 0 && (
-                      <div className="flex justify-center py-3 text-muted-foreground">No strategies</div>
-                    )}
-                  </div>
-                </TabsContent>
+                {['default', 'custom'].map((type, index) => (
+                  <TabsContent key={index} value={type} className='space-y-4'>
+                    <div className='rounded-md border'>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Strategy</TableHead>
+                            {type === 'custom' && <TableHead>User</TableHead>}
+                            <TableHead>Flags</TableHead>
+                            <TableHead>Symbol</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Active Users</TableHead>
+                            <TableHead>Enabled</TableHead>
+                            <TableHead className='w-[100px]'>Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {strategies
+                            ?.filter((s) => s?.type === type)
+                            ?.map((strategy) => (
+                              <StrategyRow
+                                key={strategy._id}
+                                strategy={strategy}
+                                type={type as 'default' | 'custom'}
+                                enablingStrategy={enablingStrategy}
+                                setOpen={setOpen}
+                                setStrategy={setStrategy}
+                              />
+                            ))}
+                        </TableBody>
+                      </Table>
+                      {strategies === null && (
+                        <div className='flex justify-center py-3'>
+                          <Spinner className='w-6 h-6' />
+                        </div>
+                      )}
+                      {strategies?.length === 0 && (
+                        <div className='flex justify-center py-3 text-muted-foreground'>No strategies</div>
+                      )}
+                    </div>
+                  </TabsContent>
+                ))}
               </Tabs>
             </CardContent>
           </Card>

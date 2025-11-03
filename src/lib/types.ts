@@ -1,7 +1,7 @@
-export type UserRole = "user" | "admin" | "owner" | "support" | "";
-export type UserStatus = "active" | "pending" | "suspended" | "deleted" | "";
-export type UserPlan = "premium" | "basic" | "";
-export type MarketplaceOpen = "Global" | "Strategy" | "Time" | "Add" | "Edit" | "Delete" | "";
+export type UserRole = 'user' | 'admin' | 'owner' | 'support' | '';
+export type UserStatus = 'active' | 'pending' | 'suspended' | 'deleted' | '';
+export type UserPlan = 'premium' | 'basic' | '';
+export type MarketplaceOpen = 'Global' | 'Strategy' | 'Time' | 'Add' | 'Edit' | 'Delete' | '';
 
 export interface UserInterface {
   _id: string;
@@ -53,7 +53,7 @@ export interface StrategySetting {
 
 export interface ConnectAccount {
   name: string;
-  platform: "mt4" | "mt5" | "-";
+  platform: 'mt4' | 'mt5' | '-';
   magic: string;
   login: string;
   brokerage: string;
@@ -61,9 +61,9 @@ export interface ConnectAccount {
   active: boolean;
   strategySettings: StrategySetting[];
   subscribedStrategies: string[];
-  dailyLossCurrency: "percentage" | "amount";
+  dailyLossCurrency: 'percentage' | 'amount';
   dailyLossLimit: number;
-  maxLossCurrency: "percentage" | "amount";
+  maxLossCurrency: 'percentage' | 'amount';
   maxLossLimit: number;
 }
 
@@ -71,7 +71,7 @@ export interface PositionSize {
   riskType: string;
   riskPerTrade: number;
   accountBalance: number;
-  stopLossType: "atr" | "percentage" | "fixed";
+  stopLossType: 'atr' | 'percentage' | 'fixed';
   atrMultiplier?: number;
   stopLossPercentage?: number;
   riskAmount: number;
@@ -130,13 +130,14 @@ export interface PositionSizeInterface {
 export interface StrategyInterface {
   _id: string;
   title: string;
+  userId: { fullName: string; email: string; _id: string };
   description: string;
   symbol: string;
   images: string[];
   subscribers: string[];
-  status: "Live" | "Development" | "Paused";
+  status: 'Live' | 'Development' | 'Paused';
   enabled: boolean;
-  type: "default" | "custom";
+  type: 'default' | 'custom';
 }
 
 export interface GlobalSettingInterface {
@@ -146,7 +147,7 @@ export interface GlobalSettingInterface {
 }
 
 export interface ITier {
-  name: "basic" | "premium";
+  name: 'basic' | 'premium';
   price: number;
   maxAccountsCount: number;
   level: number;
@@ -206,4 +207,12 @@ export interface Tutorial {
   title: string;
   description: string | null;
   modules: Module[];
+}
+
+export interface AdminStrategyStatsInterface {
+  activeUsers: number;
+  totalStrategies: number;
+  enabeldStrategies: number;
+  pausedStrategies: number;
+  devStrategies: number;
 }
