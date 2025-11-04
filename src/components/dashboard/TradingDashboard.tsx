@@ -107,10 +107,45 @@ const TradingDashboard = () => {
   }, [stats, filter, filterPrefix, activeTab, selectedAccount]);
 
   useEffect(() => {
-    setSelectedAccount({
-      login: user.accounts[0]?.login ?? '',
-      name: user.accounts[0]?.name ?? '',
-    });
+    // Try to get saved account selection from localStorage
+    const savedAccount = localStorage.getItem('selectedTradingAccount');
+    
+    if (savedAccount) {
+      try {
+        const parsed = JSON.parse(savedAccount);
+        // Verify that the saved account still exists in user's accounts
+        const accountExists = user.accounts.some(acc => acc.login === parsed.login);
+        
+        if (accountExists) {
+          setSelectedAccount(parsed);
+        } else {
+          // Saved account doesn't exist anymore, use first account
+          const defaultAccount = {
+            login: user.accounts[0]?.login ?? '',
+            name: user.accounts[0]?.name ?? '',
+          };
+          setSelectedAccount(defaultAccount);
+          localStorage.setItem('selectedTradingAccount', JSON.stringify(defaultAccount));
+        }
+      } catch (error) {
+        // Invalid saved data, use first account
+        const defaultAccount = {
+          login: user.accounts[0]?.login ?? '',
+          name: user.accounts[0]?.name ?? '',
+        };
+        setSelectedAccount(defaultAccount);
+        localStorage.setItem('selectedTradingAccount', JSON.stringify(defaultAccount));
+      }
+    } else {
+      // No saved account, use first account
+      const defaultAccount = {
+        login: user.accounts[0]?.login ?? '',
+        name: user.accounts[0]?.name ?? '',
+      };
+      setSelectedAccount(defaultAccount);
+      localStorage.setItem('selectedTradingAccount', JSON.stringify(defaultAccount));
+    }
+    
     fetchPortfolio();
     return () => {
       console.log('Component unmounted');
@@ -152,7 +187,12 @@ const TradingDashboard = () => {
   }
 
   const handleAccountToggle = (login: string, name: string) => {
-    if (login !== selectedAccount.login) setSelectedAccount({ login, name });
+    if (login !== selectedAccount.login) {
+      const newAccount = { login, name };
+      setSelectedAccount(newAccount);
+      // Save the selection to localStorage
+      localStorage.setItem('selectedTradingAccount', JSON.stringify(newAccount));
+    }
   };
 
   const ths = [

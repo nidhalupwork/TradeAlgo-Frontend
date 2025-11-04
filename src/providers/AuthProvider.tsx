@@ -11,6 +11,7 @@ interface AuthContextInterface {
   user: UserInterface;
   setUser: Dispatch<SetStateAction<UserInterface>>;
   urlAccess: boolean;
+  accessUrl: string;
   setUrlAccess: Dispatch<SetStateAction<boolean>>;
   signOut: () => Promise<void>;
 }
@@ -23,6 +24,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
   const { setUsers, setStrategies, setGlobalSetting } = useAdmin();
   const [urlAccess, setUrlAccess] = useState<boolean>(false);
+  const [accessUrl, setAccessUrl] = useState<string>('');
   const [user, setUser] = useState<UserInterface>({
     _id: '',
     createdAt: new Date(),
@@ -71,6 +73,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
           setStrategies(data.strategies);
           setGlobalSetting(data.setting);
           setNotifications(data.announcements);
+          setAccessUrl(data.accessUrl);
 
           if (data.user.status === 'suspended') {
             // toast({
@@ -122,7 +125,9 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, urlAccess, setUser, setUrlAccess, signOut }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ user, urlAccess, setUser, setUrlAccess, signOut, accessUrl }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 

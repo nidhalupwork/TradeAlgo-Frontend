@@ -25,6 +25,37 @@ export const ModuleItem = forwardRef<{ openModule: () => void }, ModuleItemProps
       },
     }));
 
+    // Extract YouTube video ID from URL
+    const getYouTubeVideoId = (url: string): string | null => {
+      if (!url) return null;
+      
+      // Handle various YouTube URL formats
+      const patterns = [
+        /(?:youtube\.com\/embed\/)([\w-]+)/,           // embed format
+        /(?:youtube\.com\/watch\?v=)([\w-]+)/,         // watch format
+        /(?:youtu\.be\/)([\w-]+)/,                     // short format
+        /(?:youtube\.com\/v\/)([\w-]+)/,               // /v/ format
+      ];
+
+      for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match && match[1]) {
+          return match[1];
+        }
+      }
+
+      return null;
+    };
+
+    // Get YouTube thumbnail URL
+    const getYouTubeThumbnail = (videoUrl: string): string => {
+      const videoId = getYouTubeVideoId(videoUrl);
+      if (!videoId) return '';
+      
+      // Using maxresdefault for highest quality, fallback to hqdefault if needed
+      return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    };
+
     const handleLessonClick = (lesson: Lesson, lessonIndex: number) => {
       setSelectedLesson(lesson);
       setCurrentLessonIndex(lessonIndex);
@@ -87,7 +118,19 @@ export const ModuleItem = forwardRef<{ openModule: () => void }, ModuleItemProps
                   <p className="font-semibold text-lg">{lesson.title}</p>
                   <p className="text-sm whitespace-pre-wrap">{lesson.description}</p>
                 </div>
-                <div className="w-36 h-24 bg-white mt-1"></div>
+                <div className="w-36 h-24 mt-1 flex-shrink-0">
+                  {lesson.video && getYouTubeThumbnail(lesson.video) ? (
+                    <img
+                      src={getYouTubeThumbnail(lesson.video)}
+                      alt={`${lesson.title} thumbnail`}
+                      className="w-full h-full object-cover rounded-lg border border-border"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-muted rounded-lg border border-border flex items-center justify-center">
+                      <p className="text-xs text-muted-foreground">No thumbnail</p>
+                    </div>
+                  )}
+                </div>
               </div>
             ))
           )}

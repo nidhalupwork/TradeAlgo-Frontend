@@ -178,7 +178,27 @@ const Logs = () => {
                 <TableBody>
                   {filteredLogs.map((log) => (
                     <TableRow key={log._id}>
-                      <TableCell className="font-mono text-sm">{log.time}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="font-medium text-sm">
+                            {new Date(log.time).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                              timeZone: 'UTC',
+                            })}
+                          </span>
+                          <span className="font-mono text-xs text-muted-foreground">
+                            {new Date(log.time).toLocaleTimeString('en-US', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit',
+                              timeZone: 'UTC',
+                            })}{' '}
+                            UTC
+                          </span>
+                        </div>
+                      </TableCell>
                       <TableCell>
                         {log.userType === 'user' && (
                           <div className="flex flex-col">

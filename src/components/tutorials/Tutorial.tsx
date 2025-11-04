@@ -4,22 +4,6 @@ import TutorialItem from './TutorialItem';
 import { useEffect, useState } from 'react';
 import { Tutorial } from '@/lib/types';
 
-// const tutorials = [
-//   {
-//     id: 0,
-//     title: 'ICT price action crash course',
-//     description: 'One stop shop for all you need to become profitable as a manual trader.',
-//     image: tutorialImage,
-//   },
-//   {
-//     id: 1,
-//     title: 'Profitability plan',
-//     description:
-//       "You'll learn exactly how to become a profitable trader FAST and as soon as today using our automated trading software — whether you're starting with personal capital or a prop firm account.",
-//     image: tutorialImage,
-//   },
-// ];
-
 const Tutorials = () => {
   const [tutorials, setTutorials] = useState<Tutorial[]>([]);
   const [isLoading, setIsLoading] = useState(false);

@@ -1,19 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import {
-  ChartLine,
-  Download,
-  Edit3,
-  Eye,
-  EyeOff,
-  Logs,
-  Plus,
-  Save,
-  Trash2,
-  TrendingUp,
-  X,
-} from 'lucide-react';
+import { ChartLine, Download, Edit3, Eye, EyeOff, Logs, Plus, Save, Trash2, TrendingUp, X } from 'lucide-react';
 import { AccountConfigModal } from './AccountConfigModal';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
@@ -27,7 +15,7 @@ import { Link } from 'react-router-dom';
 
 export const ConnectedAccounts = () => {
   const { toast } = useToast();
-  const { user, setUser } = useAuth();
+  const { user, setUser, accessUrl } = useAuth();
   const [accounts, setAccounts] = useState<ConnectAccount[]>();
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [modalOpen, setModalOpen] = useState<'Delete' | 'Account' | 'Token' | ''>('');
@@ -142,7 +130,7 @@ export const ConnectedAccounts = () => {
                   and market-optimized strategies.
                 </p>
               </div>
-              <Link to='https://whop.com/tradealgorithm/elite-program/' target='_blank' className='w-full xs:flex-1'>
+              <Link to={accessUrl} target='_blank' className='w-full xs:flex-1'>
                 <Button className='w-full gap-2 shadow-lg hover:shadow-xl transition-all'>
                   <Download className='h-5 w-5' />
                   Get Access Here

@@ -19,14 +19,28 @@ import { useAdmin } from '@/providers/AdminProvider';
 import Api from '@/services/Api';
 import { useToast } from '@/hooks/use-toast';
 import { ConfirmModal } from './ConfirmModal';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PageDescription, PageHeader } from '../components/PageHeader';
+import { useAuth } from '@/providers/AuthProvider';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Edit3, Save, X, ExternalLink } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { users, strategies, globalSetting, setGlobalSetting, setStrategies } = useAdmin();
+  const { accessUrl } = useAuth();
   const { toast } = useToast();
   const [open, setOpen] = useState<'stop' | 'start' | 'live' | 'maintain' | ''>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isEditingUrl, setIsEditingUrl] = useState<boolean>(false);
+  const [editedAccessUrl, setEditedAccessUrl] = useState<string>('');
+  const [isSavingUrl, setIsSavingUrl] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (accessUrl) {
+      setEditedAccessUrl(accessUrl);
+    }
+  }, [accessUrl]);
 
   async function manageAllTrading(type: 'stop' | 'start') {
     setIsLoading(true);
@@ -84,6 +98,47 @@ export default function AdminDashboard() {
       await changeMode(open);
     }
     setOpen('');
+  }
+
+  async function handleSaveAccessUrl() {
+    if (!editedAccessUrl.trim()) {
+      toast({
+        title: 'Validation Error',
+        description: 'Access URL cannot be empty',
+        variant: 'destructive',
+        duration: 2000,
+      });
+      return;
+    }
+
+    setIsSavingUrl(true);
+    try {
+      const data = await Api.post('/admin/access-url', { accessUrl: editedAccessUrl });
+      if (data?.success) {
+        toast({
+          title: 'Success',
+          description: 'Access URL updated successfully',
+          variant: 'profit',
+          duration: 2000,
+        });
+        setIsEditingUrl(false);
+        // Refresh the page to get the updated URL from the backend
+        window.location.reload();
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message || 'Failed to update access URL',
+        variant: 'destructive',
+        duration: 2000,
+      });
+    }
+    setIsSavingUrl(false);
+  }
+
+  function handleCancelEdit() {
+    setEditedAccessUrl(accessUrl);
+    setIsEditingUrl(false);
   }
 
   return (
@@ -170,6 +225,84 @@ export default function AdminDashboard() {
               <span className="text-xs opacity-70">Notify All Admins</span>
             </div>
           </Button> */}
+        </CardContent>
+      </Card>
+
+      {/* Elite Program Access URL Management */}
+      <Card className="border-primary/30 bg-primary/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Elite Program Access URL
+          </CardTitle>
+          <CardDescription>Manage the access URL for users to claim Elite Trading Tools</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label>Access URL</Label>
+              <Button
+                variant={isEditingUrl ? 'outline' : 'ghost'}
+                size="sm"
+                onClick={() => (isEditingUrl ? handleCancelEdit() : setIsEditingUrl(true))}
+                className="gap-2"
+                disabled={isSavingUrl}
+              >
+                {isEditingUrl ? (
+                  <>
+                    <X className="h-4 w-4" />
+                    Cancel
+                  </>
+                ) : (
+                  <>
+                    <Edit3 className="h-4 w-4" />
+                    Edit
+                  </>
+                )}
+              </Button>
+            </div>
+
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <Input
+                  type="text"
+                  value={editedAccessUrl}
+                  disabled={!isEditingUrl}
+                  onChange={(e) => setEditedAccessUrl(e.target.value)}
+                  placeholder="https://whop.com/tradealgorithm/elite-program/"
+                  className="font-mono text-sm"
+                />
+              </div>
+              {!isEditingUrl && editedAccessUrl && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open(editedAccessUrl, '_blank')}
+                  className="gap-2"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Visit
+                </Button>
+              )}
+            </div>
+
+            {isEditingUrl && (
+              <div className="flex gap-2 pt-2">
+                <Button
+                  onClick={handleSaveAccessUrl}
+                  disabled={isSavingUrl || editedAccessUrl === accessUrl || !editedAccessUrl.trim()}
+                  className="gap-2"
+                >
+                  <Save className="h-4 w-4" />
+                  {isSavingUrl ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
+            )}
+
+            <p className="text-xs text-muted-foreground">
+              This URL will be displayed to all users in their profile page to access the Elite Program tools.
+            </p>
+          </div>
         </CardContent>
       </Card>
 
