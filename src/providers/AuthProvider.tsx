@@ -12,6 +12,7 @@ interface AuthContextInterface {
   setUser: Dispatch<SetStateAction<UserInterface>>;
   urlAccess: boolean;
   accessUrl: string;
+  setAccessUrl: Dispatch<SetStateAction<string>>;
   setUrlAccess: Dispatch<SetStateAction<boolean>>;
   signOut: () => Promise<void>;
 }
@@ -125,7 +126,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, urlAccess, setUser, setUrlAccess, signOut, accessUrl }}>
+    <AuthContext.Provider value={{ user, urlAccess, setUser, setUrlAccess, signOut, accessUrl, setAccessUrl }}>
       {children}
     </AuthContext.Provider>
   );

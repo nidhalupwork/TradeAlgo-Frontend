@@ -28,7 +28,7 @@ import { Edit3, Save, X, ExternalLink } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { users, strategies, globalSetting, setGlobalSetting, setStrategies } = useAdmin();
-  const { accessUrl } = useAuth();
+  const { accessUrl, setAccessUrl } = useAuth();
   const { toast } = useToast();
   const [open, setOpen] = useState<'stop' | 'start' | 'live' | 'maintain' | ''>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -122,8 +122,7 @@ export default function AdminDashboard() {
           duration: 2000,
         });
         setIsEditingUrl(false);
-        // Refresh the page to get the updated URL from the backend
-        window.location.reload();
+        setAccessUrl(editedAccessUrl);
       }
     } catch (error) {
       toast({
