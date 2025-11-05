@@ -114,17 +114,17 @@ const StrategyMarketplace = () => {
   ) : (
     <div className='p-6 space-y-6'>
       {/* Header */}
-      <div className='flex items-center justify-between'>
-        <div>
+      <div className='flex md:flex-row flex-col w-full items-center justify-between gap-2 md:gap-0'>
+        <div className='w-full'>
           <PageHeader>Strategy Marketplace</PageHeader>
           <PageDescription>Select, connect and configure your automated trading strategies.</PageDescription>
         </div>
 
         {user.status === 'active' && (
-          <div className='flex flex-col lg:flex-row gap-2'>
+          <div className='flex flex-row w-full md:w-fit md:flex-col lg:flex-row gap-2'>
             <Button
               variant='gold'
-              className='md:text-sm text-xs px-2 md:px-4 py-0.5 h-6 sm:h-8 md:h-9'
+              className='md:text-sm text-xs px-2 md:px-4 py-0.5 h-6 sm:h-8 rounded-sm'
               onClick={() => setOpen('Global')}
             >
               <span className='hidden sm:flex'>Account Risk Settings</span>
@@ -132,7 +132,7 @@ const StrategyMarketplace = () => {
             </Button>
             <Button
               variant='gold'
-              className='md:text-sm text-xs px-2 md:px-4 py-0.5 h-6 sm:h-8 md:h-9'
+              className='md:text-sm text-xs px-2 md:px-4 py-0.5 h-6 sm:h-8 rounded-sm'
               onClick={() => setOpen('Time')}
             >
               <span className='hidden sm:flex'>Trading Time Settings</span>
@@ -140,7 +140,7 @@ const StrategyMarketplace = () => {
             </Button>
             <Button
               variant='gold'
-              className='md:text-sm text-xs px-2 md:px-4 py-0.5 h-6 sm:h-8 md:h-9'
+              className='md:text-sm text-xs px-2 md:px-4 py-0.5 h-6 sm:h-8 rounded-sm'
               onClick={() => setOpen('Execution')}
             >
               <span className='hidden sm:flex'>Execution Accuracy Multiplier</span>
