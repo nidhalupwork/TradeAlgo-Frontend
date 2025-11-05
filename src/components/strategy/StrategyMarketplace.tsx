@@ -16,6 +16,7 @@ import { StrategyCard } from './StrategyCard';
 import { AddCustomStrategyModal } from './AddCustomStrategyModal';
 import { DeleteModal } from './DeleteModal';
 import { toast } from 'sonner';
+import { ExecutionAccuracyModal } from './ExecutionAccuracyModal';
 
 const StrategyMarketplace = () => {
   const { user, setUser } = useAuth();
@@ -137,6 +138,14 @@ const StrategyMarketplace = () => {
               <span className='hidden sm:flex'>Trading Time Settings</span>
               <span className='sm:hidden'>Time Settings</span>
             </Button>
+            <Button
+              variant='gold'
+              className='md:text-sm text-xs px-2 md:px-4 py-0.5 h-6 sm:h-8 md:h-9'
+              onClick={() => setOpen('Execution')}
+            >
+              <span className='hidden sm:flex'>Execution Accuracy Multiplier</span>
+              <span className='sm:hidden'>Execution Accuracy</span>
+            </Button>
           </div>
         )}
       </div>
@@ -223,6 +232,14 @@ const StrategyMarketplace = () => {
 
       {/* For each account */}
       <TradingTimeModal open={open} onModalClose={onModalClose} isLoading={isLoading} setIsLoading={setIsLoading} />
+
+      {/* Execution Accuracy Modal */}
+      <ExecutionAccuracyModal
+        open={open === 'Execution'}
+        onOpenChange={onModalClose}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
+      />
 
       {/* Add Strategy Modal */}
       <AddCustomStrategyModal

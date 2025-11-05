@@ -1,7 +1,7 @@
 export type UserRole = 'user' | 'admin' | 'owner' | 'support' | '';
 export type UserStatus = 'active' | 'pending' | 'suspended' | 'deleted' | '';
 export type UserPlan = 'premium' | 'basic' | '';
-export type MarketplaceOpen = 'Global' | 'Strategy' | 'Time' | 'Add' | 'Edit' | 'Delete' | '';
+export type MarketplaceOpen = 'Global' | 'Strategy' | 'Time' | 'Execution' | 'Add' | 'Edit' | 'Delete' | '';
 
 export interface UserInterface {
   _id: string;
@@ -37,6 +37,9 @@ export interface GlobalRiskSetting {
   isTimeLimit: boolean;
   startTime: string;
   endTime: string;
+
+  executionAccuracyEnabled?: boolean;
+  executionAccuracyMultiplier?: number;
 }
 
 export interface StrategySetting {
